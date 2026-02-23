@@ -36,3 +36,7 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+/prisma/apps/server/prisma
+
+/prisma/apps/server/prisma
