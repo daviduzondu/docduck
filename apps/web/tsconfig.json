@@ -5,7 +5,11 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+     "@/*": ["app/*"]
+    }
   },
   "include": [
     "**/*.ts",
@@ -16,5 +20,5 @@
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
 }

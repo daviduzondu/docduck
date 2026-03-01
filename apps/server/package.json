@@ -6,7 +6,8 @@
   "scripts": {
     "add:server": "pnpm add",
     "dev": "tsx --watch src/index.ts",
-    "migrate:dev": "pnpm dlx prisma migrate dev --create-only && node ./src/db/scripts/set-updated-at.js && pnpm dlx prisma migrate dev",
+    "prisma": "pnpm dlx prisma",
+    "migrate:dev": "pnpm dlx prisma migrate dev --create-only && node ./src/db/scripts/set-updated-at.js && pnpm dlx prisma migrate dev && pnpm dlx prisma generate",
     "start": "node dist/index.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
@@ -21,6 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "better-auth": "^1.4.18",
+    "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "kysely": "^0.28.11",
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.3",
     "@types/pg": "^8.16.0",
@@ -41,8 +44,5 @@
     "prisma": "^7.4.1",
     "tsx": "^4.21.0",
     "typescript-eslint": "^8.50.0"
-  },
-  "imports": {
-    "#*": "./src/*"
   }
 }

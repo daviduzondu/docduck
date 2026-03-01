@@ -4,13 +4,74 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
+generator kysely {
  provider = "prisma-kysely"
- output   = "../generated"
+ output   = "./generated"
+ fileName = "types.ts"
 }
 
 datasource db {
  provider = "postgresql"
+}
+
+model user {
+ id            String  @id @default(dbgenerated("gen_random_uuid()"))
+ email         String  @unique
+ emailVerified Boolean @default(false)
+ name          String
+ image         String?
+ isAnonymous   Boolean @default(false)
+
+ sessions      session[]
+ accounts      account[]
+
+ createdAt DateTime @ignore
+ updatedAt DateTime @ignore
+}
+
+model session {
+ id        String   @id @unique @default(dbgenerated("gen_random_uuid()"))
+ userId    String
+ token     String
+ expiresAt DateTime
+ ipAddress String?
+ userAgent String?
+
+ createdAt DateTime @default(now()) @ignore
+ updatedAt DateTime @default(now()) @ignore
+
+ // Relations
+ user user @relation(fields: [userId], references: [id])
+}
+
+model account {
+ id                    String    @id @unique @default(dbgenerated("gen_random_uuid()"))
+ userId                String
+ accountId             String // The ID of the account as provided by the SSO or equal to the userId for credential accounts
+ providerId            String
+ accessToken           String?
+ refreshToken          String?
+ accessTokenExpiresAt  DateTime?
+ refreshTokenExpiresAt DateTime?
+ scope                 String?
+ idToken               String?
+ password              String?
+
+ createdAt DateTime @default(now()) @ignore
+ updatedAt DateTime @default(now()) @ignore
+
+ // Relations
+ user user @relation(fields: [userId], references: [id])
+}
+
+model verification {
+ id         String   @id @default(dbgenerated("gen_random_uuid()"))
+ identifier String
+ token      String?
+ expiresAt  DateTime
+
+ createdAt DateTime @ignore
+ updatedAt DateTime @ignore
 }
 
 model document {

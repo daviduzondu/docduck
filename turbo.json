@@ -25,9 +25,14 @@
     "^check-types"
    ]
   },
-  "migrate:dev": {
+  "prisma": {
    "cache": false,
    "persistent": false
+  },
+  "migrate:dev": {
+   "cache": false,
+   "persistent": false,
+   "interactive": true
   },
   "add:web": {
    "cache": false,

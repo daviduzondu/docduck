@@ -3,6 +3,10 @@
  "exclude": ["dist"],
  "include": ["**/*.ts"],
   "compilerOptions": {
+  "baseUrl": ".",
+    "paths": {
+     "@/*": ["src/*"]
+    },
     // File Layout
     "outDir": "./dist",
     // Environment Settings
