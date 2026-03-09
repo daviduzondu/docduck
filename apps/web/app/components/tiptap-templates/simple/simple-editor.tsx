@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
+import Collaboration from '@tiptap/extension-collaboration';
+import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider';
+import * as Y from 'yjs';
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit"
@@ -18,9 +21,9 @@ import { Selection } from "@tiptap/extensions"
 import { Button } from "@/components/tiptap-ui-primitive/button"
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer"
 import {
-  Toolbar,
-  ToolbarGroup,
-  ToolbarSeparator,
+ Toolbar,
+ ToolbarGroup,
+ ToolbarSeparator,
 } from "@/components/tiptap-ui-primitive/toolbar"
 
 // --- Tiptap Node ---
@@ -41,14 +44,14 @@ import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button"
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
 import {
-  ColorHighlightPopover,
-  ColorHighlightPopoverContent,
-  ColorHighlightPopoverButton,
+ ColorHighlightPopover,
+ ColorHighlightPopoverContent,
+ ColorHighlightPopoverButton,
 } from "@/components/tiptap-ui/color-highlight-popover"
 import {
-  LinkPopover,
-  LinkContent,
-  LinkButton,
+ LinkPopover,
+ LinkContent,
+ LinkButton,
 } from "@/components/tiptap-ui/link-popover"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
@@ -76,205 +79,227 @@ import "@/components/tiptap-templates/simple/simple-editor.scss"
 import content from "@/components/tiptap-templates/simple/data/content.json"
 
 const MainToolbarContent = ({
-  onHighlighterClick,
-  onLinkClick,
-  isMobile,
+ onHighlighterClick,
+ onLinkClick,
+ isMobile,
 }: {
-  onHighlighterClick: () => void
-  onLinkClick: () => void
-  isMobile: boolean
+ onHighlighterClick: () => void
+ onLinkClick: () => void
+ isMobile: boolean
 }) => {
-  return (
-    <>
-      <Spacer />
+ return (
+  <>
+   <Spacer />
 
-      <ToolbarGroup>
-        <UndoRedoButton action="undo" />
-        <UndoRedoButton action="redo" />
-      </ToolbarGroup>
+   <ToolbarGroup>
+    <UndoRedoButton action="undo" />
+    <UndoRedoButton action="redo" />
+   </ToolbarGroup>
 
-      <ToolbarSeparator />
+   <ToolbarSeparator />
 
-      <ToolbarGroup>
-        <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
-        <ListDropdownMenu
-          types={["bulletList", "orderedList", "taskList"]}
-          portal={isMobile}
-        />
-        <BlockquoteButton />
-        <CodeBlockButton />
-      </ToolbarGroup>
+   <ToolbarGroup>
+    <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
+    <ListDropdownMenu
+     types={["bulletList", "orderedList", "taskList"]}
+     portal={isMobile}
+    />
+    <BlockquoteButton />
+    <CodeBlockButton />
+   </ToolbarGroup>
 
-      <ToolbarSeparator />
+   <ToolbarSeparator />
 
-      <ToolbarGroup>
-        <MarkButton type="bold" />
-        <MarkButton type="italic" />
-        <MarkButton type="strike" />
-        <MarkButton type="code" />
-        <MarkButton type="underline" />
-        {!isMobile ? (
-          <ColorHighlightPopover />
-        ) : (
-          <ColorHighlightPopoverButton onClick={onHighlighterClick} />
-        )}
-        {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
-      </ToolbarGroup>
+   <ToolbarGroup>
+    <MarkButton type="bold" />
+    <MarkButton type="italic" />
+    <MarkButton type="strike" />
+    <MarkButton type="code" />
+    <MarkButton type="underline" />
+    {!isMobile ? (
+     <ColorHighlightPopover />
+    ) : (
+     <ColorHighlightPopoverButton onClick={onHighlighterClick} />
+    )}
+    {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
+   </ToolbarGroup>
 
-      <ToolbarSeparator />
+   <ToolbarSeparator />
 
-      <ToolbarGroup>
-        <MarkButton type="superscript" />
-        <MarkButton type="subscript" />
-      </ToolbarGroup>
+   <ToolbarGroup>
+    <MarkButton type="superscript" />
+    <MarkButton type="subscript" />
+   </ToolbarGroup>
 
-      <ToolbarSeparator />
+   <ToolbarSeparator />
 
-      <ToolbarGroup>
-        <TextAlignButton align="left" />
-        <TextAlignButton align="center" />
-        <TextAlignButton align="right" />
-        <TextAlignButton align="justify" />
-      </ToolbarGroup>
+   <ToolbarGroup>
+    <TextAlignButton align="left" />
+    <TextAlignButton align="center" />
+    <TextAlignButton align="right" />
+    <TextAlignButton align="justify" />
+   </ToolbarGroup>
 
-      <ToolbarSeparator />
+   <ToolbarSeparator />
 
-      <ToolbarGroup>
-        <ImageUploadButton text="Add" />
-      </ToolbarGroup>
+   <ToolbarGroup>
+    <ImageUploadButton text="Add" />
+   </ToolbarGroup>
 
-      <Spacer />
+   <Spacer />
 
-      {isMobile && <ToolbarSeparator />}
+   {isMobile && <ToolbarSeparator />}
 
-      <ToolbarGroup>
-        <ThemeToggle />
-      </ToolbarGroup>
-    </>
-  )
+   <ToolbarGroup>
+    <ThemeToggle />
+   </ToolbarGroup>
+  </>
+ )
 }
 
 const MobileToolbarContent = ({
-  type,
-  onBack,
+ type,
+ onBack,
 }: {
-  type: "highlighter" | "link"
-  onBack: () => void
+ type: "highlighter" | "link"
+ onBack: () => void
 }) => (
-  <>
-    <ToolbarGroup>
-      <Button variant="ghost" onClick={onBack}>
-        <ArrowLeftIcon className="tiptap-button-icon" />
-        {type === "highlighter" ? (
-          <HighlighterIcon className="tiptap-button-icon" />
-        ) : (
-          <LinkIcon className="tiptap-button-icon" />
-        )}
-      </Button>
-    </ToolbarGroup>
-
-    <ToolbarSeparator />
-
+ <>
+  <ToolbarGroup>
+   <Button variant="ghost" onClick={onBack}>
+    <ArrowLeftIcon className="tiptap-button-icon" />
     {type === "highlighter" ? (
-      <ColorHighlightPopoverContent />
+     <HighlighterIcon className="tiptap-button-icon" />
     ) : (
-      <LinkContent />
+     <LinkIcon className="tiptap-button-icon" />
     )}
-  </>
+   </Button>
+  </ToolbarGroup>
+
+  <ToolbarSeparator />
+
+  {type === "highlighter" ? (
+   <ColorHighlightPopoverContent />
+  ) : (
+   <LinkContent />
+  )}
+ </>
 )
 
 export function SimpleEditor() {
-  const isMobile = useIsBreakpoint()
-  const { height } = useWindowSize()
-  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
-    "main"
-  )
-  const toolbarRef = useRef<HTMLDivElement>(null)
+ const isMobile = useIsBreakpoint()
+ const { height } = useWindowSize()
+ const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
+  "main"
+ )
+ const toolbarRef = useRef<HTMLDivElement>(null);
+ const ydoc = new Y.Doc();
+ const socket = new HocuspocusProviderWebsocket({
+  url: 'http://localhost:1711/collab',
+  onOpen(data) {
+   console.log('connected!', data);
+  },
+ });
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        autocomplete: "off",
-        autocorrect: "off",
-        autocapitalize: "off",
-        "aria-label": "Main content area, start typing to enter text.",
-        class: "simple-editor",
-      },
+ const provider = new HocuspocusProvider({
+  websocketProvider: socket,
+  name: 'document-1',
+  document: ydoc
+ })
+
+ useEffect(() => {
+  provider.attach();
+  return () => provider.detach();
+ }, []);
+
+
+ const editor = useEditor({
+  immediatelyRender: false,
+  editorProps: {
+   attributes: {
+    autocomplete: "off",
+    autocorrect: "off",
+    autocapitalize: "off",
+    "aria-label": "Main content area, start typing to enter text.",
+    class: "simple-editor",
+   },
+  },
+  extensions: [
+   StarterKit.configure({
+    horizontalRule: false,
+    link: {
+     openOnClick: false,
+     enableClickSelection: true,
     },
-    extensions: [
-      StarterKit.configure({
-        horizontalRule: false,
-        link: {
-          openOnClick: false,
-          enableClickSelection: true,
-        },
-      }),
-      HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
-      Image,
-      Typography,
-      Superscript,
-      Subscript,
-      Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
-      }),
-    ],
-    content,
-  })
+   }),
+   Collaboration.configure({
+    document: ydoc
+   }),
+   HorizontalRule,
+   TextAlign.configure({ types: ["heading", "paragraph"] }),
+   TaskList,
+   TaskItem.configure({ nested: true }),
+   Highlight.configure({ multicolor: true }),
+   Image,
+   Typography,
+   Superscript,
+   Subscript,
+   Selection,
+   ImageUploadNode.configure({
+    accept: "image/*",
+    maxSize: MAX_FILE_SIZE,
+    limit: 3,
+    upload: handleImageUpload,
+    onError: (error) => console.error("Upload failed:", error),
+   }),
+  ],
+  content,
+ })
 
-  const rect = useCursorVisibility({
-    editor,
-    overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
-  })
+ const rect = useCursorVisibility({
+  editor,
+  overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
+ })
 
-  useEffect(() => {
-    if (!isMobile && mobileView !== "main") {
-      setMobileView("main")
-    }
-  }, [isMobile, mobileView])
+ useEffect(() => {
+  if (!isMobile && mobileView !== "main") {
+   setMobileView("main")
+  }
+ }, [isMobile, mobileView])
 
-  return (
-    <div className="simple-editor-wrapper">
-      <EditorContext.Provider value={{ editor }}>
-        <Toolbar
-          ref={toolbarRef}
-          style={{
-            ...(isMobile
-              ? {
-                  bottom: `calc(100% - ${height - rect.y}px)`,
-                }
-              : {}),
-          }}
-        >
-          {mobileView === "main" ? (
-            <MainToolbarContent
-              onHighlighterClick={() => setMobileView("highlighter")}
-              onLinkClick={() => setMobileView("link")}
-              isMobile={isMobile}
-            />
-          ) : (
-            <MobileToolbarContent
-              type={mobileView === "highlighter" ? "highlighter" : "link"}
-              onBack={() => setMobileView("main")}
-            />
-          )}
-        </Toolbar>
+ return (
+  <div className="simple-editor-wrapper">
+   <EditorContext.Provider value={{ editor }}>
+    <Toolbar
+     ref={toolbarRef}
+     style={{
+      ...(isMobile
+       ? {
+        bottom: `calc(100% - ${height - rect.y}px)`,
+       }
+       : {}),
+     }}
+    >
+     {mobileView === "main" ? (
+      <MainToolbarContent
+       onHighlighterClick={() => setMobileView("highlighter")}
+       onLinkClick={() => setMobileView("link")}
+       isMobile={isMobile}
+      />
+     ) : (
+      <MobileToolbarContent
+       type={mobileView === "highlighter" ? "highlighter" : "link"}
+       onBack={() => setMobileView("main")}
+      />
+     )}
+    </Toolbar>
 
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
-      </EditorContext.Provider>
-    </div>
-  )
+    <EditorContent
+     editor={editor}
+     role="presentation"
+     className="simple-editor-content"
+    />
+   </EditorContext.Provider>
+  </div>
+ )
 }
