@@ -116,7 +116,7 @@ const MainToolbarContent = ({
     <MarkButton type="italic" />
     <MarkButton type="strike" />
     <MarkButton type="code" />
-    <MarkButton type="underline" />
+    <MarkButton type="underline" />localStorage
     {!isMobile ? (
      <ColorHighlightPopover />
     ) : (
@@ -195,8 +195,9 @@ export function SimpleEditor() {
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
  const ydoc = new Y.Doc();
+ const hostname = location.hostname;
  const socket = new HocuspocusProviderWebsocket({
-  url: 'http://localhost:1711/collab',
+  url: `http://${hostname}:1711/collab`,
   onOpen(data) {
    console.log('connected!', data);
   },

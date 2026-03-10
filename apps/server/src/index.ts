@@ -4,7 +4,7 @@ import cors from 'cors';
 import { auth } from "./lib/auth";
 import { toNodeHandler } from "better-auth/node";
 import { createServer, IncomingMessage } from 'http';
-import { initializeHocuspocus } from '@/lib/wss';
+import { initializeHocuspocus } from '@/lib/hocuspocus';
 import { WebSocketServer } from 'ws';
 
 const app = express();

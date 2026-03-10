@@ -1,5 +1,4 @@
 import { Hocuspocus, } from "@hocuspocus/server";
-import { Server } from "node:http";
 import { WebSocketServer } from 'ws';
 
 export function initializeHocuspocus(wss: WebSocketServer) {
