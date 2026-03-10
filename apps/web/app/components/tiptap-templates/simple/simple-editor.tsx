@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 import Collaboration from '@tiptap/extension-collaboration';
+import CollaborationCaret from '@tiptap/extension-collaboration-caret';
 import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider';
 import * as Y from 'yjs';
 
@@ -231,6 +232,10 @@ export function SimpleEditor() {
      openOnClick: false,
      enableClickSelection: true,
     },
+   }),
+   CollaborationCaret.configure({
+    provider,
+    user: { name: "John" + Math.random() * 10, color: "red" }
    }),
    Collaboration.configure({
     document: ydoc
