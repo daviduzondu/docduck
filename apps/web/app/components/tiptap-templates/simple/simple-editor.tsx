@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCaret from '@tiptap/extension-collaboration-caret';
-import { HocuspocusProvider, HocuspocusProviderWebsocket } from '@hocuspocus/provider';
-import * as Y from 'yjs';
+
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit"
@@ -78,6 +77,7 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 import content from "@/components/tiptap-templates/simple/data/content.json"
+import useHocuspocus from "../../../hooks/use-hocuspocus";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -194,26 +194,7 @@ export function SimpleEditor() {
   "main"
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
- const ydoc = new Y.Doc();
- const hostname = location.hostname;
- const socket = new HocuspocusProviderWebsocket({
-  url: `http://${hostname}:1711/collab`,
-  onOpen(data) {
-   console.log('connected!', data);
-  },
- });
-
- const provider = new HocuspocusProvider({
-  websocketProvider: socket,
-  name: 'document-1',
-  document: ydoc
- })
-
- useEffect(() => {
-  provider.attach();
-  return () => provider.detach();
- }, []);
-
+ const { provider, ydoc } = useHocuspocus();
 
  const editor = useEditor({
   immediatelyRender: false,
