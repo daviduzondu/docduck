@@ -78,6 +78,8 @@ import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 import content from "@/components/tiptap-templates/simple/data/content.json"
 import useHocuspocus from "../../../hooks/use-hocuspocus";
+import { Doc } from "yjs";
+import { HocuspocusProvider } from "@hocuspocus/provider";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -116,7 +118,7 @@ const MainToolbarContent = ({
     <MarkButton type="italic" />
     <MarkButton type="strike" />
     <MarkButton type="code" />
-    <MarkButton type="underline" />localStorage
+    <MarkButton type="underline" />
     {!isMobile ? (
      <ColorHighlightPopover />
     ) : (
@@ -187,14 +189,13 @@ const MobileToolbarContent = ({
  </>
 )
 
-export function SimpleEditor() {
+export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: HocuspocusProvider }) {
  const isMobile = useIsBreakpoint()
  const { height } = useWindowSize()
  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
   "main"
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
- const { provider, ydoc } = useHocuspocus();
 
  const editor = useEditor({
   immediatelyRender: false,

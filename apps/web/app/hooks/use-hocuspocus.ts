@@ -20,6 +20,10 @@ function initHocuspocus() {
 export default function useHocuspocus() {
  const { provider, ydoc } = useMemo(() => initHocuspocus(), []);
 
+ useEffect(()=>{
+  console.log('re-render!')
+ })
+
  useEffect(() => {
   provider.attach();
   return () => {
