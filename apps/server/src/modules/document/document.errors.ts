@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { AppError } from "@/lib/utils";
+import { AppError } from "@/lib/helpers";
 
 export class DocumentNotFoundError extends AppError {
  constructor(statusCode = StatusCodes.NOT_FOUND) {

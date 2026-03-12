@@ -3,11 +3,12 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from 'cors';
 import { auth } from "@/modules/auth/auth";
 import { toNodeHandler } from "better-auth/node";
-import { createServer, IncomingMessage } from 'http';
+import { createServer } from 'http';
 import { initializeHocuspocus } from '@/lib/hocuspocus';
 import { WebSocketServer } from 'ws';
 import documentRouter from './modules/document/document.route';
-import { AppError } from './lib/utils';
+import { AppError } from './lib/helpers';
+import pino from 'pino-http';
 
 const app = express();
 const server = createServer(app);
@@ -17,12 +18,12 @@ const corsConfig: cors.CorsOptions = {
 }
 const PORT = process.env.PORT ?? "1711";
 
+app.use(pino());
 app.use(cors(corsConfig));
 app.use(express.json());
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 app.use('/api/document', documentRouter);
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
- console.error(err.stack);
  if (err instanceof AppError) {
   res.status(err.statusCode).json({
    message: err.message

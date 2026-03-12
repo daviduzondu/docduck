@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import { getDocumentsService } from "./document.service";
 import * as z from 'zod';
 import { getDocumentSchema } from "./document.validation";
+import { StatusCodes } from "http-status-codes";
 
 export async function getDocumentsController(req: Request<{}, {}, z.infer<typeof getDocumentSchema>>, res: Response, next: NextFunction) {
- const result = await getDocumentsService(req.body);
+ const data = await getDocumentsService(req.body);
+ res.status(StatusCodes.OK).json({ data });
 }
