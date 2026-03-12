@@ -1,4 +1,4 @@
-import { Hocuspocus, } from "@hocuspocus/server";
+import { Hocuspocus } from "@hocuspocus/server";
 import { WebSocketServer } from 'ws';
 
 export function initializeHocuspocus(wss: WebSocketServer) {
@@ -13,4 +13,3 @@ export function initializeHocuspocus(wss: WebSocketServer) {
   ws.on('error', console.error);
  })
 }
-

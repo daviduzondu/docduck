@@ -1,11 +1,13 @@
 import 'dotenv/config';
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from 'cors';
-import { auth } from "./lib/auth";
+import { auth } from "@/modules/auth/auth";
 import { toNodeHandler } from "better-auth/node";
 import { createServer, IncomingMessage } from 'http';
 import { initializeHocuspocus } from '@/lib/hocuspocus';
 import { WebSocketServer } from 'ws';
+import documentRouter from './modules/document/document.route';
+import { AppError } from './lib/utils';
 
 const app = express();
 const server = createServer(app);
@@ -18,8 +20,20 @@ const PORT = process.env.PORT ?? "1711";
 app.use(cors(corsConfig));
 app.use(express.json());
 app.all('/api/auth/{*any}', toNodeHandler(auth));
+app.use('/api/document', documentRouter);
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+ console.error(err.stack);
+ if (err instanceof AppError) {
+  res.status(err.statusCode).json({
+   message: err.message
+  })
+ }
+ res.status(500).json({
+  message: 'An internal error occured'
+ });
+});
 
 
-const wss = new WebSocketServer({ server, path: '/collab' });
+const wss = new WebSocketServer({ server, path: '/collab ' });
 initializeHocuspocus(wss);
 server.listen(PORT, () => console.log(`Server now listening on ${PORT}`));

@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
-import { db } from "./kysely";
-
+import { db } from "@/lib/kysely";
 
 export const auth = betterAuth({
  database: {

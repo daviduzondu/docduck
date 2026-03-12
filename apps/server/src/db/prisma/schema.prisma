@@ -22,8 +22,8 @@ model user {
  image         String?
  isAnonymous   Boolean @default(false)
 
- sessions      session[]
- accounts      account[]
+ sessions session[]
+ accounts account[]
 
  createdAt DateTime @ignore
  updatedAt DateTime @ignore
@@ -75,9 +75,37 @@ model verification {
 }
 
 model document {
- id        String   @unique @default(dbgenerated("gen_random_uuid()"))
- ownerId   String
- title     String
- createdAt DateTime @default(now()) @ignore
- updatedAt DateTime @default(now()) @ignore
+ id         String     @unique @default(dbgenerated("gen_random_uuid()"))
+ ownerId    String
+ title      String     @default("Untitled Document")
+ yjsState   Bytes
+ visibility Visibility
+ createdAt  DateTime   @default(now()) @ignore
+ updatedAt  DateTime   @default(now()) @ignore
+
+ @@index([ownerId])
+}
+
+model permission {
+ id         String   @unique @default(dbgenerated("gen_random_uuid()"))
+ documentId String
+ userId     String
+ role       Role
+ createdAt  DateTime @default(now()) @ignore
+ updatedAt  DateTime @default(now()) @ignore
+
+ @@unique([documentId, userId])
+ @@index([userId])
+ @@index([documentId])
+}
+
+enum Role {
+ VIEWER
+ EDITOR
+ OWNER
+}
+
+enum Visibility {
+ PRIVATE
+ PUBLIC
 }

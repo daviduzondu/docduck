@@ -4,6 +4,17 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export const Role = {
+    VIEWER: "VIEWER",
+    EDITOR: "EDITOR",
+    OWNER: "OWNER"
+} as const;
+export type Role = (typeof Role)[keyof typeof Role];
+export const Visibility = {
+    PRIVATE: "PRIVATE",
+    PUBLIC: "PUBLIC"
+} as const;
+export type Visibility = (typeof Visibility)[keyof typeof Visibility];
 export type account = {
     id: Generated<string>;
     userId: string;
@@ -20,7 +31,15 @@ export type account = {
 export type document = {
     id: Generated<string>;
     ownerId: string;
-    title: string;
+    title: Generated<string>;
+    yjsState: Buffer;
+    visibility: Visibility;
+};
+export type permission = {
+    id: Generated<string>;
+    documentId: string;
+    userId: string;
+    role: Role;
 };
 export type session = {
     id: Generated<string>;
@@ -47,6 +66,7 @@ export type verification = {
 export type DB = {
     account: account;
     document: document;
+    permission: permission;
     session: session;
     user: user;
     verification: verification;
