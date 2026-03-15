@@ -1,6 +1,5 @@
 import * as z from "zod";
 
-export const getDocumentSchema = z.object({
- documentIds: z.array((z.uuid()))
+export const getOrUpdateDocumentSchema = z.object({
+ documentId: z.uuid()
 });
-

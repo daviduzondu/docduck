@@ -3,6 +3,7 @@
  "exclude": ["dist"],
  "include": ["**/*.ts"],
   "compilerOptions": {
+   "experimentalDecorators": true,
   "baseUrl": ".",
     "paths": {
      "@/*": ["src/*"]

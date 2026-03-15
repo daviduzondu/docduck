@@ -33,7 +33,7 @@ export type document = {
     ownerId: string;
     title: Generated<string>;
     yjsState: Buffer;
-    visibility: Visibility;
+    visibility: Generated<Visibility>;
 };
 export type permission = {
     id: Generated<string>;

@@ -79,7 +79,7 @@ model document {
  ownerId    String
  title      String     @default("Untitled Document")
  yjsState   Bytes
- visibility Visibility
+ visibility Visibility @default(PRIVATE)
  createdAt  DateTime   @default(now()) @ignore
  updatedAt  DateTime   @default(now()) @ignore
 

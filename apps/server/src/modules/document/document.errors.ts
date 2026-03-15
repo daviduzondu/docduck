@@ -7,3 +7,10 @@ export class DocumentNotFoundError extends AppError {
   this.name = "DocumentNotFoundError";
  }
 }
+
+export class DocumentAccessNotAllowedError extends AppError {
+ constructor(statusCode = StatusCodes.FORBIDDEN) {
+  super("Sorry. You do not have access to this document", statusCode);
+  this.name = "DocumentAccessNotAllowedError";
+ }
+}
