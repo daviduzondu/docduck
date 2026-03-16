@@ -1,7 +1,5 @@
-import { Database } from "@hocuspocus/extension-database";
 import { Hocuspocus } from "@hocuspocus/server";
 import { WebSocketServer } from 'ws';
-import { db } from "./kysely";
 import { auth } from '@/modules/auth/better-auth';
 import { AppError, verifyRole } from "./helpers";
 import { StatusCodes } from "http-status-codes";
