@@ -8,12 +8,13 @@ const documentRouter: Router = express.Router();
 
 documentRouter
  .get('/',
-  helpers.validateBody(documentSchemas.getOrUpdateDocumentSchema),
+  helpers.validateBody(documentSchemas.getDocumentSchema),
   documentMiddleware.verifyDocumentAccess,
-  documentController.getDocuments)
- .post('/save',
-  helpers.validateBody(documentSchemas.getOrUpdateDocumentSchema),
-  documentMiddleware.verifyDocumentAccess,
+  documentController.getDocument)
+ .post('/new',
+  helpers.validateBody(documentSchemas.createDocumentSchema),
+  documentMiddleware.isAuthenticated,
+  documentController.createDocument
  )
 
 

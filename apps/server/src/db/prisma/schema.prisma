@@ -78,7 +78,7 @@ model document {
  id         String     @unique @default(dbgenerated("gen_random_uuid()"))
  ownerId    String
  title      String     @default("Untitled Document")
- yjsState   Bytes
+ yjsState   Bytes?
  visibility Visibility @default(PRIVATE)
  createdAt  DateTime   @default(now()) @ignore
  updatedAt  DateTime   @default(now()) @ignore

@@ -32,7 +32,7 @@ export type document = {
     id: Generated<string>;
     ownerId: string;
     title: Generated<string>;
-    yjsState: Buffer;
+    yjsState: Buffer | null;
     visibility: Generated<Visibility>;
 };
 export type permission = {

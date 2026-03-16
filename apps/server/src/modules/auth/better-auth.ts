@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { db } from "@/lib/kysely";
+import { openAPI } from "better-auth/plugins";
 
 export const auth = betterAuth({
  database: {
@@ -10,5 +11,6 @@ export const auth = betterAuth({
  emailAndPassword: {
   enabled: true,
   autoSignIn: false
- }
+ },
+ plugins: [openAPI()]
 });
