@@ -9,7 +9,7 @@ import { Role } from "@/db/prisma/generated/types";
 
 type HocuspocusContext = Awaited<ReturnType<typeof auth.api.getSession>> & { role: Role };
 export const hocuspocus = new Hocuspocus({
- async onAuthenticate(data): Promise<HocuspocusContext> {
+ async onAuthenticate(data) {
   const authData = await auth.api.getSession({
    headers: data.request.headers
   });
@@ -19,24 +19,20 @@ export const hocuspocus = new Hocuspocus({
   return Object.assign(authData, { role });
  },
  extensions: [
-  new Database({
-   fetch: async (data) => {
-    return new Promise(async (resolve) => {
-     const result = await db.selectFrom('document').where("document.id", "=", data.documentName).select(['yjsState']).executeTakeFirstOrThrow();
-     resolve(result?.yjsState ?? null);
-    })
-   },
-   store: async (data) => {
-    db.updateTable('document').where('document.id', '=', data.documentName).set({
-     yjsState: data.state
-    }).returning(['id']).executeTakeFirstOrThrow(() => { throw new AppError(`Failed to update document with id: ${data.documentName}`, StatusCodes.NOT_FOUND) })
-   },
-  })
+  // new Database({
+  //  fetch: async (data) => {
+  //   return new Promise(async (resolve) => {
+  //    const result = await db.selectFrom('document').where("document.id", "=", data.documentName).select(['yjsState']).executeTakeFirstOrThrow();
+  //    resolve(result?.yjsState ?? null);
+  //   })
+  //  },
+  //  store: async (data) => {
+  //   db.updateTable('document').where('document.id', '=', data.documentName).set({
+  //    yjsState: data.state
+  //   }).returning(['id']).executeTakeFirstOrThrow(() => { throw new AppError(`Failed to update document with id: ${data.documentName}`, StatusCodes.NOT_FOUND) })
+  //  },
+  // })
  ],
- onChange(data) {
-  console.log(data.documentName)
-  return new Promise((resolve) => resolve(undefined))
- },
  onConnect(data) {
   return new Promise((res) => res(undefined));
  },

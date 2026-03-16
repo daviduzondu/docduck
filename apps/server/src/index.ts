@@ -20,8 +20,7 @@ const corsConfig: cors.CorsOptions = {
  credentials: true,
  origin: ['http://localhost:3000'],
 }
-const wss = new WebSocketServer({ server, path: '/collab ' });
-
+const wss = new WebSocketServer({ server, path: '/collab' });
 app.use(ctx);
 app.use(pino());
 app.use(cors(corsConfig));

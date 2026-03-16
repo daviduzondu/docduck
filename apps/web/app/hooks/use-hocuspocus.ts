@@ -12,7 +12,10 @@ function initHocuspocus() {
  const provider = new HocuspocusProvider({
   websocketProvider: socket,
   name: 'document-1',
-  document: ydoc
+  document: ydoc,
+  onAuthenticationFailed() {
+   console.error("Authentication failed. You must be signed in to perform this action.")
+  },
  })
  return { ydoc, provider }
 }
