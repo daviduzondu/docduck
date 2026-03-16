@@ -23,7 +23,7 @@ function initHocuspocus() {
 export default function useHocuspocus() {
  const { provider, ydoc } = useMemo(() => initHocuspocus(), []);
 
- useEffect(()=>{
+ useEffect(() => {
   console.log('re-render!')
  })
 
