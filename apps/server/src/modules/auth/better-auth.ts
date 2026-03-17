@@ -8,9 +8,10 @@ export const auth = betterAuth({
   type: 'postgres'
  },
  appName: "DocDuck",
+ trustedOrigins: ['http://localhost:3000'],
  emailAndPassword: {
   enabled: true,
-  autoSignIn: false
+  autoSignIn: false,
  },
- plugins: [openAPI()]
+ plugins: [openAPI()],
 });

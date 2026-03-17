@@ -2,9 +2,24 @@ import { createAuthClient } from "better-auth/react";
 import { faker } from '@faker-js/faker';
 
 
-const authClient = createAuthClient({
+export const authClient = createAuthClient({
  baseURL: process.env.NEXT_PUBLIC_SERVER_BASE_URL
 });
+
+export async function loginWithEmailAndPassword(email: string, password: string) {
+ try {
+  const result = await authClient.signIn.email({
+   email, password
+  });
+  if (result.error) throw new Error(result.error.message)
+ } catch (error) {
+  alert("Failed to sign in!");
+  throw error;
+ }
+ alert("Sign in successful!");
+}
+
+
 
 export async function createAccountWithEmailAndPassword() {
  await authClient.signUp.email({

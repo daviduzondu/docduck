@@ -20,7 +20,10 @@ const corsConfig: cors.CorsOptions = {
  credentials: true,
  origin: ['http://localhost:3000'],
 }
-const wss = new WebSocketServer({ server, path: '/collab' });
+const wss = new WebSocketServer({
+ server, path: '/collab',
+});
+initializeHocuspocus(wss);
 app.use(ctx);
 app.use(pino());
 app.use(cors(corsConfig));
@@ -43,5 +46,4 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
  }
 });
 
-initializeHocuspocus(wss);
 server.listen(PORT, () => console.log(`Server now listening on ${PORT}`));

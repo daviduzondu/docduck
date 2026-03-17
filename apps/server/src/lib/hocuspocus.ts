@@ -4,17 +4,21 @@ import { auth } from '@/modules/auth/better-auth';
 import { AppError, verifyRole } from "./helpers";
 import { StatusCodes } from "http-status-codes";
 import { Role } from "@/db/prisma/generated/types";
+import { Database } from "@hocuspocus/extension-database";
+import { db } from "./kysely";
 
 type HocuspocusContext = Awaited<ReturnType<typeof auth.api.getSession>> & { role: Role };
+
 export const hocuspocus = new Hocuspocus({
  async onAuthenticate(data) {
+  // console.log("HEADERS: ", data.requestHeaders);
   const authData = await auth.api.getSession({
-   headers: data.request.headers
+   headers: data.requestHeaders
   });
   if (!authData) throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
-  const role = await verifyRole({ documentId: data.documentName, userId: authData.user.id });
-  if (role === 'VIEWER') data.connectionConfig.readOnly = true;
-  return Object.assign(authData, { role });
+  // const role = await verifyRole({ documentId: data.documentName, userId: authData.user.id });
+  // if (role === 'VIEWER') data.connectionConfig.readOnly = true;
+  return Object.assign(authData);
  },
  extensions: [
   // new Database({
@@ -31,9 +35,10 @@ export const hocuspocus = new Hocuspocus({
   //  },
   // })
  ],
- onConnect(data) {
-  return new Promise((res) => res(undefined));
- },
+ // onConnect(data) {
+ //  // console.log(data.requestHeaders)
+ //  return new Promise((res) => res(unde));
+ // },
  debounce: 35000
 });
 

@@ -15,7 +15,7 @@ export const db = new Kysely<Database>({
 }),
  log(event): void {
   if (event.level === 'query') {
-   pino().info(event.query.sql);
+   console.log(event.query.sql);
   }
  }
 });
