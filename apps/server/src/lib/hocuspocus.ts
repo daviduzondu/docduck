@@ -4,41 +4,47 @@ import { auth } from '@/modules/auth/better-auth';
 import { AppError, verifyRole } from "./helpers";
 import { StatusCodes } from "http-status-codes";
 import { Role } from "@/db/prisma/generated/types";
+import * as documentService from '@/modules/document/document.service';
 import { Database } from "@hocuspocus/extension-database";
 import { db } from "./kysely";
 
 type HocuspocusContext = Awaited<ReturnType<typeof auth.api.getSession>> & { role: Role };
 
 export const hocuspocus = new Hocuspocus({
+ async onStateless(payload) {
+  payload.connection.sendStateless("Hi!")
+ },
  async onAuthenticate(data) {
-  // console.log("HEADERS: ", data.requestHeaders);
-  const authData = await auth.api.getSession({
-   headers: data.requestHeaders
-  });
-  if (!authData) throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
-  // const role = await verifyRole({ documentId: data.documentName, userId: authData.user.id });
-  // if (role === 'VIEWER') data.connectionConfig.readOnly = true;
-  return Object.assign(authData);
+  data.connectionConfig.readOnly = true;
+  const authData = await auth.api.getSession({ headers: data.requestHeaders });
+  const permissions = await documentService.getDocumentPermissions(data.documentName, authData?.user.id ?? null);
+  
+  if (!permissions?.documentId) throw new AppError(`Document with id ${permissions?.documentId} not found`, StatusCodes.NOT_FOUND);
+
+  // For anons
+  if (!permissions?.userId && permissions?.visibility === "PRIVATE") throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
+
+  // For users
+  if (permissions?.userId === authData?.user.id && permissions?.role !== 'VIEWER') data.connectionConfig.readOnly = false;
+
+  return Object.assign(authData!);
  },
  extensions: [
-  // new Database({
-  //  fetch: async (data) => {
-  //   return new Promise(async (resolve) => {
-  //    const result = await db.selectFrom('document').where("document.id", "=", data.documentName).select(['yjsState']).executeTakeFirstOrThrow();
-  //    resolve(result?.yjsState ?? null);
-  //   })
-  //  },
-  //  store: async (data) => {
-  //   db.updateTable('document').where('document.id', '=', data.documentName).set({
-  //    yjsState: data.state
-  //   }).returning(['id']).executeTakeFirstOrThrow(() => { throw new AppError(`Failed to update document with id: ${data.documentName}`, StatusCodes.NOT_FOUND) })
-  //  },
-  // })
+  new Database({
+   fetch: async (data) => {
+    return new Promise(async (resolve, reject) => {
+     const result = await db.selectFrom('document').where("document.id", "=", data.documentName).select(['yjsState']).executeTakeFirstOrThrow();
+     // reject("Failed to retrieve doc")
+     resolve(result?.yjsState ?? null);
+    })
+   },
+   store: async (data) => {
+    db.updateTable('document').where('document.id', '=', data.documentName).set({
+     yjsState: data.state
+    }).returning(['id']).executeTakeFirstOrThrow(() => { throw new AppError(`Failed to update document with id: ${data.documentName}`, StatusCodes.NOT_FOUND) })
+   },
+  })
  ],
- // onConnect(data) {
- //  // console.log(data.requestHeaders)
- //  return new Promise((res) => res(unde));
- // },
  debounce: 35000
 });
 

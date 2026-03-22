@@ -15,8 +15,10 @@ export class AppError extends Error {
  }
 }
 
-export const validateBody = (schema: z.ZodType) => async (req: Request, res: Response, next: NextFunction) => {
- validate(schema, req.body);
+export const validateRequest = (schema: { query?: z.ZodType, body?: z.ZodType, params?: z.ZodType }) => async (req: Request, res: Response, next: NextFunction) => { 
+ if (schema.query) validate(schema.query, req.query);
+ if (schema.body) validate(schema.body, req.body);
+ if (schema.params) validate(schema.params, req.params);
  next();
 }
 
@@ -28,6 +30,8 @@ export const validate = (schema: z.ZodType, input: any) => {
    throw new AppError(error.message, StatusCodes.BAD_REQUEST)
   }
  }
+
+
 }
 
 export async function verifyRole({ documentId, userId }: { documentId: string, userId: string }) {

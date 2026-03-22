@@ -15,6 +15,12 @@ export const Visibility = {
     PUBLIC: "PUBLIC"
 } as const;
 export type Visibility = (typeof Visibility)[keyof typeof Visibility];
+export const InvitationStatus = {
+    PENDING: "PENDING",
+    ACCEPTED: "ACCEPTED",
+    DECLINED: "DECLINED"
+} as const;
+export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus];
 export type account = {
     id: Generated<string>;
     userId: string;
@@ -34,6 +40,15 @@ export type document = {
     title: Generated<string>;
     yjsState: Buffer | null;
     visibility: Generated<Visibility>;
+    allowPublicEdits: Generated<boolean>;
+};
+export type document_invitations = {
+    id: Generated<string>;
+    email: string;
+    inviterId: string;
+    documentId: string;
+    role: Role;
+    status: Generated<InvitationStatus>;
 };
 export type permission = {
     id: Generated<string>;
@@ -66,6 +81,7 @@ export type verification = {
 export type DB = {
     account: account;
     document: document;
+    document_invitations: document_invitations;
     permission: permission;
     session: session;
     user: user;

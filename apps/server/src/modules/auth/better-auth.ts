@@ -13,5 +13,9 @@ export const auth = betterAuth({
   enabled: true,
   autoSignIn: false,
  },
+ baseURL: 'http://localhost:1711',
  plugins: [openAPI()],
+ advanced: {
+  disableOriginCheck: process.env.NODE_ENV === "PRODUCTION" ? false : true
+ }
 });

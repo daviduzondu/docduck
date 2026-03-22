@@ -1,21 +1,26 @@
 import express, { Router } from 'express';
 import * as documentController from '@/modules/document/document.controller';
 import * as helpers from '../../lib/helpers';
-import * as documentSchemas from './document.validation';
+import * as documentSchema from './document.validation';
 import * as documentMiddleware from './document.middleware';
+import { ensureAuth } from '@/modules/auth/auth.middleware'
 
 const documentRouter: Router = express.Router();
 
 documentRouter
  .get('/',
-  helpers.validateBody(documentSchemas.getDocumentSchema),
+  helpers.validateRequest(documentSchema.getDocumentSchema),
   documentMiddleware.verifyDocumentAccess,
   documentController.getDocument)
  .post('/new',
-  helpers.validateBody(documentSchemas.createDocumentSchema),
-  documentMiddleware.isAuthenticated,
+  ensureAuth,
+  helpers.validateRequest(documentSchema.createDocumentSchema),
   documentController.createDocument
+ ).post('/:id/invitations',
+  ensureAuth,
+  helpers.validateRequest(documentSchema.documentInvitationSchema),
+  documentController.createDocumentInvitations
  )
 
 
-export default documentRouter;
+export default documentRouter; 

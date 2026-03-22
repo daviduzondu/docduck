@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "add:server": "pnpm add",
-    "dev": "tsx --watch src/index.ts",
+    "dev": "NODE_ENV=DEVELOPMENT tsx --watch src/index.ts",
     "prisma": "pnpm dlx prisma",
     "migrate:dev": "pnpm dlx prisma migrate dev --create-only && node ./src/db/scripts/set-updated-at.js && pnpm dlx prisma migrate dev && pnpm dlx prisma generate",
-    "start": "node dist/index.js",
+    "start": "NODE_ENV=PRODUCTION node dist/index.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",

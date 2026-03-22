@@ -13,6 +13,8 @@ import { NoResultError } from 'kysely';
 import { StatusCodes } from 'http-status-codes';
 import { ctx } from './modules/auth/auth.middleware';
 
+if (!process.env.NODE_ENV)
+ throw new Error("Failed to specify Node.js environment");
 const PORT = process.env.PORT ?? "1711";
 const app: Express = express();
 const server = createServer(app);
@@ -29,7 +31,7 @@ app.use(pino());
 app.use(cors(corsConfig));
 app.use(express.json());
 app.all('/api/auth/{*any}', toNodeHandler(auth));
-app.use('/api/document', documentRouter);
+app.use('/api/documents', documentRouter);
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
  if (err instanceof AppError) {
   res.status(err.statusCode).json({

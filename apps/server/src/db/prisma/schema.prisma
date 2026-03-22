@@ -22,8 +22,9 @@ model user {
  image         String?
  isAnonymous   Boolean @default(false)
 
- sessions session[]
- accounts account[]
+ sessions            session[]
+ accounts            account[]
+ documentInvitations document_invitations[]
 
  createdAt DateTime @ignore
  updatedAt DateTime @ignore
@@ -75,15 +76,34 @@ model verification {
 }
 
 model document {
- id         String     @unique @default(dbgenerated("gen_random_uuid()"))
- ownerId    String
- title      String     @default("Untitled Document")
- yjsState   Bytes?
- visibility Visibility @default(PRIVATE)
- createdAt  DateTime   @default(now()) @ignore
- updatedAt  DateTime   @default(now()) @ignore
+ id                  String                 @unique @default(dbgenerated("gen_random_uuid()"))
+ ownerId             String
+ title               String                 @default("Untitled Document")
+ yjsState            Bytes?
+ visibility          Visibility             @default(PRIVATE)
+ allowPublicEdits    Boolean                @default(false)
+ createdAt           DateTime               @default(now()) @ignore
+ updatedAt           DateTime               @default(now()) @ignore
+ documentInvitations document_invitations[]
 
  @@index([ownerId])
+}
+
+model document_invitations {
+ id         String           @unique @default(dbgenerated("gen_random_uuid()"))
+ email      String
+ inviterId  String
+ documentId String
+ role       Role
+ status     InvitationStatus @default(PENDING)
+ createdAt  DateTime         @default(now()) @ignore
+ updatedAt  DateTime         @default(now()) @ignore
+
+ // Relations 
+ inviter  user     @relation(fields: [inviterId], references: [id])
+ document document @relation(fields: [documentId], references: [id])
+
+ @@unique([inviterId, email, documentId])
 }
 
 model permission {
@@ -108,4 +128,10 @@ enum Role {
 enum Visibility {
  PRIVATE
  PUBLIC
+}
+
+enum InvitationStatus {
+ PENDING
+ ACCEPTED
+ DECLINED
 }
