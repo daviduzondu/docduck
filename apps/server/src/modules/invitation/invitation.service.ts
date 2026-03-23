@@ -1,8 +1,9 @@
 import { db } from "../../lib/kysely";
 import { document_invitations } from "@/db/prisma/generated/types";
-import { InsertableWithoutId } from "../../types/helpers";
+import { InsertableWithoutId } from "../../types/types";
 import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";
+import { sql } from "kysely";
 
 export async function createDocumentInvitations(invitees: Omit<InsertableWithoutId<document_invitations>, 'status'>[]) {
 
@@ -25,8 +26,15 @@ export async function acceptDocumentInvitation(invitationId: string, ctx: Expres
   const invitation = await trx.selectFrom('document_invitations').where('document_invitations.id', '=', invitationId).select(['documentId', 'email', 'role', 'status']).executeTakeFirstOrThrow();
 
   await trx.updateTable("document_invitations").set({
-   status: "ACCEPTED"
-  }).where('documentId', '=', invitation.documentId).where('document_invitations.email', '=', invitation.email).returning(['document_invitations.email']).execute();
+   status: "ACCEPTED",
+   acceptedAt: sql`now()`
+  })
+   .where('documentId', '=', invitation.documentId)
+   .where('document_invitations.email', '=', invitation.email)
+   .where('acceptedAt', 'is', null)
+   .where('status', '=', 'PENDING')
+   .where('revokedAt', 'is', null)
+   .returning(['document_invitations.email']).execute();
 
   const { role } = await trx.insertInto("permission").values({ role: invitation.role, documentId: invitation.documentId, userId: ctx!.user.id }).returning(['role']).executeTakeFirstOrThrow();
 

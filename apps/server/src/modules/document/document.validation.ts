@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { Role } from "@/db/prisma/generated/types";
+import { RequestSchema } from "../../types/types";
 
 export const getDocumentSchema = {
  body: z.object({
@@ -7,7 +8,7 @@ export const getDocumentSchema = {
  })
 }
 
-export const createDocumentSchema = {
+export const createDocumentSchema: RequestSchema = {
  body: z.object({
   // state: z.uint64(),
   title: z.string().min(1).optional(),

@@ -1,4 +1,4 @@
-import { MiddlewareArgs } from "@/types/helpers";
+import { MiddlewareArgs } from "@/types/types";
 import * as invitationsService from '@/modules/invitation/invitation.service';
 import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";

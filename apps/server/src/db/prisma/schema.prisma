@@ -96,14 +96,14 @@ model document_invitations {
  documentId String
  role       Role
  status     InvitationStatus @default(PENDING)
+ acceptedAt DateTime?
+ revokedAt  DateTime?
  createdAt  DateTime         @default(now()) @ignore
  updatedAt  DateTime         @default(now()) @ignore
 
  // Relations 
  inviter  user     @relation(fields: [inviterId], references: [id])
  document document @relation(fields: [documentId], references: [id])
-
- @@unique([inviterId, email, documentId])
 }
 
 model permission {

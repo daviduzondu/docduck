@@ -49,6 +49,8 @@ export type document_invitations = {
     documentId: string;
     role: Role;
     status: Generated<InvitationStatus>;
+    acceptedAt: Timestamp | null;
+    revokedAt: Timestamp | null;
 };
 export type permission = {
     id: Generated<string>;

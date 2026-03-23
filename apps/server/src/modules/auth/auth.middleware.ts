@@ -3,7 +3,7 @@ import { auth } from '@/modules/auth/better-auth';
 import { fromNodeHeaders } from "better-auth/node";
 import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";
-import { MiddlewareArgs } from "@/types/helpers";
+import { MiddlewareArgs } from "@/types/types";
 
 export async function ctx(...[req, res, next]: MiddlewareArgs) {
  const result = await auth.api.getSession({
