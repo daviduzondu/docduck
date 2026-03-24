@@ -15,6 +15,7 @@ export async function ctx(...[req, res, next]: MiddlewareArgs) {
 }
 
 export const ensureAuth = async (...[req, res, next]: MiddlewareArgs) => {
+ console.log("Email:", req.ctx?.user.email)
  if (req.ctx?.session) return next();
  throw new AppError("You must be signed in to perform this action.", StatusCodes.UNAUTHORIZED);
 }

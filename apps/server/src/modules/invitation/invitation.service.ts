@@ -6,11 +6,13 @@ import { StatusCodes } from "http-status-codes";
 import { Insertable, sql } from "kysely";
 
 export async function addDocInvitees(documentId: string, invitees: Pick<Insertable<document_invitations>, 'email' | 'inviterId' | 'role'>[]) {
+ // TODO: Integrate email service
  return await db.insertInto('document_invitations').values(invitees.map(i => ({ ...i, documentId }))).returning(['id']).onConflict((oc) => {
   oc.columns(['email', 'documentId']).where('status', '=', 'PENDING').doNothing()
   throw new AppError("This email already has a pending invite", StatusCodes.CONFLICT)
  }).execute();
 }
+
 
 export async function getInvitationDetails(invitationId: string) {
  return await db.selectFrom('document_invitations').select(['id', 'role', 'inviterId', 'status', 'email']).where('id', '=', invitationId).executeTakeFirstOrThrow(() => { throw new AppError("Failed to retrieve invitation", StatusCodes.NOT_FOUND) });
@@ -31,7 +33,10 @@ export async function acceptDocumentInvitation(invitationId: string, ctx: Expres
    .where('revokedAt', 'is', null)
    .returning(['document_invitations.email']).execute();
 
-  const { role } = await trx.insertInto("permission").values({ role: invitation.role, documentId: invitation.documentId, userId: ctx!.user.id }).returning(['role']).executeTakeFirstOrThrow();
+  const { role } = await trx.insertInto("permission").values({ role: invitation.role, documentId: invitation.documentId, userId: ctx!.user.id }).returning(['role']).onConflict((oc)=>{
+   oc.doNothing();
+   throw new AppError("You've already accepted this invitation", StatusCodes.CONFLICT)
+  }).executeTakeFirstOrThrow();
 
   return role;
  })
