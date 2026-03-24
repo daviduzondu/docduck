@@ -3,18 +3,23 @@ import { document_invitations } from "@/db/prisma/generated/types";
 import { InsertableWithoutId } from "../../types/types";
 import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";
-import { sql } from "kysely";
+import { Insertable, sql } from "kysely";
 
-export async function createDocumentInvitations(invitees: Omit<InsertableWithoutId<document_invitations>, 'status'>[]) {
+export async function addDocInvitees(documentId: string, invitees: Pick<Insertable<document_invitations>, 'email' | 'inviterId' | 'role'>[]) {
+ return await db.transaction().execute(async (trx) => {
+  await db.updateTable("document_invitations").set({
+   revokedAt: sql`now()`,
+   revokedBy: 'SYSTEM',
+   status: 'REVOKED'
+  })
+   .where('documentId', '=', documentId)
+   .where('email', 'in', invitees.map(i => i.email))
+   .where('status', '=', 'PENDING')
+   .where('revokedAt', 'is', null)
+   .execute()
 
- // TODO: Refactor code to integrate with the email service
- // For prototyping purposes, invites will be auto-accepted until the email service is set up.
-
- // db.transaction().execute((trx) => {
- //  // const userIds = trx.selectFrom('user').where('user.email', 'in', invitees.map(i => i.email)).select('user.id')
- // })
-
- return await db.insertInto('document_invitations').values(invitees.map(i => ({ ...i, status: "ACCEPTED" }))).returning(['id']).execute();
+  return await db.insertInto('document_invitations').values(invitees.map(i => ({ ...i, documentId }))).returning(['id']).execute();
+ })
 }
 
 export async function getInvitationDetails(invitationId: string) {

@@ -12,6 +12,7 @@ import pino from 'pino-http';
 import { NoResultError } from 'kysely';
 import { StatusCodes } from 'http-status-codes';
 import { ctx } from './modules/auth/auth.middleware';
+import invitationRouter from './modules/invitation/invitation.route';
 
 if (!process.env.NODE_ENV)
  throw new Error("Failed to specify Node.js environment");
@@ -25,23 +26,39 @@ const corsConfig: cors.CorsOptions = {
 const wss = new WebSocketServer({
  server, path: '/collab',
 });
+
 initializeHocuspocus(wss);
 app.use(ctx);
-app.use(pino());
+app.use(pino({
+ ...(process.env.NODE_ENV === "PRODUCTION"
+  ? {}
+  : {
+   transport: {
+    target: "pino-pretty",
+    options: { colorize: true }
+   }
+  }),
+}));
 app.use(cors(corsConfig));
 app.use(express.json());
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 app.use('/api/documents', documentRouter);
+app.use('/api/invitations', invitationRouter);
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
  if (err instanceof AppError) {
   res.status(err.statusCode).json({
    message: err.message
   })
+ }
+ else if (err instanceof SyntaxError && 'body' in err) {
+  return res.status(400).send({ message: err.message }); 
  } else if (err instanceof NoResultError) {
   res.status(StatusCodes.NOT_FOUND).json({
    message: "The resource you tried to access could not be found"
   })
  } else {
+  console.error(err);
   res.status(500).json({
    message: 'Internal server error'
   });

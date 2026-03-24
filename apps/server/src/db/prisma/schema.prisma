@@ -8,6 +8,7 @@ generator kysely {
  provider = "prisma-kysely"
  output   = "./generated"
  fileName = "types.ts"
+ previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -98,12 +99,15 @@ model document_invitations {
  status     InvitationStatus @default(PENDING)
  acceptedAt DateTime?
  revokedAt  DateTime?
+ revokedBy  RevokedBy?
  createdAt  DateTime         @default(now()) @ignore
  updatedAt  DateTime         @default(now()) @ignore
 
  // Relations 
  inviter  user     @relation(fields: [inviterId], references: [id])
  document document @relation(fields: [documentId], references: [id])
+
+ @@unique([email, documentId], where: raw("status = 'PENDING' AND \"revokedAt\" IS NULL"))
 }
 
 model permission {
@@ -134,4 +138,10 @@ enum InvitationStatus {
  PENDING
  ACCEPTED
  DECLINED
+ REVOKED
+}
+
+enum RevokedBy {
+ SYSTEM
+ INVITER
 }

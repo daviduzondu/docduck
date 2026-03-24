@@ -16,7 +16,6 @@ export default function useHocuspocus(id: string) {
    name: id,
    document: ydoc,
    onAuthenticationFailed(data) {
-    console.log(data);
     alert("You need to be authenticated!");
     console.error("Authentication failed. You must be signed in to perform this action.")
    },

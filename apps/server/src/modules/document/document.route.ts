@@ -3,7 +3,7 @@ import * as documentController from '@/modules/document/document.controller';
 import * as helpers from '../../lib/helpers';
 import * as documentSchema from './document.validation';
 import * as documentMiddleware from './document.middleware';
-import { ensureAuth } from '@/modules/auth/auth.middleware'
+import * as authMiddleware from '@/modules/auth/auth.middleware'
 
 const documentRouter: Router = express.Router();
 
@@ -13,12 +13,13 @@ documentRouter
   documentMiddleware.verifyDocumentAccess,
   documentController.getDocument)
  .post('/new',
-  ensureAuth,
+  authMiddleware.ensureAuth,
   helpers.validateRequest(documentSchema.createDocumentSchema),
   documentController.createDocument
  ).post('/:id/invitations',
-  ensureAuth,
+  authMiddleware.ensureAuth,
   helpers.validateRequest(documentSchema.documentInvitationSchema),
+  documentMiddleware.ensureDocumentOwner,
   documentController.createDocumentInvitations
  )
 

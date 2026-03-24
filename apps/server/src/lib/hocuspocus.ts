@@ -1,7 +1,7 @@
 import { Hocuspocus } from "@hocuspocus/server";
 import { WebSocketServer } from 'ws';
 import { auth } from '@/modules/auth/better-auth';
-import { AppError, verifyRole } from "./helpers";
+import { AppError } from "./helpers";
 import { StatusCodes } from "http-status-codes";
 import { Role } from "@/db/prisma/generated/types";
 import * as documentService from '@/modules/document/document.service';

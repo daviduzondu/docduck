@@ -9,8 +9,8 @@ const invitationRouter: Router = express.Router();
 
 invitationRouter.patch("/:id/",
  ensureAuth,
- ensureInviteeMatch,
  validateRequest(invitationSchema.acceptDocumentInvitationSchema),
+ ensureInviteeMatch,
  invitationController.acceptDocumentInvitation
 )
 

@@ -34,6 +34,11 @@
    "persistent": false,
    "interactive": true
   },
+  "create-only": {
+   "cache": false,
+   "persistent": false,
+   "interactive": true
+  },
   "add:web": {
    "cache": false,
    "persistent": false
