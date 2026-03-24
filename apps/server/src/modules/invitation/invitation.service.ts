@@ -13,7 +13,6 @@ export async function addDocInvitees(documentId: string, invitees: Pick<Insertab
  }).execute();
 }
 
-
 export async function getInvitationDetails(invitationId: string) {
  return await db.selectFrom('document_invitations').select(['id', 'role', 'inviterId', 'status', 'email']).where('id', '=', invitationId).executeTakeFirstOrThrow(() => { throw new AppError("Failed to retrieve invitation", StatusCodes.NOT_FOUND) });
 }
