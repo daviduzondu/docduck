@@ -1,5 +1,5 @@
 import { db } from "@/lib/kysely";
-import { NextFunction, Request, Response } from "express";
+import { Request } from "express";
 import { createDocumentSchema, getDocumentSchema } from "./document.validation";
 import * as z from 'zod';
 import { AppError } from "@/lib/helpers";
@@ -11,12 +11,7 @@ export async function getDocumentPermissions(id: string, userId: string | null =
   .where('document.id', '=', id)
   .select(['document.id as documentId', 'visibility', 'permission.role', 'permission.userId'])
   .executeTakeFirst();
-
-
- // id visibility role    userId
- // a  public     viewer  x
 }
-
 
 export async function getDocument(data: z.infer<typeof getDocumentSchema['body']>) {
  return await db.selectFrom('document').where('document.id', 'in', data.documentId).select(['id', 'title', 'visibility', 'ownerId']).executeTakeFirstOrThrow();
@@ -41,8 +36,4 @@ export async function createDocument(data: z.infer<typeof createDocumentSchema['
 
   return { documentId, role }
  })
-}
-
-export async function addDocumentCollaborator(collaboratorIds: []) {
-
 }
