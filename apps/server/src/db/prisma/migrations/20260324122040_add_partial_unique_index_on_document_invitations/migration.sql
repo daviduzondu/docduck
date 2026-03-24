@@ -1,12 +1,12 @@
-import fs from 'fs';
-import path from 'path';
+/*
+  Warnings:
 
-const migrationsDir = path.resolve(import.meta.dirname, "../prisma/migrations");
-const folders = fs.readdirSync(migrationsDir).filter(f => fs.statSync(path.join(migrationsDir, f)).isDirectory());
-const latestMigrationFile = path.join(migrationsDir, folders.sort().at(-1), 'migration.sql');
+  - A unique constraint covering the columns `[email,documentId]` on the table `document_invitations` will be added. If there are existing duplicate values, this will fail.
 
-const marker = 'CREATE OR REPLACE FUNCTION set_updated_at()';
-const triggerSQL = `
+*/
+-- CreateIndex
+CREATE UNIQUE INDEX "document_invitations_email_documentId_key" ON "document_invitations"("email", "documentId") WHERE ("status"= 'PENDING');
+
 
 -- Create or replace function for updating the updatedAt column
 CREATE OR REPLACE FUNCTION set_updated_at()
@@ -37,14 +37,3 @@ BEGIN
         ', tbl);
     END LOOP;
 END $$;
-`;
-
-
-const content = fs.readFileSync(latestMigrationFile, 'utf-8');
-
-if (!content.includes(marker)) {
- fs.appendFileSync(latestMigrationFile, triggerSQL);
- console.log(`[SUCCESS] Trigger function "set_updated_at" appended to: ${latestMigrationFile}`);
-} else {
- console.log(`[INFO] Trigger function "set_updated_at" already exists in ${latestMigrationFile}`)
-}

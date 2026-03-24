@@ -22,11 +22,6 @@ export const InvitationStatus = {
     REVOKED: "REVOKED"
 } as const;
 export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus];
-export const RevokedBy = {
-    SYSTEM: "SYSTEM",
-    INVITER: "INVITER"
-} as const;
-export type RevokedBy = (typeof RevokedBy)[keyof typeof RevokedBy];
 export type account = {
     id: Generated<string>;
     userId: string;
@@ -57,7 +52,6 @@ export type document_invitations = {
     status: Generated<InvitationStatus>;
     acceptedAt: Timestamp | null;
     revokedAt: Timestamp | null;
-    revokedBy: RevokedBy | null;
 };
 export type permission = {
     id: Generated<string>;

@@ -34,7 +34,12 @@
    "persistent": false,
    "interactive": true
   },
-  "create-only": {
+  "migrate:dev-apply": {
+   "cache": false,
+   "persistent": false,
+   "interactive": true
+  },
+  "migrate:create-only": {
    "cache": false,
    "persistent": false,
    "interactive": true
