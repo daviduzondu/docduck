@@ -7,13 +7,11 @@ import { Role } from "@/db/prisma/generated/types";
 import * as documentService from '@/modules/document/document.service';
 import { Database } from "@hocuspocus/extension-database";
 import { db } from "./kysely";
+import { Logger } from "@hocuspocus/extension-logger";
 
 type HocuspocusContext = Awaited<ReturnType<typeof auth.api.getSession>> & { role: Role };
 
 export const hocuspocus = new Hocuspocus({
- async onStateless(payload) {
-  payload.connection.sendStateless("Hi!")
- },
  async onAuthenticate(data) {
   data.connectionConfig.readOnly = true;
   const authData = await auth.api.getSession({ headers: data.requestHeaders });
@@ -30,11 +28,11 @@ export const hocuspocus = new Hocuspocus({
   return Object.assign(authData!);
  },
  extensions: [
+  new Logger(),
   new Database({
    fetch: async (data) => {
     return new Promise(async (resolve, reject) => {
      const result = await db.selectFrom('document').where("document.id", "=", data.documentName).select(['yjsState']).executeTakeFirstOrThrow();
-     // reject("Failed to retrieve doc")
      resolve(result?.yjsState ?? null);
     })
    },
