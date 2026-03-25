@@ -80,6 +80,8 @@ import content from "@/components/tiptap-templates/simple/data/content.json"
 import useHocuspocus from "../../../hooks/use-hocuspocus";
 import { Doc } from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
+import { useAuth } from "../../../providers/auth.provider";
+import { Session } from "better-auth";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -196,7 +198,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
   "main"
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
-
+ const { data } = useAuth();
  const editor = useEditor({
   immediatelyRender: false,
   editorProps: {
@@ -218,7 +220,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    }),
    CollaborationCaret.configure({
     provider,
-    user: { name: "John" + Math.random() * 10, color: "red" }
+    user: { name: data!.user.name, color: `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')}` }
    }),
    Collaboration.configure({
     document: ydoc

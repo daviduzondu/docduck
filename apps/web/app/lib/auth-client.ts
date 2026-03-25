@@ -6,10 +6,11 @@ export const authClient = createAuthClient({
  baseURL: process.env.NEXT_PUBLIC_SERVER_BASE_URL
 });
 
-export async function loginWithEmailAndPassword(email: string, password: string) {
+export async function loginWithEmailAndPassword(email: string, password: string, redirect?: string) {
  try {
   const result = await authClient.signIn.email({
-   email, password
+   email, password,
+   callbackURL: redirect
   });
   if (result.error) throw new Error(result.error.message)
  } catch (error) {
