@@ -29,6 +29,9 @@
    "cache": false,
    "persistent": false
   },
+  "generate:dev": {
+   "cache": false,
+  },
   "migrate:dev": {
    "cache": false,
    "persistent": false,

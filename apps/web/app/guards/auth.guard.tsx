@@ -15,11 +15,7 @@ export default function AuthGuard({ children, next }: { children: React.ReactNod
   }
  }, [isPending, data, router]);
 
- // block children until we know auth status
- if (isPending || !data) {
-  return null;
- }
-
+ if (isPending || !data) return null;
 
  return <>{children}</>;
 }

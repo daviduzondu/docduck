@@ -11,7 +11,7 @@ export default function LoginPage() {
  return (
   <div>
    <h1>Login</h1>
-
+   {searchParams.get('next') ? <em>You must be logged in to perform this action.</em> : null}
    <form onSubmit={(e) => e.preventDefault()}>
     <div>
      <label>Email</label>

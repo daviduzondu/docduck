@@ -24,5 +24,7 @@ export async function createDocumentInvitations(...[req, res]: MiddlewareArgs<z.
  res.status(StatusCodes.CREATED).json({
   message: "Invites sent successfully",
   data: result.map(r => r.id)
- })
+ });
+
+ return result;
 }

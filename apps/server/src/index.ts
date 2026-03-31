@@ -21,7 +21,7 @@ const app: Express = express();
 const server = createServer(app);
 const corsConfig: cors.CorsOptions = {
  credentials: true,
- origin: ['http://localhost:3000'],
+ origin: ['http://localhost:3000'], // TODO: replace with env variable
 }
 const wss = new WebSocketServer({
  server, path: '/collab',

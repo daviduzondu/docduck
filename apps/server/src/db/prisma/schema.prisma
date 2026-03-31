@@ -106,7 +106,8 @@ model document_invitations {
  inviter  user     @relation(fields: [inviterId], references: [id])
  document document @relation(fields: [documentId], references: [id])
 
- @@unique([email, documentId], where: raw("\"status\"= 'PENDING'"))
+ // \"status\"= 'PENDING' OR \"status\" = 'ACCEPTED' AND \"revokedAt\" IS NULL
+ @@unique([email, documentId], where: raw("(\"status\" = 'PENDING' OR \"status\" = 'ACCEPTED') AND \"revokedAt\" IS NULL "), map: "unique_active_document_invitation_index")
 }
 
 model permission {

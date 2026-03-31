@@ -1,16 +1,24 @@
 import { db } from "../../lib/kysely";
 import { document_invitations } from "@/db/prisma/generated/types";
-import { InsertableWithoutId } from "../../types/types";
 import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";
 import { Insertable, sql } from "kysely";
+import id from "zod/v4/locales/id.js";
 
 export async function addDocInvitees(documentId: string, invitees: Pick<Insertable<document_invitations>, 'email' | 'inviterId' | 'role'>[]) {
  // TODO: Integrate email service
- return await db.insertInto('document_invitations').values(invitees.map(i => ({ ...i, documentId }))).returning(['id']).onConflict((oc) => {
-  oc.columns(['email', 'documentId']).where('status', '=', 'PENDING').doNothing()
-  throw new AppError("This email already has a pending invite", StatusCodes.CONFLICT)
+
+ const ids = await db.insertInto('document_invitations').values(invitees.map(i => ({ ...i, documentId }))).returning(['id']).onConflict((oc) => {
+  return oc.columns(['email', 'documentId'])
+   .where((eb) => eb.or([
+    eb('status', '=', 'PENDING'),
+    eb('status', '=', 'ACCEPTED')
+   ]).and('revokedAt', 'is', null))
+   .doNothing();
  }).execute();
+ console.log(ids)
+ return ids;
+
 }
 
 export async function getInvitationDetails(invitationId: string) {
@@ -32,7 +40,7 @@ export async function acceptDocumentInvitation(invitationId: string, ctx: Expres
    .where('revokedAt', 'is', null)
    .returning(['document_invitations.email']).execute();
 
-  const { role } = await trx.insertInto("permission").values({ role: invitation.role, documentId: invitation.documentId, userId: ctx!.user.id }).returning(['role']).onConflict((oc)=>{
+  const { role } = await trx.insertInto("permission").values({ role: invitation.role, documentId: invitation.documentId, userId: ctx!.user.id }).returning(['role']).onConflict((oc) => {
    oc.doNothing();
    throw new AppError("You've already accepted this invitation", StatusCodes.CONFLICT)
   }).executeTakeFirstOrThrow();
