@@ -22,7 +22,7 @@ export function ThemeToggle() {
     const initialDarkMode =
       !!document.querySelector('meta[name="color-scheme"][content="dark"]') ||
       window.matchMedia("(prefers-color-scheme: dark)").matches
-    setIsDarkMode(initialDarkMode)
+    setIsDarkMode(!initialDarkMode)
   }, [])
 
   useEffect(() => {

@@ -90,7 +90,7 @@ const MainToolbarContent = ({
  isMobile: boolean
 }) => {
  return (
-  <>
+  <div className="flex m-auto border rounded-full">
    <Spacer />
 
    <ToolbarGroup>
@@ -155,7 +155,7 @@ const MainToolbarContent = ({
    <ToolbarGroup>
     <ThemeToggle />
    </ToolbarGroup>
-  </>
+  </div>
  )
 }
 
@@ -257,6 +257,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
   <div className="simple-editor-wrapper">
    <EditorContext.Provider value={{ editor }}>
     <Toolbar
+     className="m-auto"
      ref={toolbarRef}
      style={{
       ...(isMobile
@@ -283,7 +284,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
     <EditorContent
      editor={editor}
      role="presentation"
-     className="simple-editor-content border-red-50 border"
+     className="simple-editor-content rounded-sm border"
     />
    </EditorContext.Provider>
   </div>
