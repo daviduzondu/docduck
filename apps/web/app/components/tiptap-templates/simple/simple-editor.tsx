@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
+import { EditorContent, EditorContext, useEditor, useEditorState } from "@tiptap/react"
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCaret from '@tiptap/extension-collaboration-caret';
 
@@ -15,7 +15,7 @@ import { Typography } from "@tiptap/extension-typography"
 import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
-import { Selection } from "@tiptap/extensions"
+import { CharacterCount, Placeholder, Selection } from "@tiptap/extensions"
 
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button"
@@ -222,9 +222,14 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    Collaboration.configure({
     document: ydoc
    }),
+   Placeholder.configure({
+    placeholder: "Start typing..."
+   }),
    HorizontalRule,
    TextAlign.configure({ types: ["heading", "paragraph"] }),
    TaskList,
+   CharacterCount.configure({
+   }),
    TaskItem.configure({ nested: true }),
    Highlight.configure({ multicolor: true }),
    Image,
@@ -252,6 +257,14 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    setMobileView("main")
   }
  }, [isMobile, mobileView])
+
+ const editorData = useEditorState({
+  editor,
+  selector: context => ({
+   charactersCount: context.editor?.storage.characterCount.characters(),
+   wordsCount: context.editor?.storage.characterCount.words(),
+  }),
+ })
 
  return (
   <div className="simple-editor-wrapper">
@@ -286,6 +299,16 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
      role="presentation"
      className="simple-editor-content rounded-sm border"
     />
+    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm">
+     <div className="flex gap-4">
+      <span>{editorData?.charactersCount} characters</span>
+      <span>{editorData?.wordsCount} words</span>
+     </div>
+     <div className="flex gap-4">
+      <span>Synced</span>
+      <span>Saved 5 mins ago</span>
+     </div>
+    </footer>
    </EditorContext.Provider>
   </div>
  )

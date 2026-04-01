@@ -61,7 +61,8 @@ body,
  max-width: 648px;
  width: 100%;
  margin: 0 auto;
- height: 100%;
+ min-height: 100%;
+ height: fit-content;
  display: flex;
  flex-direction: column;
  flex: 1;
