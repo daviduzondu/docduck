@@ -16,9 +16,7 @@ export async function addDocInvitees(documentId: string, invitees: Pick<Insertab
    ]).and('revokedAt', 'is', null))
    .doNothing();
  }).execute();
- console.log(ids)
  return ids;
-
 }
 
 export async function getInvitationDetails(invitationId: string) {
