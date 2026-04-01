@@ -299,7 +299,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
      role="presentation"
      className="simple-editor-content rounded-sm border"
     />
-    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm">
+    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background">
      <div className="flex gap-4">
       <span>{editorData?.charactersCount} characters</span>
       <span>{editorData?.wordsCount} words</span>

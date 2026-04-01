@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import AuthGuard from "../../guards/auth.guard";
 import { EditorHeader } from "../../components/editor/editor-header";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { History, MessageSquare, Search } from "lucide-react";
 
 export default function NotePage() {
  const { noteId }: { noteId: string } = useParams();
@@ -21,7 +21,9 @@ export default function NotePage() {
    <AuthGuard next={"/doc/" + noteId}>
     <SimpleEditor ydoc={ydoc} provider={provider} />
    </AuthGuard>
-   <div className="absolute bottom-10 right-3">
+   <div className="absolute bottom-10 right-3 flex flex-col gap-3">
+    <Button size={'icon-xl'}><MessageSquare /></Button>
+    <Button size={'icon-xl'}><History /></Button>
     <Button size={'icon-xl'}><Search /></Button>
    </div>
   </main>
