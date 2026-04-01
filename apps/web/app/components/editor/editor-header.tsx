@@ -2,7 +2,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarGroup, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Edit3 } from 'lucide-react';
-import { LockIcon } from 'lucide-react';
 import { EditorShareDialogButton } from './editor-share-dialog';
 
 interface AvatarData {
@@ -29,7 +28,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  onShare,
 }) => {
  return (
-  <header className="flex w-full items-center px-3 py-2.5 justify-between">
+  <header className="flex w-full items-center px-3 py-2 justify-between">
    <div className="text-2xl font-bold grow basis-0">DocDuck</div>
 
    <div className="text-center space-x-1">

@@ -207,6 +207,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
     class: "simple-editor",
    },
   },
+  autofocus: true,
   extensions: [
    StarterKit.configure({
     horizontalRule: false,
@@ -267,7 +268,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
  })
 
  return (
-  <div className="simple-editor-wrapper">
+  <div className="simple-editor-wrapper ">
    <EditorContext.Provider value={{ editor }}>
     <Toolbar
      className="m-auto"
