@@ -51,6 +51,11 @@
    "cache": false,
    "persistent": false
   },
+  "ui": {
+   "cache": false,
+   "persistent": false,
+   "interactive": true
+  },
   "add:server": {
    "cache": false,
    "persistent": false

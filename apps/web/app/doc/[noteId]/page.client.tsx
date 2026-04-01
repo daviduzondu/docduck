@@ -15,6 +15,7 @@ export default function NotePage() {
 
  if (ydoc && provider)
   return <main>
+   {/* <div className="w-full text-center text-sm py-2">You're currently offline. Changes will sync automatically.</div> */}
    <header className="flex w-full items-center px-3 py-1 justify-between">
     <div className="text-2xl font-bold grow basis-0 ">DocDuck</div>
     <div className="w-[25%] text-center">
