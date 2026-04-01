@@ -19,11 +19,11 @@ interface EditorHeaderProps {
 }
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
- title = 'Quarterly Report (Q3 2024)',
+ title = 'The principle of population, as it affects the future improvement of society',
  avatars = [
-  { src: 'https://github.com/shadcn.png', alt: '@shadcn', fallback: 'CN' },
-  { src: 'https://github.com/maxleiter.png', alt: '@maxleiter', fallback: 'LR' },
-  { src: 'https://github.com/evilrabbit.png', alt: '@evilrabbit', fallback: 'ER' },
+  { src: 'https://github.com/shadcnx.png', alt: '@shadcn', fallback: 'CN' },
+  { src: 'https://github.com/maxleitder.png', alt: '@maxleiter', fallback: 'LR' },
+  { src: 'https://github.com/evilrabbitd.png', alt: '@evilrabbit', fallback: 'ER' },
  ],
  onEdit,
  onShare,
@@ -32,7 +32,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   <header className="flex w-full items-center px-3 py-2.5 justify-between">
    <div className="text-2xl font-bold grow basis-0">DocDuck</div>
 
-   <div className="w-[25%] text-center space-x-1">
+   <div className="text-center space-x-1">
     <div className="truncate text-center inline">{title}</div>
     <Button size="icon-xs" variant="ghost" onClick={onEdit}>
      <Edit3 />

@@ -38,6 +38,8 @@ import {
  ItemMedia,
  ItemTitle,
 } from "@/components/ui/item"
+import { Switch } from "../ui/switch"
+import { Field, FieldLabel } from "../ui/field"
 
 const roles = [{ label: "Editor", value: "editor" }, { label: "Viewer", value: "viewer" }];
 
@@ -160,9 +162,27 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
       </Item>
      </TabsContent>
     </Tabs>
+    <div className={"uppercase text-xs font-semibold"}>general access</div>
+    <div className="flex justify-between -mt-3 items-center">
+     <div>Anyone with link</div>
+     <Select items={roles} defaultValue={roles[1]!.value}>
+      <SelectTrigger className="w-max">
+       <SelectValue placeholder="Theme" />
+      </SelectTrigger>
+      <SelectContent>
+       <SelectGroup>
+        {roles.map((role) => (
+         <SelectItem key={role.value} value={role.value}>
+          {role.label}
+         </SelectItem>
+        ))}
+       </SelectGroup>
+      </SelectContent>
+     </Select>
+    </div>
     <DialogFooter className="flex sm:justify-between w-full">
      <Button variant={'outline'}><Link data-icon="inline-end" /> Copy link</Button>
-     {/* <Button disabled><Mail data-icon="inline-end" /> Send invitation</Button> */}
+     <Button><Mail data-icon="inline-end" /> Send invitation</Button>
     </DialogFooter>
    </DialogContent>
   </Dialog >
