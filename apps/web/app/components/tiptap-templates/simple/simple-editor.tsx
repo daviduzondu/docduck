@@ -76,12 +76,9 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
-import content from "@/components/tiptap-templates/simple/data/content.json"
-import useHocuspocus from "../../../hooks/use-hocuspocus";
 import { Doc } from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
-import { Session } from "better-auth";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -243,7 +240,6 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
     onError: (error) => console.error("Upload failed:", error),
    }),
   ],
-  content,
  })
 
  const rect = useCursorVisibility({
@@ -287,7 +283,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
     <EditorContent
      editor={editor}
      role="presentation"
-     className="simple-editor-content"
+     className="simple-editor-content border-red-50 border"
     />
    </EditorContext.Provider>
   </div>
