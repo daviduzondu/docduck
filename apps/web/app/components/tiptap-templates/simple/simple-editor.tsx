@@ -79,6 +79,8 @@ import "@/components/tiptap-templates/simple/simple-editor.scss"
 import { Doc } from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
+import { EditorHeader } from "../../editor/editor-header";
+import EditorSidebar from "../../editor/editor-sidebar";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -268,49 +270,45 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
  })
 
  return (
-  <div className="simple-editor-wrapper ">
+  <div className="simple-editor-wrapper">
    <EditorContext.Provider value={{ editor }}>
-    <Toolbar
-     className="m-auto"
-     ref={toolbarRef}
-     style={{
-      ...(isMobile
-       ? {
-        bottom: `calc(100% - ${height - rect.y}px)`,
-       }
-       : {}),
-     }}
-    >
-     {mobileView === "main" ? (
-      <MainToolbarContent
-       onHighlighterClick={() => setMobileView("highlighter")}
-       onLinkClick={() => setMobileView("link")}
-       isMobile={isMobile}
-      />
-     ) : (
-      <MobileToolbarContent
-       type={mobileView === "highlighter" ? "highlighter" : "link"}
-       onBack={() => setMobileView("main")}
-      />
-     )}
-    </Toolbar>
+    <div>
+     {/* Toolbar */}
+     <Toolbar
+      // 
+      className=""
+      ref={toolbarRef}
+      style={
+       isMobile
+        ? {
+         bottom: `calc(100% - ${height - rect.y}px)`,
+        }
+        : {}
+      }
+     >
+      {mobileView === "main" ? (
+       <MainToolbarContent
+        onHighlighterClick={() => setMobileView("highlighter")}
+        onLinkClick={() => setMobileView("link")}
+        isMobile={isMobile}
+       />
+      ) : (
+       <MobileToolbarContent
+        type={mobileView === "highlighter" ? "highlighter" : "link"}
+        onBack={() => setMobileView("main")}
+       />
+      )}
+     </Toolbar>
 
-    <EditorContent
-     editor={editor}
-     role="presentation"
-     className="simple-editor-content rounded-sm border"
-    />
-    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground">
-     <div className="flex gap-4">
-      <span>{editorData?.charactersCount} characters</span>
-      <span>{editorData?.wordsCount} words</span>
-     </div>
-     <div className="flex gap-4">
-      <span>Synced</span>
-      <span>Saved 5 mins ago</span>
-     </div>
-    </footer>
+     <EditorContent
+      editor={editor}
+      role="presentation"
+      className="simple-editor-content rounded-sm border min-h-full"
+     />
+    </div>
+
+    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground"> <div className="flex gap-4"> <span>{editorData?.charactersCount} characters</span> <span>{editorData?.wordsCount} words</span> </div> <div className="flex gap-4"> <span>Synced</span> <span>Saved 5 mins ago</span> </div> </footer>
    </EditorContext.Provider>
   </div>
- )
+ );
 }

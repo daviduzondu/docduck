@@ -1,5 +1,5 @@
-import EditorSidebar from "@/components/editor/editor-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { EditorSidebarProvider } from "../../providers/editor-sidebar.provider";
 
 export default function Layout({
  children,
@@ -7,14 +7,14 @@ export default function Layout({
  children: React.ReactNode;
 }>) {
  return (
-  <>
+  <body className="overflow-hidden">
    {/* <AuthProvider> */}
    <SidebarProvider>
-    {children}
-    
-    <EditorSidebar />
+    <EditorSidebarProvider>
+     {children}
+    </EditorSidebarProvider>
    </SidebarProvider>
    {/* </AuthProvider> */}
-  </>
+  </body>
  );
 }
