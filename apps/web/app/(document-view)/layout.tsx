@@ -1,5 +1,5 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { EditorSidebarProvider } from "../../providers/editor-sidebar.provider";
+import { EditorSidebarProvider } from "../providers/editor-sidebar.provider";
 
 export default function Layout({
  children,

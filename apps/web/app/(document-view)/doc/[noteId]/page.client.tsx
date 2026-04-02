@@ -23,7 +23,7 @@ export default function NotePage() {
   if (!open) toggleSidebar();
   if (open && newView === currentView) {
    setView(undefined);
-   toggleSidebar()
+   toggleSidebar();
   }
   setView(newView);
  }

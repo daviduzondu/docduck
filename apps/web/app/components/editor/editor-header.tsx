@@ -4,6 +4,7 @@ import { Avatar, AvatarGroup, AvatarImage, AvatarFallback } from '@/components/u
 import { Edit3 } from 'lucide-react';
 import { EditorShareDialogButton } from './editor-share-dialog';
 import { useSidebar } from '../ui/sidebar';
+import { useEditorSidebarView } from '../../providers/editor-sidebar.provider';
 
 interface AvatarData {
  src: string;
@@ -29,6 +30,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  onShare,
 }) => {
  const { open } = useSidebar();
+ 
  return (
 
   <header className="flex w-full items-center px-3 py-2 justify-between sticky top-0">
