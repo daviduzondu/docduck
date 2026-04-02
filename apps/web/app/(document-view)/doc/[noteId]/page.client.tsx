@@ -32,7 +32,6 @@ export default function NotePage() {
  if (ydoc && provider)
   return <main className="flex-1 relative">
    {/* <div className="w-full text-center text-sm py-2">You're currently offline. Changes will sync automatically.</div> */}
-   <AuthGuard next={"/doc/" + noteId}>
     <div className="h-screen flex flex-col">
      <EditorHeader />
      <div className="flex flex-1 relative">
@@ -65,6 +64,5 @@ export default function NotePage() {
       <EditorSidebar view={currentView} />
      </div>
     </div>
-   </AuthGuard>
   </main>
 }

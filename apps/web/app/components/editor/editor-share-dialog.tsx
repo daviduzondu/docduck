@@ -38,8 +38,6 @@ import {
  ItemMedia,
  ItemTitle,
 } from "@/components/ui/item"
-import { Switch } from "../ui/switch"
-import { Field, FieldLabel } from "../ui/field"
 
 const roles = [{ label: "Editor", value: "editor" }, { label: "Viewer", value: "viewer" }];
 
