@@ -7,10 +7,12 @@ import { createServer } from 'http';
 import { initializeHocuspocus } from '@/lib/hocuspocus';
 import { WebSocketServer } from 'ws';
 import pino from 'pino-http';
-import { ctx } from './modules/auth/auth.middleware';
-import { CORSPlugin } from '@orpc/server/plugins'
+// import { ctx } from './modules/auth/auth.middleware';
+import { CORSPlugin, RequestHeadersPlugin } from '@orpc/server/plugins'
 import { onError, os } from '@orpc/server';
 import { OpenAPIHandler } from '@orpc/openapi/node';
+import { invitationRouter } from './modules/invitation/invitation.router';
+import { AppContext } from '@/types/types';
 
 
 if (!process.env.NODE_ENV)
@@ -36,20 +38,20 @@ const logger = pino({
   }),
 })
 initializeHocuspocus(wss);
-app.use(ctx);
 app.use(logger);
 app.use(cors(corsConfig));
 app.use(express.json());
-app.all('/api/auth/{*any}', toNodeHandler(auth));
+app.all('/api/auth/*', toNodeHandler(auth));
 // app.use('/api/documents', documentRouter);
 // app.use('/api/invitations', invitationRouter);
 
 
+
 const router = {
- ping: os.handler(async () => 'pong')
+ invitations: invitationRouter
 }
 
-const handler = new OpenAPIHandler(router, {
+const handler = new OpenAPIHandler<AppContext>(router, {
  plugins: [new CORSPlugin()],
  interceptors: [
   onError((error) => {
@@ -61,14 +63,15 @@ const handler = new OpenAPIHandler(router, {
 
 app.use('/api/{/*path}', async (req, res, next) => {
  const { matched } = await handler.handle(req, res, {
-  prefix: '/api'
+  prefix: '/api',
+  context: { req }
  })
 
  if (matched) {
   return
  }
 
- next()
+ next();
 })
 
 // app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

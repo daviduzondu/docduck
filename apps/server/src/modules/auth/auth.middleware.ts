@@ -1,24 +1,17 @@
-import { NextFunction, Request, Response } from "express";
 import { auth } from '@/modules/auth/better-auth';
-import { fromNodeHeaders } from "better-auth/node";
 import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";
-import { MiddlewareArgs } from "@/types/types";
+import { base } from "../../lib/os";
+import { fromNodeHeaders } from 'better-auth/node';
 
-export async function ctx(...[req, res, next]: MiddlewareArgs) {
+export const ensureAuth = base.middleware(async ({ context, next }) => {
  const result = await auth.api.getSession({
-  headers: fromNodeHeaders(req.headers)
+  headers: fromNodeHeaders(context.req.headers),
  });
 
- req.ctx = result;
- return next();
-}
+ if (!result) throw new AppError("You must be signed in to perform this action", StatusCodes.UNAUTHORIZED);
 
-export const ensureAuth = async (...[req, res, next]: MiddlewareArgs) => {
- console.log("Email:", req.ctx?.user.email)
- if (req.ctx?.session) return next();
- throw new AppError("You must be signed in to perform this action.", StatusCodes.UNAUTHORIZED);
-}
-
-export const isResourceOwner = async (...[req, res, next]: MiddlewareArgs) => {
-}
+ return await next({
+  context: result
+ })
+})

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import z from 'zod';
 import { getDocumentSchema } from "../modules/document/document.validation";
 import { Insertable } from "kysely";
+import { auth } from "@/modules/auth/better-auth";
 
 type AtLeastOne<T, K extends keyof T = keyof T> =
  K extends keyof T
@@ -17,3 +18,7 @@ export type RequestSchema = AtLeastOne<{
  params: z.ZodObject,
  query: z.ZodObject
 }>
+
+export type AppContext = {
+ req: Request
+} & Partial<Awaited<ReturnType<typeof auth.api.getSession>>>;
