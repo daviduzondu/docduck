@@ -4,9 +4,15 @@ import { createORPCClient, onError } from '@orpc/client'
 import { OpenAPILink } from '@orpc/openapi-client/fetch'
 import { AppRouter } from "@server/orpc/app.router";
 import contract from '@server/orpc/contract.json';
+import { cookies } from 'next/headers';
 
 const link = new OpenAPILink(contract as AppRouter, {
  url: process.env.NEXT_PUBLIC_SERVER_BASE_URL! + '/api',
+ headers: async () => {
+  return ({
+   cookie: (await cookies()).toString()
+  })
+ },
  fetch: (request, init) => {
   return globalThis.fetch(request, {
    ...init,

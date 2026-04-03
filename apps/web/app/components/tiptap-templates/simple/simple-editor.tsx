@@ -81,6 +81,7 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
 import { EditorHeader } from "../../editor/editor-header";
 import EditorSidebar from "../../editor/editor-sidebar";
+import { faker } from "@faker-js/faker";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -200,6 +201,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
  const { data } = useAuth();
  const editor = useEditor({
   immediatelyRender: false,
+  editable: !!data,
   editorProps: {
    attributes: {
     autocomplete: "off",
@@ -220,7 +222,24 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    }),
    CollaborationCaret.configure({
     provider,
-    user: { name: data!.user.name, color: `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')}` }
+    render: user => {
+     const cursor = document.createElement('span')
+     cursor.classList.add('collaboration-carets_caret')
+     cursor.setAttribute('style', `border-color: ${user.color}; `)
+
+     const label = document.createElement('div')
+     label.classList.add('collaboration-carets__label');
+     // label.setAttribute('style', `background-color: ${user.color}; color: ${user.contrastColor}`);
+     label.insertBefore(document.createTextNode(user.name), null)
+
+     cursor.insertBefore(label, null)
+     return cursor
+    },
+    user: {
+     name: !data ? `Anonymous ${faker.animal.type()}`: data.user.name,
+     // color: `var(--color)`,
+     // contrastColor: `var(--contrast-color)`
+    },
    }),
    Collaboration.configure({
     document: ydoc

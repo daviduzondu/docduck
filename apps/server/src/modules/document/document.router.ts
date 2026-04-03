@@ -3,7 +3,7 @@ import * as documentService from '@/modules/document/document.service';
 import * as invitationService from '@/modules/invitation/invitation.service';
 
 import { base, r } from '@/orpc/os';
-import { ensureAuth } from '@/modules/auth/auth.middleware';
+import { ctx, ensureAuth } from '@/modules/auth/auth.middleware';
 import { ensureDocumentOwner } from '@/modules/document/document.middleware';
 import z from 'zod';
 
@@ -17,7 +17,7 @@ import z from 'zod';
 //  )
 
 
-export const documentRouter = base.prefix("/documents").router({
+export const documentRouter = base.prefix("/documents").use(ctx).router({
  getDocument:
   r.get('/{documentId}', { description: "Get document by ID", inputStructure: 'detailed' })
    .input(z.object({
@@ -25,12 +25,16 @@ export const documentRouter = base.prefix("/documents").router({
    }))
    .handler(({ input }) =>
     documentService.getDocument(input.params)),
-
+ getPermissions: r.get('/{documentId}/permissions', { inputStructure: 'detailed' })
+  .input(z.object({
+   params: z.object({ documentId: z.string() })
+  }))
+  .handler(({ input, context }) => documentService.getDocumentPermissions(input.params.documentId, context.user?.id)),
  createDocument:
   r.post('/new')
-   .use(ensureAuth).
-   input(documentSchema.createDocumentSchema)
-   .handler(({ input, context }) => 
+   .use(ensureAuth)
+   .input(documentSchema.createDocumentSchema)
+   .handler(({ input, context }) =>
     documentService.createDocument(input, context)),
 
  createDocumentInvitations:

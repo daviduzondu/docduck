@@ -16,3 +16,13 @@ export const ensureAuth = base.middleware(async ({ context, next }) => {
   context: { ...context, ...result }
  })
 })
+
+export const ctx = base.middleware(async ({ context, next }) => {
+ const result = await auth.api.getSession({
+  headers: fromNodeHeaders(context.req.headers),
+ });
+ 
+ return await next({
+  context: { ...context, ...result }
+ })
+})

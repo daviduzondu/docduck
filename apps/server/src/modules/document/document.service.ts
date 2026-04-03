@@ -6,8 +6,10 @@ import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
 
 export async function getDocumentPermissions(id: string, userId: string | null = null) {
+ //
+ console.log(userId)
  return await db.selectFrom('document')
-  .leftJoin('permission', (join) => join.onRef('permission.documentId', '=', 'document.id').on('permission.userId', '=', userId))
+  .leftJoin('permission', (join) => join.onRef('permission.documentId', '=', 'document.id').on(eb => eb('permission.userId', '=', userId).or('permission.userId', 'is', null)))
   .where('document.id', '=', id)
   .select(['document.id as documentId', 'visibility', 'permission.role', 'permission.userId'])
   .executeTakeFirst();
