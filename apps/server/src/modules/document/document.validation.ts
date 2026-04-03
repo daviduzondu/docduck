@@ -15,7 +15,7 @@ export const createDocumentSchema = z.object({
  title: z.string().min(1).optional(),
 });
 
-export const documentInvitationSchema = {
+export const documentInvitationSchema = z.object({
  params: z.object({ id: z.uuid() }),
  body: z.object({
   invitees: z.array(z.object({
@@ -23,4 +23,4 @@ export const documentInvitationSchema = {
    role: z.enum(["EDITOR", "VIEWER"])
   }))
  })
-}
+});

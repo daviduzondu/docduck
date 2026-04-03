@@ -13,6 +13,7 @@ import { onError, os } from '@orpc/server';
 import { OpenAPIHandler } from '@orpc/openapi/node';
 import { invitationRouter } from './modules/invitation/invitation.router';
 import { AppContext } from '@/types/types';
+import { documentRouter } from '@/modules/document/document.route';
 
 
 if (!process.env.NODE_ENV)
@@ -38,17 +39,18 @@ const logger = pino({
   }),
 })
 initializeHocuspocus(wss);
-app.use(logger);
+// app.use(logger);
 app.use(cors(corsConfig));
 app.use(express.json());
-app.all('/api/auth/*', toNodeHandler(auth));
+app.all('/api/auth/{*any}', toNodeHandler(auth));
 // app.use('/api/documents', documentRouter);
 // app.use('/api/invitations', invitationRouter);
 
 
 
 const router = {
- invitations: invitationRouter
+ invitations: invitationRouter,
+ // documents: documentRouter
 }
 
 const handler = new OpenAPIHandler<AppContext>(router, {
@@ -61,14 +63,13 @@ const handler = new OpenAPIHandler<AppContext>(router, {
 })
 
 
-app.use('/api/{/*path}', async (req, res, next) => {
+app.use('/api/{*path}', async (req, res, next) => {
  const { matched } = await handler.handle(req, res, {
   prefix: '/api',
   context: { req }
  })
-
  if (matched) {
-  return
+  return;
  }
 
  next();
