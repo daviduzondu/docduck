@@ -1,7 +1,7 @@
 import { auth } from '@/modules/auth/better-auth';
 import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";
-import { base } from "../../lib/os";
+import { base } from "../../orpc/os";
 import { fromNodeHeaders } from 'better-auth/node';
 import { AppContext } from '@/types/types';
 

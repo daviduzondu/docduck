@@ -3,7 +3,7 @@ import * as documentSchema from './document.validation';
 import * as documentService from '@/modules/document/document.service';
 import * as invitationService from '@/modules/invitation/invitation.service';
 
-import { base, r } from '@/lib/os';
+import { base, r } from '@/orpc/os';
 import { Route } from '@orpc/server';
 import { ensureAuth } from '@/modules/auth/auth.middleware';
 import { ensureDocumentOwner } from '@/modules/document/document.middleware';

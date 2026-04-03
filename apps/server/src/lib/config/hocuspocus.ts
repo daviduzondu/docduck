@@ -1,11 +1,11 @@
 import { Hocuspocus } from "@hocuspocus/server";
 import { WebSocketServer } from 'ws';
 import { auth } from '@/modules/auth/better-auth';
-import { AppError } from "./helpers";
+import { AppError } from "../helpers";
 import { StatusCodes } from "http-status-codes";
 import * as documentService from '@/modules/document/document.service';
 import { Database } from "@hocuspocus/extension-database";
-import { db } from "./kysely";
+import { db } from "../kysely";
 import { Logger } from "@hocuspocus/extension-logger";
 
 export const hocuspocus = new Hocuspocus({

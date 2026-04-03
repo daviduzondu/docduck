@@ -5,7 +5,7 @@ import { getDocumentSchema } from "./document.validation";
 import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
 import { AppContext, MiddlewareArgs } from "@/types/types";
-import { base } from "@/lib/os";
+import { base } from "@/orpc/os";
 
 // export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next: NextFunction) => {
 //  const isDocumentVisible = await db.selectFrom('document').select(['visibility', 'document.id']).where('id', '=', req.body.documentId).executeTakeFirstOrThrow();

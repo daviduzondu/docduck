@@ -1,7 +1,8 @@
 import * as invitationSchema from './invitation.validation';
 import * as invitationService from './invitation.service';
-import { base, r } from '@/lib/os';
+import { base, r } from '@/orpc/os';
 import { ensureAuth } from '@/modules/auth/auth.middleware';
+import { ORPCError } from '@orpc/server';
 
 export const invitationRouter = base.prefix('/invitations').router({
  acceptDocumentInvitation:
@@ -12,6 +13,6 @@ export const invitationRouter = base.prefix('/invitations').router({
    .use(ensureAuth)
    .input(invitationSchema.acceptDocumentInvitationSchema)
    .handler(async ({ context, input }) => {
-    return await invitationService.acceptDocumentInvitation(input.id, context)
+    return invitationService.acceptDocumentInvitation(input.id, context)
    })
 });
