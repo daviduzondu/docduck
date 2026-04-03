@@ -7,7 +7,6 @@ import pino from 'pino';
 // knows your database structure.
 // Dialect is passed to Kysely's constructor, and from now on, Kysely knows how 
 // to communicate with your database.
-console.log(process.env['DATABASE_URL'])
 export const db = new Kysely<Database>({
  dialect: new PostgresDialect({
  pool: new Pool({

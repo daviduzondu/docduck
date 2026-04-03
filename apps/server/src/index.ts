@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express, { type Express, Request } from "express";
+import express, { type Express, Request, Response, NextFunction } from "express";
 import cors from 'cors';
 import { auth } from "@/modules/auth/better-auth";
 import { toNodeHandler } from "better-auth/node";
@@ -13,7 +13,10 @@ import { onError, os } from '@orpc/server';
 import { OpenAPIHandler } from '@orpc/openapi/node';
 import { invitationRouter } from './modules/invitation/invitation.router';
 import { AppContext } from '@/types/types';
-import { documentRouter } from '@/modules/document/document.route';
+import { documentRouter } from '@/modules/document/document.router';
+import { AppError } from '@/lib/helpers';
+import { NoResultError } from 'kysely';
+import { StatusCodes } from 'http-status-codes';
 
 
 if (!process.env.NODE_ENV)
@@ -21,6 +24,19 @@ if (!process.env.NODE_ENV)
 const PORT = process.env.PORT ?? "1711";
 const app: Express = express();
 const server = createServer(app);
+const router = {
+ invitations: invitationRouter,
+ documents: documentRouter
+}
+
+const handler = new OpenAPIHandler(router, {
+ plugins: [new CORSPlugin()],
+ interceptors: [
+  onError((error) => {
+   console.error(error)
+  }),
+ ],
+})
 const corsConfig: cors.CorsOptions = {
  credentials: true,
  origin: ['http://localhost:3000'], // TODO: replace with env variable
@@ -39,60 +55,40 @@ const logger = pino({
   }),
 })
 initializeHocuspocus(wss);
-// app.use(logger);
+app.use(logger);
 app.use(cors(corsConfig));
 app.use(express.json());
 app.all('/api/auth/{*any}', toNodeHandler(auth));
-// app.use('/api/documents', documentRouter);
-// app.use('/api/invitations', invitationRouter);
 
 
-
-const router = {
- invitations: invitationRouter,
- // documents: documentRouter
-}
-
-const handler = new OpenAPIHandler<AppContext>(router, {
- plugins: [new CORSPlugin()],
- interceptors: [
-  onError((error) => {
-   console.error(error)
-  }),
- ],
-})
-
-
-app.use('/api/{*path}', async (req, res, next) => {
+app.use('/api{/*path}', async (req, res, next) => {
  const { matched } = await handler.handle(req, res, {
   prefix: '/api',
-  context: { req }
+  context: { req },
  })
- if (matched) {
-  return;
- }
-
- next();
+ if (matched) return
+ next()
 })
 
-// app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-//  req.log.error(err);
-//  if (err instanceof AppError) {
-//   res.status(err.statusCode).json({
-//    message: err.message
-//   })
-//  }
-//  else if (err instanceof SyntaxError && 'body' in err) {
-//   return res.status(400).send({ message: err.message });
-//  } else if (err instanceof NoResultError) {
-//   res.status(StatusCodes.NOT_FOUND).json({
-//    message: "The resource you tried to access could not be found"
-//   })
-//  } else {
-//   res.status(500).json({
-//    message: 'Internal server error'
-//   });
-//  }
-// });
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+ req.log.error(err);
+ if (err instanceof AppError) {
+  res.status(err.statusCode).json({
+   message: err.message
+  })
+ }
+ else if (err instanceof SyntaxError && 'body' in err) {
+  return res.status(400).send({ message: err.message });
+ } else if (err instanceof NoResultError) {
+  res.status(StatusCodes.NOT_FOUND).json({
+   message: "The resource you tried to access could not be found"
+  })
+ } else {
+  res.status(500).json({
+   message: 'Internal server error'
+  });
+ }
+});
 
 server.listen(PORT, () => console.log(`Server now listening on ${PORT}`));

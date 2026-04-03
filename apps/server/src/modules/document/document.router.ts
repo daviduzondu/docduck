@@ -18,11 +18,11 @@ import { ensureDocumentOwner } from '@/modules/document/document.middleware';
 //  )
 
 
-export const documentRouter = {
+export const documentRouter = base.prefix("/documents").router({
  getDocument:
-  r.get('/{id}', { description: "Get document by ID" })
+  r.get('/{id}', { description: "Get document by ID", inputStructure: 'detailed' })
    .input(documentSchema.getDocumentSchema)
-   .handler(({ input, context }) =>
+   .handler(({ input }) =>
     documentService.getDocument(input)),
 
  createDocument:
@@ -33,10 +33,9 @@ export const documentRouter = {
     documentService.createDocument(input, context)),
 
  createDocumentInvitations:
-  r.post('/{id}/invitations')
+  r.post('/{id}/invitations', { inputStructure: 'detailed' })
    .input(documentSchema.documentInvitationSchema)
    .use(ensureAuth)
    .use(ensureDocumentOwner, input => input.params.id)
    .handler(({ input, context }) => invitationService.addDocInvitees(input.params.id, input.body.invitees.map(i => ({ ...i, inviterId: context.user.id }))))
-
-}
+});

@@ -30,6 +30,7 @@
     "@hocuspocus/server": "^3.4.4",
     "@orpc/openapi": "^1.13.12",
     "@orpc/server": "^1.13.12",
+    "@orpc/zod": "^1.13.13",
     "@standard-schema/spec": "^1.1.0",
     "better-auth": "^1.4.18",
     "cors": "^2.8.6",

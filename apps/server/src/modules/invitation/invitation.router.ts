@@ -1,16 +1,17 @@
 import * as invitationSchema from './invitation.validation';
 import * as invitationService from './invitation.service';
-import { r } from '@/lib/os';
+import { base, r } from '@/lib/os';
 import { ensureAuth } from '@/modules/auth/auth.middleware';
 
-export const invitationRouter = {
+export const invitationRouter = base.prefix('/invitations').router({
  acceptDocumentInvitation:
   r
-   .get('/{id}/', {
-    description: 'Accept the invitation for a document'
+   .patch('/{id}', {
+    description: 'Accept the invitation for a document',
    })
    .use(ensureAuth)
    .input(invitationSchema.acceptDocumentInvitationSchema)
-   .handler(({ context, input }) =>
-    invitationService.acceptDocumentInvitation(input.id, context))
-}
+   .handler(async ({ context, input }) => {
+    return await invitationService.acceptDocumentInvitation(input.id, context)
+   })
+});
