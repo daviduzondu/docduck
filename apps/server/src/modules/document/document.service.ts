@@ -13,8 +13,8 @@ export async function getDocumentPermissions(id: string, userId: string | null =
   .executeTakeFirst();
 }
 
-export async function getDocument(data: z.infer<typeof getDocumentSchema>) {
- return await db.selectFrom('document').where('document.id', 'in', data.documentId).select(['id', 'title', 'visibility', 'ownerId']).executeTakeFirstOrThrow();
+export async function getDocument(data: z.infer<typeof getDocumentSchema>['params']) {
+ return await db.selectFrom('document').where('document.id', '=', data.documentId).select(['id', 'title', 'visibility', 'ownerId']).executeTakeFirstOrThrow();
 }
 
 export async function createDocument(data: z.infer<typeof createDocumentSchema>, ctx: Request["ctx"]) {

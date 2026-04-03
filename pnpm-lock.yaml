@@ -29,6 +29,9 @@ importers:
       '@hocuspocus/server':
         specifier: ^3.4.4
         version: 3.4.4(y-protocols@1.0.7(yjs@13.6.29))(yjs@13.6.29)
+      '@orpc/contract':
+        specifier: ^1.13.13
+        version: 1.13.13
       '@orpc/openapi':
         specifier: ^1.13.12
         version: 1.13.12(crossws@0.4.4)(ws@8.19.0)
@@ -162,6 +165,15 @@ importers:
       '@orpc/client':
         specifier: ^1.13.12
         version: 1.13.12
+      '@orpc/contract':
+        specifier: ^1.13.13
+        version: 1.13.13
+      '@orpc/openapi-client':
+        specifier: ^1.13.13
+        version: 1.13.13
+      '@orpc/server':
+        specifier: ^1.13.13
+        version: 1.13.13(crossws@0.4.4)(ws@8.19.0)
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.16
         version: 2.1.16(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)

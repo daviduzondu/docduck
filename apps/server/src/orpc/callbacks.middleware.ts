@@ -2,7 +2,6 @@ import { AppError } from "@/lib/helpers";
 import { onError, ORPCError } from "@orpc/server";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { NoResultError } from "kysely";
-import { extend } from "node_modules/zod/v4/core/util.cjs";
 
 export const onErrorCallback = <T extends typeof onError>(...[err]: Parameters<Parameters<T>[0]>) => {
  // TODO: Improve error handling and type-safety

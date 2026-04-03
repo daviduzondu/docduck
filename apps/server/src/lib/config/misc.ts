@@ -16,6 +16,7 @@ export const logger = pino({
 
 export const corsConfig: cors.CorsOptions = {
  credentials: true,
+ exposedHeaders: ['Content-Disposition'],
  origin: ['http://localhost:3000'], // TODO: replace with env variable
 }
 

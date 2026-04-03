@@ -9,20 +9,21 @@ import { CORSPlugin } from '@orpc/server/plugins'
 import { onError } from '@orpc/server';
 import { OpenAPIHandler } from '@orpc/openapi/node';
 import { corsConfig, createWebsocketServer, logger } from '@/lib/config/misc';
-import { router } from '@/orpc/router';
+import { appRouter } from '@/orpc/app.router';
 import { onErrorCallback } from '@/orpc/callbacks.middleware';
-
+import { generateContract } from '@/orpc/scripts/generate-contract';
 
 if (!process.env.NODE_ENV) throw new Error("Failed to specify Node.js environment");
 const PORT = process.env.PORT ?? "1711";
 const app: Express = express();
 const server = createServer(app);
+generateContract();
 initializeHocuspocus(createWebsocketServer(server));
-const handler = new OpenAPIHandler(router, {
+const handler = new OpenAPIHandler(appRouter, {
  plugins: [new CORSPlugin()],
  interceptors: [onError(onErrorCallback)],
 })
-app.use(logger);
+// app.use(logger);
 app.use(cors(corsConfig));
 app.use(express.json());
 app.all('/api/auth/{*any}', toNodeHandler(auth));
@@ -34,6 +35,9 @@ app.use('/api{/*path}', async (req, res, next) => {
  if (matched) return
  next()
 })
+
+server.listen(PORT, () => console.log(`Server now listening on ${PORT}`));
+
 
 
 // app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -55,5 +59,3 @@ app.use('/api{/*path}', async (req, res, next) => {
 //   });
 //  }
 // });
-
-server.listen(PORT, () => console.log(`Server now listening on ${PORT}`));

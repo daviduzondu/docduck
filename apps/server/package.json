@@ -28,6 +28,7 @@
     "@hocuspocus/extension-database": "^3.4.4",
     "@hocuspocus/extension-logger": "^3.4.4",
     "@hocuspocus/server": "^3.4.4",
+    "@orpc/contract": "^1.13.13",
     "@orpc/openapi": "^1.13.12",
     "@orpc/server": "^1.13.12",
     "@orpc/zod": "^1.13.13",

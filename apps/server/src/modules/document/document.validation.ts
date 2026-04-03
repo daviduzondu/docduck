@@ -7,7 +7,7 @@ z.config({
 })
 
 export const getDocumentSchema = z.object({
- documentId: z.uuid()
+ params: z.object({ documentId: z.uuid() })
 });
 
 export const createDocumentSchema = z.object({
