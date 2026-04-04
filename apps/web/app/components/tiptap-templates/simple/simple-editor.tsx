@@ -79,9 +79,7 @@ import "@/components/tiptap-templates/simple/simple-editor.scss"
 import { Doc } from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
-import { EditorHeader } from "../../editor/editor-header";
-import EditorSidebar from "../../editor/editor-sidebar";
-import { faker } from "@faker-js/faker";
+import { getUserColor } from "@/lib/utils";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -199,9 +197,10 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
  const { data } = useAuth();
+ const caretColor = useRef(getUserColor(data?.user.id ?? ""));
+
  const editor = useEditor({
   immediatelyRender: false,
-  editable: !!data,
   editorProps: {
    attributes: {
     autocomplete: "off",
@@ -222,24 +221,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    }),
    CollaborationCaret.configure({
     provider,
-    render: user => {
-     const cursor = document.createElement('span')
-     cursor.classList.add('collaboration-carets_caret')
-     cursor.setAttribute('style', `border-color: ${user.color}; `)
-
-     const label = document.createElement('div')
-     label.classList.add('collaboration-carets__label');
-     // label.setAttribute('style', `background-color: ${user.color}; color: ${user.contrastColor}`);
-     label.insertBefore(document.createTextNode(user.name), null)
-
-     cursor.insertBefore(label, null)
-     return cursor
-    },
-    user: {
-     name: !data ? `Anonymous ${faker.animal.type()}`: data.user.name,
-     // color: `var(--color)`,
-     // contrastColor: `var(--contrast-color)`
-    },
+    user: { name: "" }
    }),
    Collaboration.configure({
     document: ydoc
@@ -287,6 +269,12 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    wordsCount: context.editor?.storage.characterCount.words(),
   }),
  })
+
+ useEffect(() => {
+  if (editor && data?.user?.name) {
+    editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id) })
+  }
+}, [editor, data])
 
  return (
   <div className="simple-editor-wrapper">

@@ -13,14 +13,8 @@ export const hocuspocus = new Hocuspocus({
   data.connectionConfig.readOnly = true;
   const authData = await auth.api.getSession({ headers: data.requestHeaders });
   const permissions = await documentService.getDocumentPermissions(data.documentName, authData?.user.id ?? null);
-  
-  if (!permissions?.documentId) throw new AppError(`Document with id ${permissions?.documentId} not found`, StatusCodes.NOT_FOUND);
-
-  // For anons
-  if (!permissions?.userId && permissions?.visibility === "PRIVATE") throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
-
-  // For users
-  if (permissions?.userId === authData?.user.id && permissions?.role !== 'VIEWER') data.connectionConfig.readOnly = false;
+  if (!permissions.canView) throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
+  if (permissions.canEdit) data.connectionConfig.readOnly = false;
 
   return authData;
  },

@@ -9,10 +9,11 @@ import { History, MessageSquare, Search } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import EditorSidebar from "@/components/editor/editor-sidebar";
 import { useEditorSidebarView } from "@/providers/editor-sidebar.provider";
+import { useAuth } from "@/providers/auth.provider";
 
 // function sidebarHandler(view:) { }
 
-export default function NotePage() {
+export default function NotePage({ canEdit }: { canEdit: boolean }) {
  const { noteId }: { noteId: string } = useParams();
  const { toggleSidebar, open } = useSidebar();
  const { view: currentView, setView } = useEditorSidebarView();

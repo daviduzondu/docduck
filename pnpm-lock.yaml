@@ -34,13 +34,13 @@ importers:
         version: 1.13.13
       '@orpc/openapi':
         specifier: ^1.13.12
-        version: 1.13.12(crossws@0.4.4)(ws@8.19.0)
+        version: 1.13.13(crossws@0.4.4)(ws@8.19.0)
       '@orpc/server':
         specifier: ^1.13.12
-        version: 1.13.12(crossws@0.4.4)(ws@8.19.0)
+        version: 1.13.13(crossws@0.4.4)(ws@8.19.0)
       '@orpc/zod':
         specifier: ^1.13.13
-        version: 1.13.13(@orpc/contract@1.13.13)(@orpc/server@1.13.12(crossws@0.4.4)(ws@8.19.0))(crossws@0.4.4)(ws@8.19.0)(zod@4.3.6)
+        version: 1.13.13(@orpc/contract@1.13.13)(@orpc/server@1.13.13(crossws@0.4.4)(ws@8.19.0))(crossws@0.4.4)(ws@8.19.0)(zod@4.3.6)
       '@standard-schema/spec':
         specifier: ^1.1.0
         version: 1.1.0
@@ -164,7 +164,7 @@ importers:
         version: 1.1.6(react@19.2.0)
       '@orpc/client':
         specifier: ^1.13.12
-        version: 1.13.12
+        version: 1.13.13
       '@orpc/contract':
         specifier: ^1.13.13
         version: 1.13.13
@@ -357,10 +357,10 @@ importers:
         version: 16.5.0
       typescript:
         specifier: ^5.9.2
-        version: 5.9.2
+        version: 5.9.3
       typescript-eslint:
         specifier: ^8.50.0
-        version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
+        version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
 
   packages/typescript-config: {}
 
@@ -803,12 +803,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@eslint-community/eslint-utils@4.9.0':
-    resolution: {integrity: sha512-ayVFHdtZ+hsq1t2Dy24wCmGXGe4q9Gu3smhLYALJrr473ZH27MsnSL+LKUlimp4BWJqMDMLmPpx/Q9R3OAlL4g==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
 
   '@eslint-community/eslint-utils@4.9.1':
     resolution: {integrity: sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==}
@@ -1253,20 +1247,11 @@ packages:
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
 
-  '@orpc/client@1.13.12':
-    resolution: {integrity: sha512-AGhpEkkdiHTwSORbpmHKr+k1r3f+xHPN2RGS08rCCmrP8w9aP1TK4JkydiP0h83H8Py2Pj56lHUq4X0BBtSGyA==}
-
   '@orpc/client@1.13.13':
     resolution: {integrity: sha512-jagx/Sa+9K4HEC5lBrUlMSrmR/06hvZctWh93/sKZc8GBk4zM0+71oT1kXQVw1oRYFV2XAq3xy3m6NdM6gfKYA==}
 
-  '@orpc/contract@1.13.12':
-    resolution: {integrity: sha512-2SeQE01fevAhNm5wa6j2mArcucEm1QlIbzEo5ymRuTRD8aoBt+A+1XWtbjYNdg6YVDnEBWvOfzZevstFZcO/9w==}
-
   '@orpc/contract@1.13.13':
     resolution: {integrity: sha512-md6iyrYkePBSJNs1VnVEEnAUORMDPHIf3JGRSHxyssIcNakev/iOjP0HvpH0Sx0MlTBhihAJo6uFL8Vpth58Nw==}
-
-  '@orpc/interop@1.13.12':
-    resolution: {integrity: sha512-SqGjLfqvdJbSVObi2IVMMqzeN5sOuvQc9kRca2VjqROneu2Ubmv3XFgR5yltEKszDDHjTs5GDFe3T2BcLxXE/A==}
 
   '@orpc/interop@1.13.13':
     resolution: {integrity: sha512-S8edIRA7ekD3/gHx5MrsO9CxZ0QvCaVDkVbNf42SZbLYPXuvxtdH0CYwaB1q9uQg2Jk0PBP8AquLH6WFwjMSbQ==}
@@ -1274,28 +1259,11 @@ packages:
   '@orpc/json-schema@1.13.13':
     resolution: {integrity: sha512-48CgMrWIKG/t8l4OBlFRcYOj2ZCrIXfw1LA2Q6qRGdyBPzSLmQCMhh3Y4eoFXfz/wKvQIfyoUmBIdd91BxSyLg==}
 
-  '@orpc/openapi-client@1.13.12':
-    resolution: {integrity: sha512-Iov4RdtM94fZGf+jEcqchQ0MyCFv8peAjkoZMDQsN12/9GcSsT+hzLgHWLqTE4mZt46Sul4VCl8Q+hrsj45FKg==}
-
   '@orpc/openapi-client@1.13.13':
     resolution: {integrity: sha512-k8od+bD7MqysKPPybAkxgfaNIaNseFPXtbidWkZAdCZ5w34SnDc7QPZJ0PQbyt9n9B+jOXSADNwQSTWSuGpjyA==}
 
-  '@orpc/openapi@1.13.12':
-    resolution: {integrity: sha512-NiFn617ir6dGfUJz3rmQ57NC1csQVTm+JzDVGHGqXsyjNqCnQ0J/2gfsyTzAnZKI51W+ArVzuqzUhVzd7dpm4g==}
-
   '@orpc/openapi@1.13.13':
     resolution: {integrity: sha512-lm3cAR1KJ1xp5WyDKCIqvhzYlDC914oevwYPWC7GFvTU1cTEmFP4lkQRdzLfvo06BprCg+UtHjzdLUDrBOF/zQ==}
-
-  '@orpc/server@1.13.12':
-    resolution: {integrity: sha512-2WGI9hOOrF25JAzj9WJltjZb72iwXyiHjcn89eo0l8pGcP7CrU6R0bmgxxT25pfSUOLPmgmPGsA1ShITHEE6rw==}
-    peerDependencies:
-      crossws: '>=0.3.4'
-      ws: '>=8.18.1'
-    peerDependenciesMeta:
-      crossws:
-        optional: true
-      ws:
-        optional: true
 
   '@orpc/server@1.13.13':
     resolution: {integrity: sha512-l3OfiaqfLiLQqamXufKiEzT8K9Zq8VHvijADV5eDJOaz6sFzK1Mg6q2D8l9wcmuyG7ga0HfMT+cf3JQsh5WDIA==}
@@ -1308,14 +1276,6 @@ packages:
       ws:
         optional: true
 
-  '@orpc/shared@1.13.12':
-    resolution: {integrity: sha512-AKGEArN7ssYTbUtYZrTdElCXHZG5i0qqCb1cU1tXtfsgOI81L/NCssvFZ5ZtV1aQ76Aa9goJ8zyTZjQ1H/mFLQ==}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.9.0'
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-
   '@orpc/shared@1.13.13':
     resolution: {integrity: sha512-kNpYOBjHvmgKHla6munWOaEeA0utEfAvoiZpXjiRjjt1RxTibdwQvVHgxRIBNMXfQsb+ON3Q/wDkoaUhvvSnIw==}
     peerDependencies:
@@ -1324,19 +1284,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@orpc/standard-server-aws-lambda@1.13.12':
-    resolution: {integrity: sha512-WWgzGpG1cxg2AF69FCgqf7CboX5WRLoH3NFTqG0HegzXOnZC3KB3d9UO+MloAWhoyBD4KCDOKqX9NyQ8AVg6tQ==}
-
   '@orpc/standard-server-aws-lambda@1.13.13':
     resolution: {integrity: sha512-e7310DnN6FSpRgR5gQpwvwg2B3uR+NoT7qlnyQWsjxQGr95L4GST3hRNSsQdQyXmFx1jvCCp0i3kAE9SJyvU6A==}
-
-  '@orpc/standard-server-fastify@1.13.12':
-    resolution: {integrity: sha512-ai+rKWqAR8EQX4b31J+KuK/9Ik5nC9q5dooxh2Q3I7GQPwL9PPiaz4SPvSrkerI3pzGBAsrRWkb4dsMh55qm6Q==}
-    peerDependencies:
-      fastify: '>=5.6.1'
-    peerDependenciesMeta:
-      fastify:
-        optional: true
 
   '@orpc/standard-server-fastify@1.13.13':
     resolution: {integrity: sha512-G5Sq+rZDPwHvWJHsAA6bYWoJ7LcGyBby+SjjEGwz+viRdBk/inZnZafKpM+pL89aDdq6iw99Bcbug5WFPP6KdA==}
@@ -1346,26 +1295,14 @@ packages:
       fastify:
         optional: true
 
-  '@orpc/standard-server-fetch@1.13.12':
-    resolution: {integrity: sha512-EJgc1fMeb8B368VeRqG5KfZlFpMGfX89HypBlY1W6IOw4vAFHHLM/Z4X849zJOBIF5LoZ4JqZn4qamoEEZEF1A==}
-
   '@orpc/standard-server-fetch@1.13.13':
     resolution: {integrity: sha512-Lffy26+WtCQkwOUacsrdyeJF1GNzrhm75O3LXKVFXqmSdyVVdyI6zuqLn/YKGODU2L9IqGxZ2CwsV2tE298SSA==}
-
-  '@orpc/standard-server-node@1.13.12':
-    resolution: {integrity: sha512-odGbewbInGpmWfjdIHsmx2RArbfPRyLFyORrMN1F+SlqRI7oEqENA6GNuiVmsKQgMPcp9Jt0shE8EpLlKd4kOA==}
 
   '@orpc/standard-server-node@1.13.13':
     resolution: {integrity: sha512-wI45h/bVWn7lgvqqm5aM7vj5BblmmBdFG2wbEhmpY85DslbCtMNJrIw/x+zxm1XgYAzsKLExLp6L01hzjeHmEA==}
 
-  '@orpc/standard-server-peer@1.13.12':
-    resolution: {integrity: sha512-LQIyhuTZoyyYvXjCTrD2yWUIzH+dNA2QpTxMfEGwtqeYXkAifbopd1nkgwDHU3p+/h3p+o0gZHKNbCq6y+Ze+g==}
-
   '@orpc/standard-server-peer@1.13.13':
     resolution: {integrity: sha512-FeWAbXfnZDPYQRajM0hD6GJvHeC3DZILngAjdcLHy5zt3riu6nL2lLPSWDv5yNWWscmYU+CfKmXWd0Z01BOeWA==}
-
-  '@orpc/standard-server@1.13.12':
-    resolution: {integrity: sha512-dk2ZUrKECQRTOhYKakXOxu1OruQ4lOHI5fyCVh3AiQp6E/3Zd4ma4dQxgKIovuuHAetm1389Q887aY35WmIEFg==}
 
   '@orpc/standard-server@1.13.13':
     resolution: {integrity: sha512-9pgS8XvauuRQElkyuD8F3om+nN0KBEnTkhblDHCBzkZERjWkmfirJmshQrWHoFaDTk+nnXHIaY6d7TBTxXdPRw==}
@@ -2527,10 +2464,6 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  baseline-browser-mapping@2.9.11:
-    resolution: {integrity: sha512-Sg0xJUNDU1sJNGdfGWhVHX0kkZ+HWcvmVymJbj6NSgZZmW/8S9Y2HQ5euytnIgakgxN6papOAWiwDo1ctFDcoQ==}
-    hasBin: true
-
   better-auth@1.4.18:
     resolution: {integrity: sha512-bnyifLWBPcYVltH3RhS7CM62MoelEqC6Q+GnZwfiDWNfepXoQZBjEvn4urcERC7NTKgKq5zNBM8rvPvRBa6xcg==}
     peerDependencies:
@@ -2666,9 +2599,6 @@ packages:
   callsites@3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
-
-  caniuse-lite@1.0.30001761:
-    resolution: {integrity: sha512-JF9ptu1vP2coz98+5051jZ4PwQgd2ni8A+gYSN7EA7dPKIMf0pDlSUxhdmVOaV3/fYK5uWBkgSXJaRLr4+3A6g==}
 
   caniuse-lite@1.0.30001784:
     resolution: {integrity: sha512-WU346nBTklUV9YfUl60fqRbU5ZqyXlqvo1SgigE1OAXK5bFL8LL9q1K7aap3N739l4BvNqnkm3YrGHiY9sfUQw==}
@@ -5024,12 +4954,6 @@ packages:
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
 
-  ts-api-utils@2.1.0:
-    resolution: {integrity: sha512-CUgTZL1irw8u29bzrOD/nH85jqyc74D6SshFgujOIA7osm2Rz7dYH77agkx7H4FBNxDq7Cjf+IjaX/8zwFW+ZQ==}
-    engines: {node: '>=18.12'}
-    peerDependencies:
-      typescript: '>=4.8.4'
-
   ts-api-utils@2.4.0:
     resolution: {integrity: sha512-3TaVTaAv2gTiMB35i3FiGJaRfwb3Pyn/j3m/bfAvGe8FB7CF6u+LMYqYlDh7reQf7UNvoTvdfAqHGmPGOSsPmA==}
     engines: {node: '>=18.12'}
@@ -5743,11 +5667,6 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@eslint-community/eslint-utils@4.9.0(eslint@9.39.1(jiti@2.6.1))':
-    dependencies:
-      eslint: 9.39.1(jiti@2.6.1)
-      eslint-visitor-keys: 3.4.3
-
   '@eslint-community/eslint-utils@4.9.1(eslint@9.39.1(jiti@2.6.1))':
     dependencies:
       eslint: 9.39.1(jiti@2.6.1)
@@ -5850,7 +5769,7 @@ snapshots:
       '@hocuspocus/common': 3.4.4
       '@lifeomic/attempt': 3.1.0
       lib0: 0.2.117
-      ws: 8.18.3
+      ws: 8.19.0
       y-protocols: 1.0.7(yjs@13.6.29)
       yjs: 13.6.29
     transitivePeerDependencies:
@@ -6137,30 +6056,12 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@orpc/client@1.13.12':
-    dependencies:
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-      '@orpc/standard-server-fetch': 1.13.12
-      '@orpc/standard-server-peer': 1.13.12
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/client@1.13.13':
     dependencies:
       '@orpc/shared': 1.13.13
       '@orpc/standard-server': 1.13.13
       '@orpc/standard-server-fetch': 1.13.13
       '@orpc/standard-server-peer': 1.13.13
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
-  '@orpc/contract@1.13.12':
-    dependencies:
-      '@orpc/client': 1.13.12
-      '@orpc/shared': 1.13.12
-      '@standard-schema/spec': 1.1.0
-      openapi-types: 12.1.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -6172,8 +6073,6 @@ snapshots:
       openapi-types: 12.1.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
-
-  '@orpc/interop@1.13.12': {}
 
   '@orpc/interop@1.13.13': {}
 
@@ -6191,15 +6090,6 @@ snapshots:
       - fastify
       - ws
 
-  '@orpc/openapi-client@1.13.12':
-    dependencies:
-      '@orpc/client': 1.13.12
-      '@orpc/contract': 1.13.12
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/openapi-client@1.13.13':
     dependencies:
       '@orpc/client': 1.13.13
@@ -6208,23 +6098,6 @@ snapshots:
       '@orpc/standard-server': 1.13.13
     transitivePeerDependencies:
       - '@opentelemetry/api'
-
-  '@orpc/openapi@1.13.12(crossws@0.4.4)(ws@8.19.0)':
-    dependencies:
-      '@orpc/client': 1.13.12
-      '@orpc/contract': 1.13.12
-      '@orpc/interop': 1.13.12
-      '@orpc/openapi-client': 1.13.12
-      '@orpc/server': 1.13.12(crossws@0.4.4)(ws@8.19.0)
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-      json-schema-typed: 8.0.2
-      rou3: 0.7.12
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-      - crossws
-      - fastify
-      - ws
 
   '@orpc/openapi@1.13.13(crossws@0.4.4)(ws@8.19.0)':
     dependencies:
@@ -6242,26 +6115,6 @@ snapshots:
       - crossws
       - fastify
       - ws
-
-  '@orpc/server@1.13.12(crossws@0.4.4)(ws@8.19.0)':
-    dependencies:
-      '@orpc/client': 1.13.12
-      '@orpc/contract': 1.13.12
-      '@orpc/interop': 1.13.12
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-      '@orpc/standard-server-aws-lambda': 1.13.12
-      '@orpc/standard-server-fastify': 1.13.12
-      '@orpc/standard-server-fetch': 1.13.12
-      '@orpc/standard-server-node': 1.13.12
-      '@orpc/standard-server-peer': 1.13.12
-      cookie: 1.1.1
-    optionalDependencies:
-      crossws: 0.4.4
-      ws: 8.19.0
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-      - fastify
 
   '@orpc/server@1.13.13(crossws@0.4.4)(ws@8.19.0)':
     dependencies:
@@ -6283,24 +6136,10 @@ snapshots:
       - '@opentelemetry/api'
       - fastify
 
-  '@orpc/shared@1.13.12':
-    dependencies:
-      radash: 12.1.1
-      type-fest: 5.5.0
-
   '@orpc/shared@1.13.13':
     dependencies:
       radash: 12.1.1
       type-fest: 5.5.0
-
-  '@orpc/standard-server-aws-lambda@1.13.12':
-    dependencies:
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-      '@orpc/standard-server-fetch': 1.13.12
-      '@orpc/standard-server-node': 1.13.12
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
 
   '@orpc/standard-server-aws-lambda@1.13.13':
     dependencies:
@@ -6308,14 +6147,6 @@ snapshots:
       '@orpc/standard-server': 1.13.13
       '@orpc/standard-server-fetch': 1.13.13
       '@orpc/standard-server-node': 1.13.13
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
-  '@orpc/standard-server-fastify@1.13.12':
-    dependencies:
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-      '@orpc/standard-server-node': 1.13.12
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -6327,25 +6158,10 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server-fetch@1.13.12':
-    dependencies:
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/standard-server-fetch@1.13.13':
     dependencies:
       '@orpc/shared': 1.13.13
       '@orpc/standard-server': 1.13.13
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
-  '@orpc/standard-server-node@1.13.12':
-    dependencies:
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-      '@orpc/standard-server-fetch': 1.13.12
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -6357,23 +6173,10 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server-peer@1.13.12':
-    dependencies:
-      '@orpc/shared': 1.13.12
-      '@orpc/standard-server': 1.13.12
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
   '@orpc/standard-server-peer@1.13.13':
     dependencies:
       '@orpc/shared': 1.13.13
       '@orpc/standard-server': 1.13.13
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-
-  '@orpc/standard-server@1.13.12':
-    dependencies:
-      '@orpc/shared': 1.13.12
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -6383,12 +6186,12 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/zod@1.13.13(@orpc/contract@1.13.13)(@orpc/server@1.13.12(crossws@0.4.4)(ws@8.19.0))(crossws@0.4.4)(ws@8.19.0)(zod@4.3.6)':
+  '@orpc/zod@1.13.13(@orpc/contract@1.13.13)(@orpc/server@1.13.13(crossws@0.4.4)(ws@8.19.0))(crossws@0.4.4)(ws@8.19.0)(zod@4.3.6)':
     dependencies:
       '@orpc/contract': 1.13.13
       '@orpc/json-schema': 1.13.13(crossws@0.4.4)(ws@8.19.0)
       '@orpc/openapi': 1.13.13(crossws@0.4.4)(ws@8.19.0)
-      '@orpc/server': 1.13.12(crossws@0.4.4)(ws@8.19.0)
+      '@orpc/server': 1.13.13(crossws@0.4.4)(ws@8.19.0)
       '@orpc/shared': 1.13.13
       escape-string-regexp: 5.0.0
       wildcard-match: 5.1.4
@@ -7332,22 +7135,6 @@ snapshots:
     dependencies:
       '@types/node': 22.15.3
 
-  '@typescript-eslint/eslint-plugin@8.50.0(@typescript-eslint/parser@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)':
-    dependencies:
-      '@eslint-community/regexpp': 4.12.2
-      '@typescript-eslint/parser': 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-      '@typescript-eslint/scope-manager': 8.50.0
-      '@typescript-eslint/type-utils': 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-      '@typescript-eslint/utils': 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-      '@typescript-eslint/visitor-keys': 8.50.0
-      eslint: 9.39.1(jiti@2.6.1)
-      ignore: 7.0.5
-      natural-compare: 1.4.0
-      ts-api-utils: 2.1.0(typescript@5.9.2)
-      typescript: 5.9.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/eslint-plugin@8.50.0(@typescript-eslint/parser@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -7359,20 +7146,8 @@ snapshots:
       eslint: 9.39.1(jiti@2.6.1)
       ignore: 7.0.5
       natural-compare: 1.4.0
-      ts-api-utils: 2.1.0(typescript@5.9.3)
+      ts-api-utils: 2.4.0(typescript@5.9.3)
       typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@typescript-eslint/parser@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)':
-    dependencies:
-      '@typescript-eslint/scope-manager': 8.50.0
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.2)
-      '@typescript-eslint/visitor-keys': 8.50.0
-      debug: 4.4.3
-      eslint: 9.39.1(jiti@2.6.1)
-      typescript: 5.9.2
     transitivePeerDependencies:
       - supports-color
 
@@ -7388,19 +7163,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.50.0(typescript@5.9.2)':
-    dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.50.0(typescript@5.9.2)
-      '@typescript-eslint/types': 8.50.0
-      debug: 4.4.3
-      typescript: 5.9.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/project-service@8.50.0(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.50.0(typescript@5.9.3)
-      '@typescript-eslint/types': 8.50.0
+      '@typescript-eslint/tsconfig-utils': 8.56.0(typescript@5.9.3)
+      '@typescript-eslint/types': 8.56.0
       debug: 4.4.3
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -7425,10 +7191,6 @@ snapshots:
       '@typescript-eslint/types': 8.56.0
       '@typescript-eslint/visitor-keys': 8.56.0
 
-  '@typescript-eslint/tsconfig-utils@8.50.0(typescript@5.9.2)':
-    dependencies:
-      typescript: 5.9.2
-
   '@typescript-eslint/tsconfig-utils@8.50.0(typescript@5.9.3)':
     dependencies:
       typescript: 5.9.3
@@ -7437,18 +7199,6 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  '@typescript-eslint/type-utils@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)':
-    dependencies:
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.2)
-      '@typescript-eslint/utils': 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-      debug: 4.4.3
-      eslint: 9.39.1(jiti@2.6.1)
-      ts-api-utils: 2.1.0(typescript@5.9.2)
-      typescript: 5.9.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/type-utils@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/types': 8.50.0
@@ -7456,7 +7206,7 @@ snapshots:
       '@typescript-eslint/utils': 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       debug: 4.4.3
       eslint: 9.39.1(jiti@2.6.1)
-      ts-api-utils: 2.1.0(typescript@5.9.3)
+      ts-api-utils: 2.4.0(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -7464,21 +7214,6 @@ snapshots:
   '@typescript-eslint/types@8.50.0': {}
 
   '@typescript-eslint/types@8.56.0': {}
-
-  '@typescript-eslint/typescript-estree@8.50.0(typescript@5.9.2)':
-    dependencies:
-      '@typescript-eslint/project-service': 8.50.0(typescript@5.9.2)
-      '@typescript-eslint/tsconfig-utils': 8.50.0(typescript@5.9.2)
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/visitor-keys': 8.50.0
-      debug: 4.4.3
-      minimatch: 9.0.5
-      semver: 7.7.3
-      tinyglobby: 0.2.15
-      ts-api-utils: 2.1.0(typescript@5.9.2)
-      typescript: 5.9.2
-    transitivePeerDependencies:
-      - supports-color
 
   '@typescript-eslint/typescript-estree@8.50.0(typescript@5.9.3)':
     dependencies:
@@ -7490,7 +7225,7 @@ snapshots:
       minimatch: 9.0.5
       semver: 7.7.3
       tinyglobby: 0.2.15
-      ts-api-utils: 2.1.0(typescript@5.9.3)
+      ts-api-utils: 2.4.0(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -7510,20 +7245,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)':
-    dependencies:
-      '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.1(jiti@2.6.1))
-      '@typescript-eslint/scope-manager': 8.50.0
-      '@typescript-eslint/types': 8.50.0
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.2)
-      eslint: 9.39.1(jiti@2.6.1)
-      typescript: 5.9.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/utils@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.1(jiti@2.6.1))
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.1(jiti@2.6.1))
       '@typescript-eslint/scope-manager': 8.50.0
       '@typescript-eslint/types': 8.50.0
       '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.3)
@@ -7704,8 +7428,6 @@ snapshots:
 
   baseline-browser-mapping@2.10.13: {}
 
-  baseline-browser-mapping@2.9.11: {}
-
   better-auth@1.4.18(mysql2@3.15.3)(next@16.1.5(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.97.3))(pg@8.18.0)(prisma@7.4.1(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.2))(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       '@better-auth/core': 1.4.18(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.8(zod@4.3.6))(jose@6.1.3)(kysely@0.28.11)(nanostores@1.1.0)
@@ -7854,8 +7576,6 @@ snapshots:
   call-me-maybe@1.0.2: {}
 
   callsites@3.1.0: {}
-
-  caniuse-lite@1.0.30001761: {}
 
   caniuse-lite@1.0.30001784: {}
 
@@ -8341,7 +8061,7 @@ snapshots:
 
   eslint@9.39.1(jiti@2.6.1):
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.1(jiti@2.6.1))
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.1(jiti@2.6.1))
       '@eslint-community/regexpp': 4.12.2
       '@eslint/config-array': 0.21.1
       '@eslint/config-helpers': 0.4.2
@@ -9222,8 +8942,8 @@ snapshots:
     dependencies:
       '@next/env': 16.1.5
       '@swc/helpers': 0.5.15
-      baseline-browser-mapping: 2.9.11
-      caniuse-lite: 1.0.30001761
+      baseline-browser-mapping: 2.10.13
+      caniuse-lite: 1.0.30001784
       postcss: 8.4.31
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
@@ -10408,14 +10128,6 @@ snapshots:
 
   tr46@0.0.3: {}
 
-  ts-api-utils@2.1.0(typescript@5.9.2):
-    dependencies:
-      typescript: 5.9.2
-
-  ts-api-utils@2.1.0(typescript@5.9.3):
-    dependencies:
-      typescript: 5.9.3
-
   ts-api-utils@2.4.0(typescript@5.9.3):
     dependencies:
       typescript: 5.9.3
@@ -10497,17 +10209,6 @@ snapshots:
       is-typed-array: 1.1.15
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
-
-  typescript-eslint@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2):
-    dependencies:
-      '@typescript-eslint/eslint-plugin': 8.50.0(@typescript-eslint/parser@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-      '@typescript-eslint/parser': 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-      '@typescript-eslint/typescript-estree': 8.50.0(typescript@5.9.2)
-      '@typescript-eslint/utils': 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
-      eslint: 9.39.1(jiti@2.6.1)
-      typescript: 5.9.2
-    transitivePeerDependencies:
-      - supports-color
 
   typescript-eslint@8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3):
     dependencies:

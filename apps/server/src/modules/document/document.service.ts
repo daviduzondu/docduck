@@ -4,15 +4,29 @@ import { createDocumentSchema, getDocumentSchema } from "./document.validation";
 import * as z from 'zod';
 import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
+import { Role } from "@/db/prisma/generated/types";
 
-export async function getDocumentPermissions(id: string, userId: string | null = null) {
- //
- console.log(userId)
- return await db.selectFrom('document')
+type DocumentPermissions = {
+ canEdit: boolean,
+ canView: boolean,
+ role?: Role,
+ documentId?: String
+}
+
+
+export async function getDocumentPermissions(id: string, userId: string | null = null): Promise<DocumentPermissions> {
+ const result = await db.selectFrom('document')
   .leftJoin('permission', (join) => join.onRef('permission.documentId', '=', 'document.id').on(eb => eb('permission.userId', '=', userId).or('permission.userId', 'is', null)))
   .where('document.id', '=', id)
-  .select(['document.id as documentId', 'visibility', 'permission.role', 'permission.userId'])
-  .executeTakeFirst();
+  .select(['document.id as documentId', 'visibility', 'permission.role', 'permission.userId', 'document.allowPublicEdits'])
+  .executeTakeFirstOrThrow();
+
+ return {
+  canEdit: !!(result?.documentId && result.role && (result.allowPublicEdits || (['OWNER', 'EDITOR'] as Role[]).includes(result.role))),
+  canView: !!(result?.documentId && (result.visibility === 'PUBLIC' || result.role)),
+  documentId: result?.documentId,
+  role: result?.role ?? undefined
+ }
 }
 
 export async function getDocument(data: z.infer<typeof getDocumentSchema>['params']) {
