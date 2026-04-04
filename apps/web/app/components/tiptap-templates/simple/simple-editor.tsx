@@ -221,10 +221,10 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    }),
    CollaborationCaret.configure({
     provider,
-    user: { name: "" }
+
    }),
    Collaboration.configure({
-    document: ydoc
+    document: ydoc,
    }),
    Placeholder.configure({
     placeholder: "Start typing..."
@@ -272,9 +272,9 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
 
  useEffect(() => {
   if (editor && data?.user?.name) {
-    editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id) })
+   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id) })
   }
-}, [editor, data])
+ }, [editor, data])
 
  return (
   <div className="simple-editor-wrapper">
