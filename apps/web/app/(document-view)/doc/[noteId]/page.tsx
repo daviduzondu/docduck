@@ -15,5 +15,5 @@ export default async function Page({ params }: { params: Promise<{ noteId: strin
   console.error(error);
  }
 
- return <NotePage canEdit={result.canEdit} />
+ return <NotePage />
 }
