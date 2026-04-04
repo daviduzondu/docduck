@@ -45,7 +45,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
  return (
   <Dialog>
    <DialogTrigger render={
-    <Button size="lg" onClick={onShare}>
+    <Button size="lg" onClick={onShare} className={'outline outline-accent-foreground'}>
      <LockIcon data-icon="inline-end" />
      Share
     </Button>} />

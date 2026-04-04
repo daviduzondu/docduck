@@ -80,6 +80,7 @@ import { Doc } from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
 import { getUserColor } from "@/lib/utils";
+import { faker } from "@faker-js/faker";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -197,7 +198,7 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
  const { data } = useAuth();
- const caretColor = useRef(getUserColor(data?.user.id ?? ""));
+ const anonymousUser = useRef(faker.animal.type())
 
  const editor = useEditor({
   immediatelyRender: false,
@@ -272,7 +273,9 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
 
  useEffect(() => {
   if (editor && data?.user?.name) {
-   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id) })
+   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id), image: data.user.image, isAnonymous: false })
+  } else if (editor && !data) {
+   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, color: getUserColor(anonymousUser.current), image: null, isAnonymous: true })
   }
  }, [editor, data])
 
