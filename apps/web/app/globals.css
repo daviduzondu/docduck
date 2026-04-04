@@ -144,11 +144,6 @@
 
  body {
   @apply bg-background text-foreground;
-
-  .collaboration-carets__label {
-   background-color: var(--color);
-   color: var(--contrast-color);
-  }
  }
 
  html {
