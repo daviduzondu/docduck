@@ -81,6 +81,7 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
 import { getUserColor } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
+import { useHocuspocus } from "@/providers/document.provider";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -190,7 +191,7 @@ const MobileToolbarContent = ({
  </>
 )
 
-export function SimpleEditor({ ydoc, provider, canEdit }: { ydoc: Y.Doc, provider: HocuspocusProvider, canEdit: boolean }) {
+export function SimpleEditor({ canEdit }: {  canEdit: boolean }) {
  const isMobile = useIsBreakpoint()
  const { height } = useWindowSize()
  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -198,7 +199,8 @@ export function SimpleEditor({ ydoc, provider, canEdit }: { ydoc: Y.Doc, provide
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
  const { data } = useAuth();
- const anonymousUser = useRef(faker.animal.type())
+ const {provider, ydoc} = useHocuspocus();
+ const anonymousUser = useRef(faker.animal.type());
 
  const editor = useEditor({
   immediatelyRender: false,

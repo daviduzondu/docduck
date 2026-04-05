@@ -1,5 +1,4 @@
 import * as z from "zod";
-import { RequestSchema } from "../../types/types";
 import { createErrorMap } from "zod-validation-error";
 
 z.config({
@@ -24,3 +23,7 @@ export const documentInvitationSchema = z.object({
   }))
  })
 });
+
+export const getCollaboratorsSchema = z.object({
+ params: z.object({id:z.uuid()}),
+})

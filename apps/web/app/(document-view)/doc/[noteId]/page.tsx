@@ -1,6 +1,7 @@
 import DocPage from "@/(document-view)/doc/[noteId]/page.client";
 import { authClient } from "@/lib/auth.client";
 import { orpc } from "@/lib/orpc.client";
+import { DocumentProvider } from "@/providers/document.provider";
 import { headers } from 'next/headers';
 
 export default async function Page({ params }: { params: Promise<{ noteId: string }> }) {
@@ -23,5 +24,8 @@ export default async function Page({ params }: { params: Promise<{ noteId: strin
   return <div>Hmmm...Something went wrong when fetching the document!</div>
  }
 
- return <DocPage canEdit={result.permissions.canEdit} title={result.meta.title} />
+ return <DocumentProvider documentId={noteId}>
+  <DocPage canEdit={result.permissions.canEdit} title={result.meta.title} />
+ </DocumentProvider>
+
 }

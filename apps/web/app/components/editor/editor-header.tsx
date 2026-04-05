@@ -5,13 +5,13 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/h
 import { Edit3 } from 'lucide-react';
 import { EditorShareDialogButton } from './editor-share-dialog';
 import { useSidebar } from '../ui/sidebar';
-import { HocuspocusProvider, onAwarenessUpdateParameters } from '@hocuspocus/provider';
-import { generateAnonymousAvatar } from '@/lib/utils';
+import { onAwarenessUpdateParameters } from '@hocuspocus/provider';
+import { generateAnonymousAvatar, sendStateless } from '@/lib/utils';
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { useHocuspocus } from '@/providers/document.provider';
 
 interface EditorHeaderProps {
  title?: string;
- provider: HocuspocusProvider;
  onEdit?: () => void;
  onShare?: () => void;
  canEdit: boolean
@@ -23,7 +23,6 @@ type AwarenessStates = {
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
  title,
- provider,
  canEdit,
  onEdit,
  onShare,
@@ -31,11 +30,11 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  const [collaborators, setCollaborators] = useState<AwarenessStates[]>([]);
 
  const { open } = useSidebar();
-
+ const { provider } = useHocuspocus();
  useEffect(() => {
   provider.on('awarenessUpdate', ({ states }: onAwarenessUpdateParameters) => {
    setCollaborators(states.map(x => ({ ...x.user })))
-  })
+  });
  }, []);
 
  if (collaborators.length >= 1)
@@ -45,7 +44,12 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
     <div className={`text-center space-x-1  ${open ? 'mr-[20em]' : ''}`}>
      <div className={`truncate text-center inline`}>{title}</div>
-     <Button size="icon-xs" variant="ghost" onClick={onEdit}>
+     <Button size="icon-xs" variant="ghost" onClick={() => {
+      sendStateless(provider, {
+       type: "update:title",
+       data: "Random Title"
+      })
+     }}>
       {canEdit ? <Edit3 /> : null}
      </Button>
      {/* <Badge className="uppercase text-xs inline rounded-sm" variant="default">private</Badge> */}

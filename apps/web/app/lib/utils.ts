@@ -2,6 +2,9 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { createAvatar } from '@dicebear/core';
 import * as thumbs from '@dicebear/thumbs';
+import { Provider } from "react";
+import { HocuspocusProvider } from "@hocuspocus/provider";
+import { StatelessMessage } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
  return twMerge(clsx(inputs))
@@ -36,3 +39,7 @@ export function getUserColor(userId: string): string {
 export const generateAnonymousAvatar = (seed: string) => createAvatar(thumbs, {
  seed
 });
+
+export function sendStateless<T = any>(provider: HocuspocusProvider, data: StatelessMessage<T>) {
+ provider.sendStateless(JSON.stringify(data));
+}

@@ -18,6 +18,9 @@ export const hocuspocus = new Hocuspocus({
 
   return authData;
  },
+ async onStateless({ document, payload }) {
+  document.broadcastStateless(payload.toString())
+ },
  extensions: [
   new Logger(),
   new Database({

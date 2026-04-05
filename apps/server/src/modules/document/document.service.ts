@@ -9,8 +9,6 @@ import { Role, Visibility } from "@/db/prisma/generated/types";
 type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
 type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role };
 
-
-
 export async function getDocumentWithPermissions(
  id: string,
  userId: string | null = null
@@ -22,13 +20,21 @@ export async function getDocumentWithPermissions(
   .executeTakeFirstOrThrow();
 
  return {
-  meta: {documentId: result.documentId, title: result.title, visibility: result.visibility},
+  meta: { documentId: result.documentId, title: result.title, visibility: result.visibility },
   permissions: {
    canEdit: !!(result?.documentId && result.role && (result.allowPublicEdits || (['OWNER', 'EDITOR'] as Role[]).includes(result.role))),
    canView: !!(result?.documentId && (result.visibility === 'PUBLIC' || result.role)),
    role: result?.role ?? undefined,
   }
  }
+}
+
+export async function getDocumentCollaborators(id: string) {
+ return await db.selectFrom('document')
+  .innerJoin('permission', 'permission.documentId', 'document.id')
+  .innerJoin('user', 'permission.userId', 'user.id')
+  .where('document.id', '=', id)
+  .select(['permission.userId as id', 'permission.role', 'user.email']).execute()
 }
 
 export async function getDocument(data: z.infer<typeof getDocumentSchema>['params']) {

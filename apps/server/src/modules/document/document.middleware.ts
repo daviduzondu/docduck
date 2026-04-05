@@ -1,13 +1,10 @@
-import { NextFunction, Request, Response } from "express";
 import { db } from "@/lib/kysely";
-import * as z from 'zod';
-import { getDocumentSchema } from "./document.validation";
 import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
 import { AppContext, MiddlewareArgs } from "@/types/types";
 import { base } from "@/orpc/os";
 
-// export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next: NextFunction) => {
+// export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next:  => {
 //  const isDocumentVisible = await db.selectFrom('document').select(['visibility', 'document.id']).where('id', '=', req.body.documentId).executeTakeFirstOrThrow();
 //  if (isDocumentVisible.visibility === 'PUBLIC') return next();
 //  if (!req.ctx?.user.id) throw new AppError("You must be signed in to perform this action.", StatusCodes.UNAUTHORIZED);
@@ -24,11 +21,24 @@ import { base } from "@/orpc/os";
 //  if (ownerId !== userId) throw new AppError("You are not allowed to perform this action", StatusCodes.UNAUTHORIZED);
 // }))
 
-export const ensureDocumentOwner = base.$context<Required<AppContext>>().middleware((async ({ context, next }, input: string) => {
- const { ownerId } = await db.selectFrom('document').where('document.id', '=', input).where('document.ownerId', '=', context.user!.id).select(['ownerId']).executeTakeFirstOrThrow(() => new AppError("Document with id ${documentId} could not be found", StatusCodes.NOT_FOUND));
- return await next({
-  context: { ...context }
- })
-}))
+export const ensureDocumentOwner = base
+ .$context<Required<AppContext>>()
+ .middleware(async ({ context, next }, documentId: string) => {
+  const doc = await db
+   .selectFrom('document')
+   .select(['ownerId'])
+   .where('document.id', '=', documentId)
+   .where('document.ownerId', '=', context.user.id)
+   .executeTakeFirst();
 
+  if (!doc) {
+   throw new AppError(
+    `You're not the owner of this document`,
+    StatusCodes.NOT_FOUND
+   );
+  }
 
+  return next({
+   context
+  });
+ });
