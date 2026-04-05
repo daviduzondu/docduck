@@ -78,7 +78,7 @@ function CollaboratorsHoverCard({ collaborators }: { collaborators: AwarenessSta
   <HoverCard>
    <HoverCardTrigger delay={150}>
     <AvatarGroup className='bg-card-foreground px-1 py-1 rounded-full w-fit'>
-     {collaborators.map((collaborator) => <CollaboratorAvatar collaborator={collaborator} />)}
+     {collaborators.map((collaborator) => <CollaboratorAvatar collaborator={collaborator} key={collaborator.name + collaborator.color} />)}
     </AvatarGroup>
    </HoverCardTrigger>
    <HoverCardContent side="bottom" align="center">

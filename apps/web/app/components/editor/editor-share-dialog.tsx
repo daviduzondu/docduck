@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Link, LockIcon, Mail, User, UserRoundPlus } from "lucide-react"
+import { Check, Link, LockIcon, Mail, User, UserRoundPlus } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
  Select,
@@ -38,10 +38,22 @@ import {
  ItemMedia,
  ItemTitle,
 } from "@/components/ui/item"
+import { useState } from "react"
 
 const roles = [{ label: "Editor", value: "editor" }, { label: "Viewer", value: "viewer" }];
 
 export function EditorShareDialogButton({ onShare }: { onShare: any }) {
+ const [copied, setCopied] = useState(false);
+ const handleCopy = async (textToCopy: string) => {
+  try {
+   await navigator.clipboard.writeText(textToCopy);
+   setCopied(true);
+   setTimeout(() => setCopied(false), 2000);
+  } catch (err) {
+   console.error('Failed to copy: ', err);
+  }
+ }
+
  return (
   <Dialog>
    <DialogTrigger render={
@@ -179,7 +191,8 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
      </Select>
     </div>
     <DialogFooter className="flex sm:justify-between w-full">
-     <Button variant={'outline'}><Link data-icon="inline-end" /> Copy link</Button>
+     <Button variant={'outline'} onClick={() => handleCopy(window.location.href)}>
+      {copied ? <Check data-icon="inline-end" /> : <Link data-icon="inline-end" />} Copy link</Button>
      <Button><Mail data-icon="inline-end" /> Send invitation</Button>
     </DialogFooter>
    </DialogContent>
