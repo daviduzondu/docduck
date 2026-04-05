@@ -190,7 +190,7 @@ const MobileToolbarContent = ({
  </>
 )
 
-export function SimpleEditor({ ydoc, provider, canView }: { ydoc: Y.Doc, provider: HocuspocusProvider, canView: boolean }) {
+export function SimpleEditor({ ydoc, provider, canEdit }: { ydoc: Y.Doc, provider: HocuspocusProvider, canEdit: boolean }) {
  const isMobile = useIsBreakpoint()
  const { height } = useWindowSize()
  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -202,6 +202,7 @@ export function SimpleEditor({ ydoc, provider, canView }: { ydoc: Y.Doc, provide
 
  const editor = useEditor({
   immediatelyRender: false,
+  editable: canEdit,
   editorProps: {
    attributes: {
     autocomplete: "off",
