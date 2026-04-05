@@ -5,24 +5,37 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/h
 import { Edit3 } from 'lucide-react';
 import { EditorShareDialogButton } from './editor-share-dialog';
 import { useSidebar } from '../ui/sidebar';
-import { onAwarenessUpdateParameters } from '@hocuspocus/provider';
+import { HocuspocusProvider, onAwarenessUpdateParameters } from '@hocuspocus/provider';
 import { generateAnonymousAvatar, sendStateless } from '@/lib/utils';
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item';
-import { useHocuspocus } from '@/providers/document.provider';
+import { useDocument } from '@/providers/document.provider';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useForm, Controller } from 'react-hook-form';
+import {
+ Field,
+ FieldDescription,
+ FieldError,
+ FieldGroup,
+ FieldLabel,
+} from "@/components/ui/field"
+import z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { orpc } from '@/lib/orpc.client';
+import { Badge } from '@/components/ui/badge';
 
 interface EditorHeaderProps {
- title?: string;
  onEdit?: () => void;
  onShare?: () => void;
  canEdit: boolean
 }
 
 type AwarenessStates = {
- name: string, color: string, image?: string, isAnonymous: boolean
+ name: string, color: string, image?: string, isAnonymous: boolean, role: "VIEWER" | "EDITOR" | "OWNER"
 }
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
- title,
  canEdit,
  onEdit,
  onShare,
@@ -30,7 +43,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  const [collaborators, setCollaborators] = useState<AwarenessStates[]>([]);
 
  const { open } = useSidebar();
- const { provider } = useHocuspocus();
+ const { provider, documentId, title } = useDocument();
  useEffect(() => {
   provider.on('awarenessUpdate', ({ states }: onAwarenessUpdateParameters) => {
    setCollaborators(states.map(x => ({ ...x.user })))
@@ -42,19 +55,16 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
    <header className="flex w-full items-center px-3 py-2 justify-between sticky top-0">
     <div className="text-2xl font-bold grow basis-0">DocDuck</div>
 
-    <div className={`text-center space-x-1  ${open ? 'mr-[20em]' : ''}`}>
-     <div className={`truncate text-center inline`}>{title}</div>
-     <Button size="icon-xs" variant="ghost" onClick={() => {
-      sendStateless(provider, {
-       type: "update:title",
-       data: "Random Title"
-      })
-     }}>
-      {canEdit ? <Edit3 /> : null}
-     </Button>
-     {/* <Badge className="uppercase text-xs inline rounded-sm" variant="default">private</Badge> */}
-    </div>
-
+    {canEdit ?
+     <EditTitlePopover title={title} documentId={documentId} provider={provider}>
+      <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[20em]' : ''}`}>
+       <div className={`truncate text-center`}>{title}</div>
+       <Edit3 className={"size-3.5"} />
+      </div>
+     </EditTitlePopover>
+     : <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[20em]' : ''}`}>
+      <div className={`truncate text-center`}>{title}</div>
+     </div>}
     <div className="gap-2 items-center flex grow basis-0 justify-end">
      <CollaboratorsHoverCard collaborators={collaborators} />
      <EditorShareDialogButton onShare={onShare} />
@@ -62,6 +72,71 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
    </header>
   );
 };
+
+function EditTitlePopover({ children, title, documentId, provider }: { children: React.ReactNode, title: string, documentId: string, provider: HocuspocusProvider }) {
+ const updateTitleSchema = z.object({
+  title: z.string().trim().nonempty({ error: "Title cannot be empty" }),
+ });
+ const form = useForm<z.infer<typeof updateTitleSchema>>({
+  resolver: zodResolver(updateTitleSchema),
+  shouldUnregister: true,
+  defaultValues: {
+   title
+  }
+ });
+
+ async function onSubmit({ title }: { title: string }) {
+  try {
+   sendStateless(provider, {
+    data: title,
+    type: 'update:title'
+   });
+   await orpc.documents.updateDocumentTitle({
+    body: { title },
+    params: { id: documentId }
+   });
+
+  } catch (e) {
+   console.error(e);
+   return
+  }
+ }
+
+
+ return <Popover>
+  <PopoverTrigger className={"active:not-aria-[haspopup]:translate-y-px cursor-pointer p-0"}>
+   {children}
+  </PopoverTrigger>
+  <PopoverContent side="bottom" align="center" className={'w-lg'}>
+   <form id='update-title-form' onSubmit={form.handleSubmit(onSubmit)}>
+    <Controller
+     name="title"
+     control={form.control}
+     render={({ field, fieldState }) => (
+      <Field data-invalid={fieldState.invalid}>
+       <FieldLabel htmlFor='title'>
+        Update Title
+       </FieldLabel>
+       <div className='flex space-x-2 w-full'>
+        <div className='flex-1 space-y-2'>
+         <Input
+          {...field}
+          id="title"
+          placeholder='Update title...'
+         />
+         {fieldState.invalid && (
+          <FieldError errors={[fieldState.error]} />
+         )}
+        </div>
+        <Button className={'w-fit'} type='submit' form='update-title-form'>Update</Button>
+       </div>
+      </Field>
+     )}
+    />
+   </form>
+  </PopoverContent>
+ </Popover>
+}
 
 function CollaboratorAvatar({ collaborator }: { collaborator: AwarenessStates }) {
  return <Avatar key={collaborator.name}>
@@ -78,6 +153,7 @@ function CollaboratorAvatar({ collaborator }: { collaborator: AwarenessStates })
 }
 
 function CollaboratorsHoverCard({ collaborators }: { collaborators: AwarenessStates[] }) {
+ console.log(collaborators)
  return (
   <HoverCard>
    <HoverCardTrigger delay={150}>
@@ -93,6 +169,7 @@ function CollaboratorsHoverCard({ collaborators }: { collaborators: AwarenessSta
      </ItemMedia>
      <ItemContent>
       <ItemTitle>{collaborator.name}</ItemTitle>
+      <Badge>{collaborator.role}</Badge>
      </ItemContent>
     </Item>)}
    </HoverCardContent>

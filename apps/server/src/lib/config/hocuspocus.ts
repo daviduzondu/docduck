@@ -8,6 +8,9 @@ import { Database } from "@hocuspocus/extension-database";
 import { db } from "@/lib/kysely";
 import { Logger } from "@hocuspocus/extension-logger";
 
+// const statelessMessageSchema = {
+//  "update:title": 
+// },
 export const hocuspocus = new Hocuspocus({
  async onAuthenticate(data) {
   data.connectionConfig.readOnly = true;
@@ -19,7 +22,7 @@ export const hocuspocus = new Hocuspocus({
   return authData;
  },
  async onStateless({ document, payload }) {
-  document.broadcastStateless(payload.toString())
+  document.broadcastStateless(payload.toString());
  },
  extensions: [
   new Logger(),

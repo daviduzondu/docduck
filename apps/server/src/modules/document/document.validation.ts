@@ -25,5 +25,12 @@ export const documentInvitationSchema = z.object({
 });
 
 export const getCollaboratorsSchema = z.object({
- params: z.object({id:z.uuid()}),
+ params: z.object({ id: z.uuid() }),
+})
+
+export const updateDocumentSchema = z.object({
+ params: z.object({ id: z.uuid() }),
+ body: z.object({
+  title: z.string().trim().nonempty({ error: "Title cannot be empty" })
+ })
 })

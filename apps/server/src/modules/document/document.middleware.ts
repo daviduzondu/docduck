@@ -1,8 +1,9 @@
 import { db } from "@/lib/kysely";
 import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
-import { AppContext, MiddlewareArgs } from "@/types/types";
+import { AppContext } from "@/types/types";
 import { base } from "@/orpc/os";
+import * as documentService from '@/modules/document/document.service';
 
 // export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next:  => {
 //  const isDocumentVisible = await db.selectFrom('document').select(['visibility', 'document.id']).where('id', '=', req.body.documentId).executeTakeFirstOrThrow();
@@ -42,3 +43,11 @@ export const ensureDocumentOwner = base
    context
   });
  });
+
+export const ensureCanEditDocument = base.middleware(async ({ context, next }, documentId: string) => {
+ const { permissions } = await documentService.getDocumentWithPermissions(documentId, context.user?.id);
+ if (!permissions.canEdit) throw new AppError("You're not allowed to perform this action", StatusCodes.FORBIDDEN);
+ return next({
+  context: { ...context }
+ })
+}) 

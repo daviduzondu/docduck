@@ -4,7 +4,7 @@ import * as invitationService from '@/modules/invitation/invitation.service';
 
 import { base, r } from '@/orpc/os';
 import { ctx, ensureAuth } from '@/modules/auth/auth.middleware';
-import { ensureDocumentOwner } from '@/modules/document/document.middleware';
+import { ensureCanEditDocument, ensureDocumentOwner } from '@/modules/document/document.middleware';
 import z from 'zod';
 
 export const documentRouter = base.prefix("/documents").use(ctx).router({
@@ -30,6 +30,13 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
    .input(documentSchema.createDocumentSchema)
    .handler(({ input, context }) =>
     documentService.createDocument(input, context)),
+
+ updateDocumentTitle:
+  r.patch('/{id}/title', { inputStructure: 'detailed' })
+   .input(documentSchema.updateDocumentSchema)
+   .use(ensureCanEditDocument, (input) => input.params.id)
+   .handler(({ input }) =>
+    documentService.updateDocumentTitle(input.params.id, input.body.title)),
 
  getCollaborators:
   r.get('/{id}/collaborators', { inputStructure: 'detailed' })

@@ -8,9 +8,8 @@ import { History, MessageSquare, Search } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import EditorSidebar from "@/components/editor/editor-sidebar";
 import { useEditorSidebarView } from "@/providers/editor-sidebar.provider";
-import { DocumentProvider } from "@/providers/document.provider";
 
-export default function DocPage({ canEdit, title }: { canEdit: boolean, title: string }) {
+export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VIEWER" | "EDITOR" | "OWNER" | undefined }) {
  const { noteId }: { noteId: string } = useParams();
  const { toggleSidebar, open } = useSidebar();
  const { view: currentView, setView } = useEditorSidebarView();
@@ -28,11 +27,11 @@ export default function DocPage({ canEdit, title }: { canEdit: boolean, title: s
  return <main className="flex-1 relative">
   {/* <div className="w-full text-center text-sm py-2">You're currently offline. Changes will sync automatically.</div> */}
   <div className="h-screen flex flex-col">
-   <EditorHeader canEdit={canEdit} title={title} />
+   <EditorHeader canEdit={canEdit} />
    <div className="flex flex-1 relative">
     {/* Main editor area */}
     <div className="flex-1 relative">
-     <SimpleEditor canEdit={canEdit} />
+     <SimpleEditor canEdit={canEdit} role={role} />
 
      {/* Floating buttons */}
      <div className="absolute bottom-22 right-3 flex flex-col gap-3">

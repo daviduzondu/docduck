@@ -29,6 +29,12 @@ export async function getDocumentWithPermissions(
  }
 }
 
+export async function updateDocumentTitle(id: string, title: string) {
+ return await db.updateTable('document').set({
+  title: title,
+ }).where('document.id', '=', id).returning(['id', 'title']).execute();
+}
+
 export async function getDocumentCollaborators(id: string) {
  return await db.selectFrom('document')
   .innerJoin('permission', 'permission.documentId', 'document.id')

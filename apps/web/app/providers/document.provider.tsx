@@ -4,11 +4,13 @@ import { StatelessMessage } from "@/types";
 import { HocuspocusProvider, HocuspocusProviderWebsocket } from "@hocuspocus/provider";
 import React, { useContext, useEffect, useState } from "react";
 import * as Y from 'yjs';
+import { string } from "zod";
 
-export const HocuspocusContext = React.createContext<{ ydoc: Y.Doc | null, provider: HocuspocusProvider | null }>({ ydoc: null, provider: null });
+type DocumentContext = { title: string | undefined, documentId: string | null, ydoc: Y.Doc | null, provider: HocuspocusProvider | null };
+export const HocuspocusContext = React.createContext<DocumentContext>({ title: undefined, documentId: null, ydoc: null, provider: null });
 
-export function DocumentProvider({ documentId, children }: { documentId: string, children: React.ReactNode }) {
- const [data, setData] = useState<{ ydoc: Y.Doc | null, provider: HocuspocusProvider | null }>({ ydoc: null, provider: null });
+export function DocumentProvider({ documentId, title, children }: { title: string, documentId: string, children: React.ReactNode }) {
+ const [data, setData] = useState<DocumentContext>({ title, ydoc: null, provider: null, documentId });
 
  useEffect(() => {
   const ydoc = new Y.Doc();
@@ -23,18 +25,16 @@ export function DocumentProvider({ documentId, children }: { documentId: string,
    onAuthenticationFailed(data) {
     console.error("Authentication failed. You must be signed in to perform this action.")
    },
-   onStateless(data) {
-    const message: StatelessMessage<string> = JSON.parse(data.payload);
-    console.log('hi!')
+   onStateless({ payload }) {
+    const message: StatelessMessage<string> = JSON.parse(payload);
     if (message.type === 'update:title') {
-     console.log(message.data)
+     setData(prev => ({ ...prev, title: message.data }))
     }
    },
   });
-
   provider.attach();
 
-  setData({ ...data, ydoc, provider })
+  setData(prev => ({ ...prev, ydoc, provider }))
   return () => {
    provider.detach();
   }
@@ -46,8 +46,8 @@ export function DocumentProvider({ documentId, children }: { documentId: string,
   </HocuspocusContext.Provider>
 }
 
-export function useHocuspocus() {
- const { ydoc, provider } = useContext(HocuspocusContext);
- if (ydoc && provider) return { ydoc, provider };
+export function useDocument() {
+ const { ydoc, provider, documentId, title } = useContext(HocuspocusContext);
+ if (ydoc && provider && documentId && title) return { ydoc, provider, documentId, title };
  throw new Error("useHocuspocus must be called within a DocumentProvider.");
 }

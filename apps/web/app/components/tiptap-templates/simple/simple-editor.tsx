@@ -81,7 +81,7 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
 import { getUserColor } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
-import { useHocuspocus } from "@/providers/document.provider";
+import { useDocument } from "@/providers/document.provider";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -191,7 +191,7 @@ const MobileToolbarContent = ({
  </>
 )
 
-export function SimpleEditor({ canEdit }: {  canEdit: boolean }) {
+export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWER" | "EDITOR" | "OWNER" | undefined }) {
  const isMobile = useIsBreakpoint()
  const { height } = useWindowSize()
  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -199,7 +199,7 @@ export function SimpleEditor({ canEdit }: {  canEdit: boolean }) {
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
  const { data } = useAuth();
- const {provider, ydoc} = useHocuspocus();
+ const { provider, ydoc } = useDocument();
  const anonymousUser = useRef(faker.animal.type());
 
  const editor = useEditor({
@@ -276,9 +276,9 @@ export function SimpleEditor({ canEdit }: {  canEdit: boolean }) {
 
  useEffect(() => {
   if (editor && data?.user?.name) {
-   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id), image: data.user.image, isAnonymous: false })
+   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id), image: data.user.image, isAnonymous: false, role })
   } else if (editor && !data) {
-   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, color: getUserColor(anonymousUser.current), image: null, isAnonymous: true })
+   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, color: getUserColor(anonymousUser.current), image: null, isAnonymous: true, role })
   }
  }, [editor, data])
 
