@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { db } from "@/lib/kysely";
+import { db } from "../../lib/kysely";
 import { openAPI } from "better-auth/plugins";
 
 export const auth = betterAuth({
@@ -24,3 +24,5 @@ export const auth = betterAuth({
   // }
  }
 });
+
+export const api = auth.api;

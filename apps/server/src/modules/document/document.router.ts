@@ -25,11 +25,11 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
    }))
    .handler(({ input }) =>
     documentService.getDocument(input.params)),
- getPermissions: r.get('/{documentId}/permissions', { inputStructure: 'detailed' })
+ getDocumentWithPermissions: r.get('/{documentId}/permissions', { inputStructure: 'detailed' })
   .input(z.object({
    params: z.object({ documentId: z.string() })
   }))
-  .handler(({ input, context }) => documentService.getDocumentPermissions(input.params.documentId, context.user?.id)),
+  .handler(({ input, context }) => documentService.getDocumentWithPermissions(input.params.documentId, context.user?.id)),
  createDocument:
   r.post('/new')
    .use(ensureAuth)

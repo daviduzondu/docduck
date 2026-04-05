@@ -12,9 +12,9 @@ export const hocuspocus = new Hocuspocus({
  async onAuthenticate(data) {
   data.connectionConfig.readOnly = true;
   const authData = await auth.api.getSession({ headers: data.requestHeaders });
-  const permissions = await documentService.getDocumentPermissions(data.documentName, authData?.user.id ?? null);
-  if (!permissions.canView) throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
-  if (permissions.canEdit) data.connectionConfig.readOnly = false;
+  const permissions = await documentService.getDocumentWithPermissions(data.documentName, authData?.user.id ?? null);
+  if (!permissions.permissions.canView) throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
+  if (permissions.permissions.canEdit) data.connectionConfig.readOnly = false;
 
   return authData;
  },

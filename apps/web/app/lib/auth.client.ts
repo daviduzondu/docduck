@@ -9,6 +9,7 @@ export const authClient = createAuthClient({
  }
 });
 
+
 export async function loginWithEmailAndPassword(email: string, password: string, redirect?: string) {
  try {
   const result = await authClient.signIn.email({

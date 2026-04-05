@@ -4,28 +4,30 @@ import { createDocumentSchema, getDocumentSchema } from "./document.validation";
 import * as z from 'zod';
 import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
-import { Role } from "@/db/prisma/generated/types";
+import { Role, Visibility } from "@/db/prisma/generated/types";
 
-type DocumentPermissions = {
- canEdit: boolean,
- canView: boolean,
- role?: Role,
- documentId?: String
-}
+type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
+type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role };
 
 
-export async function getDocumentPermissions(id: string, userId: string | null = null): Promise<DocumentPermissions> {
+
+export async function getDocumentWithPermissions(
+ id: string,
+ userId: string | null = null
+): Promise<{ meta: DocumentMeta; permissions: DocumentPermissions }> {
  const result = await db.selectFrom('document')
   .leftJoin('permission', (join) => join.onRef('permission.documentId', '=', 'document.id').on(eb => eb('permission.userId', '=', userId).or('permission.userId', 'is', null)))
   .where('document.id', '=', id)
-  .select(['document.id as documentId', 'visibility', 'permission.role', 'permission.userId', 'document.allowPublicEdits'])
+  .select(['document.id as documentId', 'visibility', 'permission.role', 'permission.userId', 'document.allowPublicEdits', 'document.title'])
   .executeTakeFirstOrThrow();
 
  return {
-  canEdit: !!(result?.documentId && result.role && (result.allowPublicEdits || (['OWNER', 'EDITOR'] as Role[]).includes(result.role))),
-  canView: !!(result?.documentId && (result.visibility === 'PUBLIC' || result.role)),
-  documentId: result?.documentId,
-  role: result?.role ?? undefined
+  meta: {documentId: result.documentId, title: result.title, visibility: result.visibility},
+  permissions: {
+   canEdit: !!(result?.documentId && result.role && (result.allowPublicEdits || (['OWNER', 'EDITOR'] as Role[]).includes(result.role))),
+   canView: !!(result?.documentId && (result.visibility === 'PUBLIC' || result.role)),
+   role: result?.role ?? undefined,
+  }
  }
 }
 

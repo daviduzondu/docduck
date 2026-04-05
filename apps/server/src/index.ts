@@ -25,8 +25,8 @@ const handler = new OpenAPIHandler(appRouter, {
 })
 // app.use(logger);
 app.use(cors(corsConfig));
-app.use(express.json());
 app.all('/api/auth/{*any}', toNodeHandler(auth));
+app.use(express.json());
 app.use('/api{/*path}', async (req, res, next) => {
  const { matched } = await handler.handle(req, res, {
   prefix: '/api',
@@ -37,7 +37,6 @@ app.use('/api{/*path}', async (req, res, next) => {
 })
 
 server.listen(PORT, () => console.log(`Server now listening on ${PORT}`));
-
 
 
 // app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

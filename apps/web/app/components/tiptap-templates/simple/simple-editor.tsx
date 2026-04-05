@@ -76,7 +76,7 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
-import { Doc } from "yjs";
+import * as Y from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
 import { getUserColor } from "@/lib/utils";
@@ -190,7 +190,7 @@ const MobileToolbarContent = ({
  </>
 )
 
-export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: HocuspocusProvider }) {
+export function SimpleEditor({ ydoc, provider, canView }: { ydoc: Y.Doc, provider: HocuspocusProvider, canView: boolean }) {
  const isMobile = useIsBreakpoint()
  const { height } = useWindowSize()
  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
