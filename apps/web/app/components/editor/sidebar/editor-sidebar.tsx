@@ -1,4 +1,5 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader } from "../ui/sidebar";
+import FindAndReplace from "@/components/editor/sidebar/search";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader } from "../../ui/sidebar";
 
 export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
  if (!view) return <></>
@@ -14,9 +15,8 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
     }
    </div>
   </SidebarHeader>
-  <SidebarContent>
-   <SidebarGroup />
-   <SidebarGroup />
+  <SidebarContent className="p-2">
+   <FindAndReplace />
   </SidebarContent>
   <SidebarFooter />
  </Sidebar>

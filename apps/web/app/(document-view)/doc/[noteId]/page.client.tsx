@@ -6,7 +6,7 @@ import { EditorHeader } from "@/components/editor/editor-header";
 import { Button } from "@/components/ui/button";
 import { History, MessageSquare, Search } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
-import EditorSidebar from "@/components/editor/editor-sidebar";
+import EditorSidebar from "@/components/editor/sidebar/editor-sidebar";
 import { useEditorSidebarView } from "@/providers/editor-sidebar.provider";
 
 export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VIEWER" | "EDITOR" | "OWNER" | undefined }) {
