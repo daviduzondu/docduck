@@ -1,28 +1,28 @@
 import { Hocuspocus } from "@hocuspocus/server";
 import { WebSocketServer } from 'ws';
 import { auth } from '@/modules/auth/better-auth';
-import { AppError } from "./helpers";
+import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
 import * as documentService from '@/modules/document/document.service';
 import { Database } from "@hocuspocus/extension-database";
-import { db } from "./kysely";
+import { db } from "@/lib/kysely";
 import { Logger } from "@hocuspocus/extension-logger";
 
+// const statelessMessageSchema = {
+//  "update:title": 
+// },
 export const hocuspocus = new Hocuspocus({
  async onAuthenticate(data) {
   data.connectionConfig.readOnly = true;
   const authData = await auth.api.getSession({ headers: data.requestHeaders });
-  const permissions = await documentService.getDocumentPermissions(data.documentName, authData?.user.id ?? null);
-  
-  if (!permissions?.documentId) throw new AppError(`Document with id ${permissions?.documentId} not found`, StatusCodes.NOT_FOUND);
+  const permissions = await documentService.getDocumentWithPermissions(data.documentName, authData?.user.id ?? null);
+  if (!permissions.permissions.canView) throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
+  if (permissions.permissions.canEdit) data.connectionConfig.readOnly = false;
 
-  // For anons
-  if (!permissions?.userId && permissions?.visibility === "PRIVATE") throw new AppError("You must be signed in to perform this action!", StatusCodes.UNAUTHORIZED);
-
-  // For users
-  if (permissions?.userId === authData?.user.id && permissions?.role !== 'VIEWER') data.connectionConfig.readOnly = false;
-
-  return Object.assign(authData!);
+  return authData;
+ },
+ async onStateless({ document, payload }) {
+  document.broadcastStateless(payload.toString());
  },
  extensions: [
   new Logger(),

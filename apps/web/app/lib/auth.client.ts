@@ -3,8 +3,12 @@ import { faker } from '@faker-js/faker';
 
 
 export const authClient = createAuthClient({
- baseURL: process.env.NEXT_PUBLIC_SERVER_BASE_URL
+ baseURL: process.env.NEXT_PUBLIC_SERVER_BASE_URL,
+ fetchOptions: {
+  credentials: 'include'
+ }
 });
+
 
 export async function loginWithEmailAndPassword(email: string, password: string, redirect?: string) {
  try {

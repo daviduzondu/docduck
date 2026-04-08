@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from "react";
-import { loginWithEmailAndPassword } from "../../lib/auth-client";
+import { loginWithEmailAndPassword } from "../../lib/auth.client";
 import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {

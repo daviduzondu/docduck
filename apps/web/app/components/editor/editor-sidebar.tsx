@@ -5,7 +5,7 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
 
  return <Sidebar side="right" collapsible="offcanvas" className="absolute" >
   <SidebarHeader>
-   <div className="text-xl">
+   <div className="text-lg">
     {
      view === 'comments' ? "Comments"
       : view === 'history' ? "Version History"

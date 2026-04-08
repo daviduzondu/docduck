@@ -1,26 +1,53 @@
-import { NextFunction, Request, Response } from "express";
 import { db } from "@/lib/kysely";
-import * as z from 'zod';
-import { getDocumentSchema } from "./document.validation";
-import { AppError } from "../../lib/helpers";
+import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
-import { MiddlewareArgs } from "../../types/types";
+import { AppContext } from "@/types/types";
+import { base } from "@/orpc/os";
+import * as documentService from '@/modules/document/document.service';
 
-export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next: NextFunction) => {
- const isDocumentVisible = await db.selectFrom('document').select(['visibility', 'document.id']).where('id', '=', req.body.documentId).executeTakeFirstOrThrow();
- if (isDocumentVisible.visibility === 'PUBLIC') return next();
- if (!req.ctx?.user.id) throw new AppError("You must be signed in to perform this action.", StatusCodes.UNAUTHORIZED);
+// export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next:  => {
+//  const isDocumentVisible = await db.selectFrom('document').select(['visibility', 'document.id']).where('id', '=', req.body.documentId).executeTakeFirstOrThrow();
+//  if (isDocumentVisible.visibility === 'PUBLIC') return next();
+//  if (!req.ctx?.user.id) throw new AppError("You must be signed in to perform this action.", StatusCodes.UNAUTHORIZED);
 
- const permission = await db.selectFrom('permission').select(['role', 'userId', 'documentId']).where('documentId', '=', req.body.documentId).where('permission.userId', '=', req.ctx.user.id).executeTakeFirst();
- if (permission) return next();
+//  const permission = await db.selectFrom('permission').select(['role', 'userId', 'documentId']).where('documentId', '=', req.body.documentId).where('permission.userId', '=', req.ctx.user.id).executeTakeFirst();
+//  if (permission) return next();
 
- throw new AppError("Sorry, you do not have access to one or more documents in this list", StatusCodes.FORBIDDEN);
-}
- 
-export const ensureDocumentOwner = async (...[req, res, next]: MiddlewareArgs<{id: string}>) => {
- const { ownerId } = await db.selectFrom('document').where('document.id', '=', req.params.id).select(['ownerId']).executeTakeFirstOrThrow(() => new AppError("Document with id ${documentId} could not be found", StatusCodes.NOT_FOUND));
+//  throw new AppError("Sorry, you do not have access to one or more documents in this list", StatusCodes.FORBIDDEN);
+// }
 
- if (ownerId !== req.ctx!.user.id) throw new AppError("You are not allowed to perform this action", StatusCodes.UNAUTHORIZED);
+// export const ensureDocumentOwner = (documentId: string, userId) => base.middleware(async({ context, next } => {
+//  const { ownerId } = await db.selectFrom('document').where('document.id', '=', documentId).select(['ownerId']).executeTakeFirstOrThrow(() => new AppError("Document with id ${documentId} could not be found", StatusCodes.NOT_FOUND));
 
- return next();
-}
+//  if (ownerId !== userId) throw new AppError("You are not allowed to perform this action", StatusCodes.UNAUTHORIZED);
+// }))
+
+export const ensureDocumentOwner = base
+ .$context<Required<AppContext>>()
+ .middleware(async ({ context, next }, documentId: string) => {
+  const doc = await db
+   .selectFrom('document')
+   .select(['ownerId'])
+   .where('document.id', '=', documentId)
+   .where('document.ownerId', '=', context.user.id)
+   .executeTakeFirst();
+
+  if (!doc) {
+   throw new AppError(
+    `You're not the owner of this document`,
+    StatusCodes.NOT_FOUND
+   );
+  }
+
+  return next({
+   context
+  });
+ });
+
+export const ensureCanEditDocument = base.middleware(async ({ context, next }, documentId: string) => {
+ const { permissions } = await documentService.getDocumentWithPermissions(documentId, context.user?.id);
+ if (!permissions.canEdit) throw new AppError("You're not allowed to perform this action", StatusCodes.FORBIDDEN);
+ return next({
+  context: { ...context }
+ })
+}) 

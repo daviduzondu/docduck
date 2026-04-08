@@ -1,5 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { EditorSidebarProvider } from "../providers/editor-sidebar.provider";
+// import {gener} from 'next'
 
 export default function Layout({
  children,

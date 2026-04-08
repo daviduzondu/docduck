@@ -76,11 +76,12 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
-import { Doc } from "yjs";
+import * as Y from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useAuth } from "../../../providers/auth.provider";
-import { EditorHeader } from "../../editor/editor-header";
-import EditorSidebar from "../../editor/editor-sidebar";
+import { getUserColor } from "@/lib/utils";
+import { faker } from "@faker-js/faker";
+import { useDocument } from "@/providers/document.provider";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -190,7 +191,7 @@ const MobileToolbarContent = ({
  </>
 )
 
-export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: HocuspocusProvider }) {
+export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWER" | "EDITOR" | "OWNER" | undefined }) {
  const isMobile = useIsBreakpoint()
  const { height } = useWindowSize()
  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -198,8 +199,12 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
  )
  const toolbarRef = useRef<HTMLDivElement>(null);
  const { data } = useAuth();
+ const { provider, ydoc } = useDocument();
+ const anonymousUser = useRef(faker.animal.type());
+
  const editor = useEditor({
   immediatelyRender: false,
+  editable: canEdit,
   editorProps: {
    attributes: {
     autocomplete: "off",
@@ -220,10 +225,10 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    }),
    CollaborationCaret.configure({
     provider,
-    user: { name: data!.user.name, color: `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')}` }
+
    }),
    Collaboration.configure({
-    document: ydoc
+    document: ydoc,
    }),
    Placeholder.configure({
     placeholder: "Start typing..."
@@ -268,6 +273,14 @@ export function SimpleEditor({ ydoc, provider }: { ydoc: Doc, provider: Hocuspoc
    wordsCount: context.editor?.storage.characterCount.words(),
   }),
  })
+
+ useEffect(() => {
+  if (editor && data?.user?.name) {
+   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id), image: data.user.image, isAnonymous: false, role })
+  } else if (editor && !data) {
+   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, color: getUserColor(anonymousUser.current), image: null, isAnonymous: true, role: canEdit ? "EDITOR" : "VIEWER" })
+  }
+ }, [editor, data])
 
  return (
   <div className="simple-editor-wrapper">

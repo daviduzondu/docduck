@@ -1,7 +1,10 @@
-import { createErrorMap } from "zod-validation-error";
-import { RequestSchema } from "../../types/types";
 import z from 'zod';
+import { createErrorMap } from 'zod-validation-error';
 
-export const acceptDocumentInvitationSchema: RequestSchema = {
- params: z.object({ id: z.uuid({ error: "Invitation ID must be a valid UUID." }) })
-}
+z.config({
+ customError: createErrorMap()
+});
+
+export const acceptDocumentInvitationSchema = z.object({
+ id: z.uuid()
+})

@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import z from 'zod';
 import { db } from './kysely';
 import { createErrorMap, fromError } from 'zod-validation-error';
+import { ORPCError } from '@orpc/server';
 
 z.config({
  customError: createErrorMap()
