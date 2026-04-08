@@ -40,7 +40,7 @@ export async function getDocumentCollaborators(id: string) {
   .innerJoin('permission', 'permission.documentId', 'document.id')
   .innerJoin('user', 'permission.userId', 'user.id')
   .where('document.id', '=', id)
-  .select(['permission.userId as id', 'permission.role', 'user.email']).execute()
+  .select(['permission.userId as id', 'permission.role', 'user.email', 'user.image', 'user.isAnonymous', 'user.name']).execute()
 }
 
 export async function getDocument(data: z.infer<typeof getDocumentSchema>['params']) {

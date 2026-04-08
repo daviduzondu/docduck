@@ -29,6 +29,7 @@ import {
  Item,
  ItemActions,
  ItemContent,
+ ItemMedia,
 } from "@/components/ui/item"
 import { useState } from "react"
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
@@ -44,13 +45,16 @@ import { orpc } from "@/lib/orpc.client"
 import { useDocument } from "@/providers/document.provider"
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from "sonner"
+import { LocalErrorBoundary } from "@/components/error/error-boundary"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getUserColor } from "@/lib/utils"
 
- const shareFormSchema = z.object({
-  invitees: z.array(z.object({
-   email: z.email(),
-   role: z.enum(["EDITOR", "VIEWER"])
-  })).min(1)
- });
+const shareFormSchema = z.object({
+ invitees: z.array(z.object({
+  email: z.email(),
+  role: z.enum(["EDITOR", "VIEWER"])
+ })).min(1)
+});
 
 const roles = [{ label: "Editor", value: "EDITOR" }, { label: "Viewer", value: "VIEWER" }];
 export function EditorShareDialogButton({ onShare }: { onShare: any }) {
@@ -63,7 +67,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
  const getCollaboratorsQuery = useQuery(orpc.documents.getCollaborators.queryOptions({
   input: {
    params: {
-    id: documentId + 'd'
+    id: documentId
    }
   },
  }));
@@ -83,7 +87,6 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
    console.error('Failed to copy: ', err);
   }
  }
-
 
  const form = useForm<z.infer<typeof shareFormSchema>>({
   resolver: zodResolver(shareFormSchema),
@@ -188,12 +191,36 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
        <TabsTrigger className={"uppercase text-xs font-semibold"} value="invite-list" onClick={() => setTabValue('invite-list')}>invite list</TabsTrigger>
       </TabsList>
       <TabsContent value="people-with-access" className={'min-h-60 max-h-60'}>
-       <NothingToSeeHere icon={<UserRoundPlus />} title="No one with access...yet" description="Collaborators will appear here once they accept your invite." />
+       {getCollaboratorsQuery.isLoading ? (
+        <div className="p-4">Loading collaborators...</div>
+       ) : (getCollaboratorsQuery.data && getCollaboratorsQuery.data.length > 0) ? (
+        <>
+         {getCollaboratorsQuery.data.map((collab) => (
+          <Item key={collab.id} className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center">
+           <ItemMedia variant="icon">
+            <Avatar key={collab.id}>
+             <AvatarImage src={collab.image || undefined} alt={`Profile picture of ${collab.name}`} />
+             <AvatarFallback style={{ background: getUserColor(collab.id) }} className={'text-background text-base'}>{
+              collab.name?.split(" ")[0]![0]}</AvatarFallback>
+            </Avatar>
+           </ItemMedia>
+           <ItemContent>
+            {collab.email}
+           </ItemContent>
+           <ItemActions>
+            <span className="text-sm text-muted-foreground">{collab.role === 'EDITOR' ? 'Editor' : collab.role === 'OWNER' ? 'Owner' : 'Viewer'}</span>
+           </ItemActions>
+          </Item>
+         ))}
+        </>
+       ) : (
+        <NothingToSeeHere icon={<UserRoundPlus />} title="No one with access...yet" description="Collaborators will appear here once they accept your invite." />
+       )}
       </TabsContent>
       <TabsContent value="invite-list" className={'min-h-60 max-h-60'}>
-       {fields.length === 0 && (
+       {/* {fields.length === 0 && (
         <NothingToSeeHere icon={<MailPlus />} title="No invitees...yet" description="Add people to review before sending invitations" />
-       )}
+       )} */}
        {fields.map((fieldItem, index) => (
         <Item key={fieldItem.id} className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center">
          <ItemContent>
