@@ -278,7 +278,7 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
   if (editor && data?.user?.name) {
    editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id), image: data.user.image, isAnonymous: false, role })
   } else if (editor && !data) {
-   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, color: getUserColor(anonymousUser.current), image: null, isAnonymous: true, role })
+   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, color: getUserColor(anonymousUser.current), image: null, isAnonymous: true, role: canEdit ? "EDITOR" : "VIEWER" })
   }
  }, [editor, data])
 

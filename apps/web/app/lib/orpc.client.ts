@@ -4,6 +4,7 @@ import { createORPCClient, onError } from '@orpc/client'
 import { OpenAPILink } from '@orpc/openapi-client/fetch'
 import { AppRouter } from "@server/orpc/app.router";
 import contract from '@server/orpc/contract.json';
+import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 
 const link = new OpenAPILink(contract as AppRouter, {
  url: process.env.NEXT_PUBLIC_SERVER_BASE_URL! + '/api',
@@ -13,7 +14,7 @@ const link = new OpenAPILink(contract as AppRouter, {
  fetch: (request, init) => {
   return globalThis.fetch(request, {
    ...init,
-   headers: request.headers, 
+   headers: request.headers,
    credentials: 'include', // Include cookies for cross-origin requests
   })
  },
@@ -24,4 +25,5 @@ const link = new OpenAPILink(contract as AppRouter, {
  ],
 })
 
-export const orpc: JsonifiedClient<ContractRouterClient<AppRouter>> = createORPCClient(link);
+export const $api: JsonifiedClient<ContractRouterClient<AppRouter>> = createORPCClient(link);
+export const orpc = createTanstackQueryUtils($api);

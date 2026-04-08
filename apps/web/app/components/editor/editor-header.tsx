@@ -7,22 +7,19 @@ import { EditorShareDialogButton } from './editor-share-dialog';
 import { useSidebar } from '../ui/sidebar';
 import { HocuspocusProvider, onAwarenessUpdateParameters } from '@hocuspocus/provider';
 import { generateAnonymousAvatar, sendStateless } from '@/lib/utils';
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { useDocument } from '@/providers/document.provider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useForm, Controller } from 'react-hook-form';
 import {
  Field,
- FieldDescription,
  FieldError,
- FieldGroup,
  FieldLabel,
 } from "@/components/ui/field"
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { orpc } from '@/lib/orpc.client';
+import { $api } from '@/lib/orpc.client';
 import { Badge } from '@/components/ui/badge';
 
 interface EditorHeaderProps {
@@ -91,11 +88,10 @@ function EditTitlePopover({ children, title, documentId, provider }: { children:
     data: title,
     type: 'update:title'
    });
-   await orpc.documents.updateDocumentTitle({
+   await $api.documents.updateDocumentTitle({
     body: { title },
     params: { id: documentId }
    });
-
   } catch (e) {
    console.error(e);
    return
@@ -153,7 +149,6 @@ function CollaboratorAvatar({ collaborator }: { collaborator: AwarenessStates })
 }
 
 function CollaboratorsHoverCard({ collaborators }: { collaborators: AwarenessStates[] }) {
- console.log(collaborators)
  return (
   <HoverCard>
    <HoverCardTrigger delay={150}>

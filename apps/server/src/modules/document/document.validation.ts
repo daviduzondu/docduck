@@ -20,7 +20,7 @@ export const documentInvitationSchema = z.object({
   invitees: z.array(z.object({
    email: z.email(),
    role: z.enum(["EDITOR", "VIEWER"])
-  }))
+  })).min(1)
  })
 });
 

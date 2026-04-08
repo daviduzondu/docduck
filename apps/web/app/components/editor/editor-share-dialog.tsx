@@ -40,14 +40,39 @@ import {
  InputGroupAddon,
 } from "@/components/ui/input-group"
 import validator from 'validator';
+import { orpc } from "@/lib/orpc.client"
+import { useDocument } from "@/providers/document.provider"
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from "sonner"
+
+ const shareFormSchema = z.object({
+  invitees: z.array(z.object({
+   email: z.email(),
+   role: z.enum(["EDITOR", "VIEWER"])
+  })).min(1)
+ });
 
 const roles = [{ label: "Editor", value: "EDITOR" }, { label: "Viewer", value: "VIEWER" }];
-
 export function EditorShareDialogButton({ onShare }: { onShare: any }) {
  const [copied, setCopied] = useState(false);
  const [newEmail, setNewEmail] = useState("");
  const [newRole, setNewRole] = useState<'EDITOR' | 'VIEWER'>("VIEWER");
  const [emailError, setEmailError] = useState("");
+ const [tabValue, setTabValue] = useState<"people-with-access" | "invite-list">('people-with-access');
+ const { documentId } = useDocument();
+ const getCollaboratorsQuery = useQuery(orpc.documents.getCollaborators.queryOptions({
+  input: {
+   params: {
+    id: documentId + 'd'
+   }
+  },
+ }));
+
+ const sendInvitationsMutation = useMutation(orpc.documents.createDocumentInvitations.mutationOptions({
+  onError(error) {
+   toast.error(error.message);
+  },
+ }));
 
  const handleCopy = async (textToCopy: string) => {
   try {
@@ -59,12 +84,6 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
   }
  }
 
- const shareFormSchema = z.object({
-  invitees: z.array(z.object({
-   email: z.email(),
-   role: z.enum(["EDITOR", "VIEWER"])
-  }))
- });
 
  const form = useForm<z.infer<typeof shareFormSchema>>({
   resolver: zodResolver(shareFormSchema),
@@ -90,10 +109,14 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
   append({ email: newEmail, role: newRole });
   setNewEmail("");
   setNewRole('VIEWER');
+  setTabValue('invite-list')
  }
 
- function onSubmit(data: z.infer<typeof shareFormSchema>) {
-  console.log("invite submit", data)
+ async function onSubmit(data: z.infer<typeof shareFormSchema>) {
+  await sendInvitationsMutation.mutateAsync({
+   body: { invitees: data.invitees },
+   params: { id: documentId }
+  })
  }
 
  return (
@@ -159,15 +182,15 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
       </div>
      </div>
 
-     <Tabs defaultValue="people-with-access" className="w-full h-72">
+     <Tabs value={tabValue} className="w-full">
       <TabsList className={'w-full'} variant={'line'}>
-       <TabsTrigger className={"uppercase text-xs font-semibold"} value="people-with-access">People with access</TabsTrigger>
-       <TabsTrigger className={"uppercase text-xs font-semibold"} value="invite-list">invite list</TabsTrigger>
+       <TabsTrigger className={"uppercase text-xs font-semibold"} value="people-with-access" onClick={() => setTabValue('people-with-access')}>People with access</TabsTrigger>
+       <TabsTrigger className={"uppercase text-xs font-semibold"} value="invite-list" onClick={() => setTabValue('invite-list')}>invite list</TabsTrigger>
       </TabsList>
-      <TabsContent value="people-with-access">
+      <TabsContent value="people-with-access" className={'min-h-60 max-h-60'}>
        <NothingToSeeHere icon={<UserRoundPlus />} title="No one with access...yet" description="Collaborators will appear here once they accept your invite." />
       </TabsContent>
-      <TabsContent value="invite-list">
+      <TabsContent value="invite-list" className={'min-h-60 max-h-60'}>
        {fields.length === 0 && (
         <NothingToSeeHere icon={<MailPlus />} title="No invitees...yet" description="Add people to review before sending invitations" />
        )}
@@ -210,7 +233,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
       <Button variant={'outline'} onClick={() => handleCopy(window.location.href)}>
        {copied ? <Check data-icon="inline-end" /> : <Link data-icon="inline-end" />} Copy link
       </Button>
-      <Button type="submit"><Mail data-icon="inline-end" /> Send invitation</Button>
+      <Button type="submit" className={`${tabValue === "invite-list" ? "visible" : "invisible"}`} disabled={form.formState.isSubmitting || !form.formState.isValid}><Mail data-icon="inline-end" /> {form.formState.isSubmitting ? "Sending..." : "Send invitation"}</Button>
      </DialogFooter>
     </form>
    </DialogContent>
@@ -219,7 +242,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
 }
 
 function NothingToSeeHere({ title, description, icon }: { title: string, description: string, icon: React.ReactNode }) {
- return <Empty className="border border-dashed h-max">
+ return <Empty className="border border-dashed h-60">
   <EmptyHeader>
    <EmptyMedia variant="icon">
     {icon}

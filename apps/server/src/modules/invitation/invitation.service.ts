@@ -4,17 +4,22 @@ import { AppError } from "../../lib/helpers";
 import { StatusCodes } from "http-status-codes";
 import { Insertable, sql } from "kysely";
 import id from "zod/v4/locales/id.js";
+import { User } from "better-auth";
 
-export async function addDocInvitees(documentId: string, invitees: Pick<Insertable<document_invitations>, 'email' | 'inviterId' | 'role'>[]) {
+export async function addDocInvitees(documentId: string, invitees: Pick<Insertable<document_invitations>, 'email' | 'inviterId' | 'role'>[], user: User) {
  // TODO: Integrate email service
-
+ if (invitees.some(i => i.email === user.email)) {
+  throw new AppError("You already own this document. You cannot add yourself as a collaborator", StatusCodes.CONFLICT);
+ }
  const ids = await db.insertInto('document_invitations').values(invitees.map(i => ({ ...i, documentId }))).returning(['id']).onConflict((oc) => {
   return oc.columns(['email', 'documentId'])
    .where((eb) => eb.or([
     eb('status', '=', 'PENDING'),
     eb('status', '=', 'ACCEPTED')
    ]).and('revokedAt', 'is', null))
-   .doNothing();
+   .doUpdateSet((eb) => ({
+    role: eb.ref('excluded.role')
+   }));
  }).execute();
  return ids;
 }

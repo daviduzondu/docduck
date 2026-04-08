@@ -1,6 +1,6 @@
 import DocPage from "@/(document-view)/doc/[noteId]/page.client";
 import { authClient } from "@/lib/auth.client";
-import { orpc } from "@/lib/orpc.client";
+import { $api } from "@/lib/orpc.client";
 import { DocumentProvider } from "@/providers/document.provider";
 import { headers } from 'next/headers';
 
@@ -13,7 +13,7 @@ export default async function Page({ params }: { params: Promise<{ noteId: strin
  });
  let result
  try {
-  result = await orpc.documents.getDocumentWithPermissions({
+  result = await $api.documents.getDocumentWithPermissions({
    params: { documentId: noteId }
   });
   console.log(result)
