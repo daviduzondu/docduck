@@ -178,6 +178,7 @@ function processSearches(
     : searchResultClass;
   const decoration: Decoration = Decoration.inline(r.from, r.to, {
    class: className,
+   style: 'background: rgba(255, 230, 0, 0.4);'
   });
 
   decorations.push(decoration);

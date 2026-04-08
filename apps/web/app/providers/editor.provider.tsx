@@ -13,6 +13,7 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { CharacterCount, Placeholder, Selection } from "@tiptap/extensions"
 import { EditorContext, useEditor } from '@tiptap/react'
+import { TextStyleKit } from '@tiptap/extension-text-style'
 
 // --- Tiptap Node ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
@@ -43,6 +44,7 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
   },
   autofocus: true,
   extensions: [
+   TextStyleKit,
    StarterKit.configure({
     horizontalRule: false,
     link: {

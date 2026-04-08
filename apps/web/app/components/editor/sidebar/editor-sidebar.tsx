@@ -3,7 +3,6 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader } f
 
 export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
  if (!view) return <></>
-
  return <Sidebar side="right" collapsible="offcanvas" className="absolute" >
   <SidebarHeader>
    <div className="text-lg">
