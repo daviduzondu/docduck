@@ -82,6 +82,7 @@ import { useAuth } from "../../../providers/auth.provider";
 import { getUserColor } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
 import { useDocument } from "@/providers/document.provider";
+import SearchAndReplace from "@/lib/search-and-replace";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -222,6 +223,9 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
      openOnClick: false,
      enableClickSelection: true,
     },
+   }),
+   SearchAndReplace.configure({
+    // searchResultClass: "search-result"
    }),
    CollaborationCaret.configure({
     provider,
