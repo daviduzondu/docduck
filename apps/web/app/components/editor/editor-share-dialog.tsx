@@ -29,7 +29,10 @@ import {
  Item,
  ItemActions,
  ItemContent,
+ ItemDescription,
+ ItemHeader,
  ItemMedia,
+ ItemTitle,
 } from "@/components/ui/item"
 import { useState } from "react"
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
@@ -195,32 +198,42 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         <div className="p-4">Loading collaborators...</div>
        ) : (getCollaboratorsQuery.data && getCollaboratorsQuery.data.length > 0) ? (
         <>
-         {getCollaboratorsQuery.data.map((collab) => (
-          <Item key={collab.id} className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center">
-           <ItemMedia variant="icon">
-            <Avatar key={collab.id}>
-             <AvatarImage src={collab.image || undefined} alt={`Profile picture of ${collab.name}`} />
-             <AvatarFallback style={{ background: getUserColor(collab.id) }} className={'text-background text-base'}>{
-              collab.name?.split(" ")[0]![0]}</AvatarFallback>
-            </Avatar>
-           </ItemMedia>
-           <ItemContent>
-            {collab.email}
-           </ItemContent>
-           <ItemActions>
-            <span className="text-sm text-muted-foreground">{collab.role === 'EDITOR' ? 'Editor' : collab.role === 'OWNER' ? 'Owner' : 'Viewer'}</span>
-           </ItemActions>
-          </Item>
-         ))}
+         {(() => {
+          const owner = getCollaboratorsQuery.data.find(x => x.role === "OWNER");
+          const rest = getCollaboratorsQuery.data.filter(x => x.role !== "OWNER");
+          const sorted = owner ? [owner, ...rest] : rest;
+
+          return sorted.map((collab) => (
+           <Item key={collab.id} className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center">
+            <ItemMedia variant="icon">
+             <Avatar key={collab.id}>
+              <AvatarImage src={collab.image || undefined} alt={`Profile picture of ${collab.name}`} />
+              <AvatarFallback style={{ background: getUserColor(collab.id) }} className={'text-background text-base'}>
+               {collab.name?.split(" ")[0]![0]}
+              </AvatarFallback>
+             </Avatar>
+            </ItemMedia>
+            <ItemContent>
+             <ItemTitle>{collab.name}</ItemTitle>
+             <ItemDescription>{collab.email}</ItemDescription>
+            </ItemContent>
+            <ItemActions>
+             <span className="text-sm text-muted-foreground">
+              {collab.role === 'EDITOR' ? 'Editor' : collab.role === 'OWNER' ? 'Owner' : 'Viewer'}
+             </span>
+            </ItemActions>
+           </Item>
+          ));
+         })()}
         </>
        ) : (
         <NothingToSeeHere icon={<UserRoundPlus />} title="No one with access...yet" description="Collaborators will appear here once they accept your invite." />
        )}
       </TabsContent>
       <TabsContent value="invite-list" className={'min-h-60 max-h-60'}>
-       {/* {fields.length === 0 && (
+       {fields.length === 0 && (
         <NothingToSeeHere icon={<MailPlus />} title="No invitees...yet" description="Add people to review before sending invitations" />
-       )} */}
+       )}
        {fields.map((fieldItem, index) => (
         <Item key={fieldItem.id} className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center">
          <ItemContent>

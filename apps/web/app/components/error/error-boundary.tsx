@@ -27,7 +27,7 @@ export class LocalErrorBoundary extends React.Component<Props, State> {
 
  render() {
   if (this.state.hasError) {
-   return this.props.fallback ?? <div className="flex w-full bg-red-200">
+   return this.props.fallback ?? <div className="flex w-full bg-red-200 ">
     Failed to get resource</div>;
   }
 
