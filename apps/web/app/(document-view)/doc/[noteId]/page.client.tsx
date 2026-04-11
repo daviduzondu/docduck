@@ -9,17 +9,20 @@ import { useSidebar } from "@/components/ui/sidebar";
 import EditorSidebar from "@/components/editor/sidebar/editor-sidebar";
 import { useEditorSidebarView } from "@/providers/editor-sidebar.provider";
 import TipTapEditorProvider from "@/providers/editor.provider";
+import { useCurrentEditor } from "@tiptap/react";
 
 export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VIEWER" | "EDITOR" | "OWNER" | undefined }) {
  const { noteId }: { noteId: string } = useParams();
  const { toggleSidebar, open } = useSidebar();
  const { view: currentView, setView } = useEditorSidebarView();
+ const { editor } = useCurrentEditor();
  if (!noteId) throw new Error("Invalid document ID.");
- function handleSidebar(newView: typeof currentView) {
+ function handleSidebar(newView: typeof currentView, onClose?: () => void) {
   if (!open) toggleSidebar();
   if (open && newView === currentView) {
    setView(undefined);
    toggleSidebar();
+   onClose && onClose();
   }
   setView(newView);
  }
@@ -48,7 +51,10 @@ export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VI
         <History />
        </Button>
        <Button
-        onClick={() => handleSidebar('search')}
+        onClick={() => handleSidebar('search', () => {
+         editor?.commands.setSearchTerm('')
+         editor?.commands.setReplaceTerm('')
+        })}
         className="bg-foreground text-background dark:hover:text-foreground"
         size="icon-lg"
        >
