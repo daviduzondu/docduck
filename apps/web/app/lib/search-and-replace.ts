@@ -47,6 +47,10 @@ export interface SearchAndReplaceStorage {
  lastCaseSensitive: boolean;
  resultIndex: number;
  lastResultIndex: number;
+ disableRegex: boolean;
+ lastDisableRegex: boolean;
+ replaceAllMode: boolean;
+ lastReplaceAllMode: boolean;
 }
 
 declare module "@tiptap/core" {
@@ -84,6 +88,8 @@ declare module "@tiptap/core" {
     * @description Replace all instances of search result with given replace term.
     */
    replaceAll: () => ReturnType;
+   setRegexMode: (state: boolean) => ReturnType;
+   setReplaceAllMode: (state: boolean) => ReturnType;
   };
  }
 
@@ -288,6 +294,8 @@ export const SearchAndReplace = Extension.create<
    lastCaseSensitive: false,
    resultIndex: 0,
    lastResultIndex: 0,
+   disableRegex: true,
+   lastDisableRegex: true
   };
  },
 
@@ -321,6 +329,14 @@ export const SearchAndReplace = Extension.create<
 
       return false;
      },
+   setRegexMode: (state) => ({ editor }) => {
+    editor.storage.searchAndReplace.disableRegex = !state;
+    return false;
+   },
+   setReplaceAllMode: (state) => ({ editor }) => {
+    editor.storage.searchAndReplace.replaceAllMode = state;
+    return false;
+   },
    nextSearchResult:
     () =>
      ({ editor }) => {
@@ -374,7 +390,7 @@ export const SearchAndReplace = Extension.create<
 
  addProseMirrorPlugins() {
   const editor = this.editor;
-  const { searchResultClass, disableRegex } = this.options;
+  const { searchResultClass } = this.options;
 
   const setLastSearchTerm = (t: string) => {
    editor.storage.searchAndReplace.lastSearchTerm = t;
@@ -399,19 +415,25 @@ export const SearchAndReplace = Extension.create<
        lastCaseSensitive,
        resultIndex,
        lastResultIndex,
+       disableRegex, lastDisableRegex,
+       replaceAllMode, lastReplaceAllMode,
       } = editor.storage.searchAndReplace;
 
       if (
        !docChanged &&
        lastSearchTerm === searchTerm &&
        lastCaseSensitive === caseSensitive &&
-       lastResultIndex === resultIndex
+       lastResultIndex === resultIndex &&
+       lastDisableRegex === disableRegex && 
+       lastReplaceAllMode === replaceAllMode
       )
        return oldState;
 
       setLastSearchTerm(searchTerm);
       setLastCaseSensitive(caseSensitive);
       setLastResultIndex(resultIndex);
+      editor.storage.searchAndReplace.lastDisableRegex = disableRegex;
+      editor.storage.searchAndReplace.lastReplaceAllMode = replaceAllMode;
 
       if (!searchTerm) {
        editor.storage.searchAndReplace.results = [];

@@ -14,7 +14,7 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
     }
    </div>
   </SidebarHeader>
-  <SidebarContent className="p-2">
+  <SidebarContent className="p-1">
    <FindAndReplace />
   </SidebarContent>
   <SidebarFooter />
