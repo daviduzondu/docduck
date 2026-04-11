@@ -25,10 +25,11 @@ model user {
 
  sessions            session[]
  accounts            account[]
- documentInvitations document_invitations[]
 
  createdAt DateTime @ignore
  updatedAt DateTime @ignore
+
+ documentInvitation document_invitation[]
 }
 
 model session {
@@ -85,12 +86,13 @@ model document {
  allowPublicEdits    Boolean                @default(false)
  createdAt           DateTime               @default(now()) @ignore
  updatedAt           DateTime               @default(now()) @ignore
- documentInvitations document_invitations[]
 
  @@index([ownerId])
+ documentInvitation document_invitation[]
 }
 
-model document_invitations {
+
+model document_invitation {
  id         String           @unique @default(dbgenerated("gen_random_uuid()"))
  email      String
  inviterId  String
@@ -107,7 +109,7 @@ model document_invitations {
  document document @relation(fields: [documentId], references: [id])
 
  // \"status\"= 'PENDING' OR \"status\" = 'ACCEPTED' AND \"revokedAt\" IS NULL
- @@unique([email, documentId], where: raw("(\"status\" = 'PENDING' OR \"status\" = 'ACCEPTED') AND \"revokedAt\" IS NULL "), map: "unique_active_document_invitation_index")
+ @@unique([email, documentId], where: raw("(\"status\" = 'PENDING' OR \"status\" = 'ACCEPTED') AND \"revokedAt\" IS NULL "), map: "unique_active_document_invitations_index")
 }
 
 model permission {

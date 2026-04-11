@@ -43,7 +43,7 @@ export type document = {
     visibility: Generated<Visibility>;
     allowPublicEdits: Generated<boolean>;
 };
-export type document_invitations = {
+export type document_invitation = {
     id: Generated<string>;
     email: string;
     inviterId: string;
@@ -84,7 +84,7 @@ export type verification = {
 export type DB = {
     account: account;
     document: document;
-    document_invitations: document_invitations;
+    document_invitation: document_invitation;
     permission: permission;
     session: session;
     user: user;

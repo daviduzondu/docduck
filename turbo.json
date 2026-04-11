@@ -30,7 +30,7 @@
    "persistent": false
   },
   "generate:dev": {
-   "cache": false,
+   "cache": false
   },
   "migrate:dev": {
    "cache": false,
