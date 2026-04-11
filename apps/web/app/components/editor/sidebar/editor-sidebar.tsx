@@ -1,4 +1,4 @@
-import FindAndReplace from "@/components/editor/sidebar/search";
+import FindAndReplace from "@/components/editor/sidebar/find-and-replace";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader } from "../../ui/sidebar";
 
 export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
@@ -15,7 +15,9 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
    </div>
   </SidebarHeader>
   <SidebarContent className="p-1">
-   <FindAndReplace />
+   {
+    view === 'search' ? <FindAndReplace /> : null
+   }
   </SidebarContent>
   <SidebarFooter />
  </Sidebar>

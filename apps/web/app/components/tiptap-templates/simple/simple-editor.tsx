@@ -185,7 +185,8 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
  const rect = useCursorVisibility({
   editor,
   overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
- })
+ });
+
 
  useEffect(() => {
   if (!isMobile && mobileView !== "main") {
@@ -247,7 +248,7 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
      />
     </div>
 
-    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground"> <div className="flex gap-4"> <span>{editorData?.charactersCount} characters</span> <span>{editorData?.wordsCount} words</span> </div> <div className="flex gap-4"> <span>Synced</span> <span>Saved 5 mins ago</span> </div> </footer>
+    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground"> <div className="flex gap-4"> <span>{editorData?.charactersCount} characters</span> <span>{editorData?.wordsCount} words</span> </div> <div className="flex gap-4"> </div> </footer>
    </EditorContext.Provider>
   </div>
  );
