@@ -1,7 +1,7 @@
 'use client'
 
 import React from "react";
-import { authClient } from "@/lib/auth.client";
+import { authClient } from "@/misc/auth.client";
 
 const AuthContext = React.createContext<ReturnType<typeof authClient.useSession> | undefined>(undefined);
 

@@ -59,7 +59,7 @@ import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 import { useAuth } from "../../../providers/auth.provider";
-import { getUserColor } from "@/lib/utils";
+import { getUserColor } from "@/misc/utils";
 import { faker } from "@faker-js/faker";
 import { useDocument } from "@/providers/document.provider";
 

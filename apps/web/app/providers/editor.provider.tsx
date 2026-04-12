@@ -20,16 +20,16 @@ import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/imag
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension"
 
 // --- Lib ---
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
+import { handleImageUpload, MAX_FILE_SIZE } from "@/misc/tiptap-utils"
 
-import SearchAndReplace from "@/lib/search-and-replace";
-import { useMemo } from 'react';
+import SearchAndReplace from "@/misc/search-and-replace.extension";
+import { useEffect, useMemo } from 'react';
 import { useDocument } from '@/providers/document.provider';
+import Comment from '@/misc/comment.extension';
 
 
 export default function TipTapEditorProvider({ children, canEdit }: { children: React.ReactNode, canEdit: boolean }) {
  const { provider, ydoc } = useDocument();
-
  const editor = useEditor({
   immediatelyRender: false,
   editable: canEdit,
@@ -45,6 +45,11 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
   autofocus: true,
   extensions: [
    TextStyleKit,
+   Comment.configure({
+    HTMLAttributes: {
+     class: 'comment'
+    }
+   }),
    StarterKit.configure({
     horizontalRule: false,
     link: {
@@ -59,7 +64,6 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
    }),
    CollaborationCaret.configure({
     provider,
-
    }),
    Collaboration.configure({
     document: ydoc,
@@ -87,7 +91,13 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
     onError: (error) => console.error("Upload failed:", error),
    }),
   ],
+  onSelectionUpdate: ({ editor }) => {
+   console.log('select update', editor.state.selection);
+   editor.commands.setComment('.random-id');
+  },
  });
+
+
  const providerValue = useMemo(() => ({ editor }), [editor])
 
  return <EditorContext.Provider value={providerValue}>

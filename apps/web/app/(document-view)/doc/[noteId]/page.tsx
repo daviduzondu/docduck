@@ -1,6 +1,6 @@
 import DocPage from "@/(document-view)/doc/[noteId]/page.client";
-import { authClient } from "@/lib/auth.client";
-import { $api } from "@/lib/orpc.client";
+import { authClient } from "@/misc/auth.client";
+import { $api } from "@/misc/orpc.client";
 import { DocumentProvider } from "@/providers/document.provider";
 import { headers } from 'next/headers';
 

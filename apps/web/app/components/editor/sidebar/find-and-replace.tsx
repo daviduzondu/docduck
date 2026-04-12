@@ -4,7 +4,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Toggle } from "@/components/ui/toggle";
-import { cn } from "@/lib/utils";
+import { cn } from "@/misc/utils";
 import { useEditorSidebarView } from "@/providers/editor-sidebar.provider";
 import { useCurrentEditor } from "@tiptap/react";
 import { LetterText, Regex, ReplaceAll, SearchXIcon } from "lucide-react";

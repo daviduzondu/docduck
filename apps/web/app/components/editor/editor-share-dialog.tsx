@@ -44,13 +44,13 @@ import {
  InputGroupAddon,
 } from "@/components/ui/input-group"
 import validator from 'validator';
-import { orpc } from "@/lib/orpc.client"
+import { orpc } from "@/misc/orpc.client"
 import { useDocument } from "@/providers/document.provider"
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from "sonner"
 import { LocalErrorBoundary } from "@/components/error/error-boundary"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getUserColor } from "@/lib/utils"
+import { getUserColor } from "@/misc/utils"
 
 const shareFormSchema = z.object({
  invitees: z.array(z.object({

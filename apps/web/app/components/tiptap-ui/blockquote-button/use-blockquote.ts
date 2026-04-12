@@ -18,7 +18,7 @@ import {
   isNodeTypeSelected,
   isValidPosition,
   selectionWithinConvertibleTypes,
-} from "@/lib/tiptap-utils"
+} from "@/misc/tiptap-utils"
 
 export const BLOCKQUOTE_SHORTCUT_KEY = "mod+shift+b"
 
