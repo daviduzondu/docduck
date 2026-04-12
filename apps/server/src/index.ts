@@ -4,11 +4,11 @@ import cors from 'cors';
 import { auth } from "@/modules/auth/better-auth";
 import { toNodeHandler } from "better-auth/node";
 import { createServer } from 'http';
-import { initializeHocuspocus } from '@/lib/config/hocuspocus';
+import { hocuspocus, initializeHocuspocus } from '@/lib/config/hocuspocus';
 import { CORSPlugin } from '@orpc/server/plugins'
 import { onError } from '@orpc/server';
 import { OpenAPIHandler } from '@orpc/openapi/node';
-import { corsConfig, createWebsocketServer, logger } from '@/lib/config/misc';
+import { corsConfig, createWebsocketServer } from '@/lib/config/misc';
 import { appRouter } from '@/orpc/app.router';
 import { onErrorCallback } from '@/orpc/callbacks.middleware';
 import { generateContract } from '@/orpc/scripts/generate-contract';

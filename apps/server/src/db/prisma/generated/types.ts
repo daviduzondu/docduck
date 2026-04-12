@@ -42,6 +42,7 @@ export type document = {
     yjsState: Buffer | null;
     visibility: Generated<Visibility>;
     allowPublicEdits: Generated<boolean>;
+    lastSnapshotAt: Timestamp | null;
 };
 export type document_invitation = {
     id: Generated<string>;
@@ -52,6 +53,13 @@ export type document_invitation = {
     status: Generated<InvitationStatus>;
     acceptedAt: Timestamp | null;
     revokedAt: Timestamp | null;
+};
+export type document_snapshot = {
+    id: Generated<string>;
+    documentId: string;
+    yjsState: Buffer;
+    creatorId: string | null;
+    name: string | null;
 };
 export type permission = {
     id: Generated<string>;
@@ -85,6 +93,7 @@ export type DB = {
     account: account;
     document: document;
     document_invitation: document_invitation;
+    document_snapshot: document_snapshot;
     permission: permission;
     session: session;
     user: user;

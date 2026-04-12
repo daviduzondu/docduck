@@ -5,6 +5,10 @@ import * as z from 'zod';
 import { AppError } from "@/lib/helpers";
 import { StatusCodes } from "http-status-codes";
 import { Role, Visibility } from "@/db/prisma/generated/types";
+import * as Y from 'yjs';
+import { sql } from "kysely";
+import { hocuspocus } from "@/lib/config/hocuspocus";
+
 
 type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
 type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role };
@@ -13,12 +17,13 @@ export async function getDocumentWithPermissions(
  id: string,
  userId: string | null = null
 ): Promise<{ meta: DocumentMeta; permissions: DocumentPermissions }> {
+
+
  const result = await db.selectFrom('document')
   .leftJoin('permission', (join) => join.onRef('permission.documentId', '=', 'document.id').on(eb => eb('permission.userId', '=', userId).or('permission.userId', 'is', null)))
   .where('document.id', '=', id)
   .select(['document.id as documentId', 'visibility', 'permission.role', 'permission.userId', 'document.allowPublicEdits', 'document.title'])
   .executeTakeFirstOrThrow();
-
  return {
   meta: { documentId: result.documentId, title: result.title, visibility: result.visibility },
   permissions: {
@@ -28,6 +33,128 @@ export async function getDocumentWithPermissions(
   }
  }
 }
+
+export async function getSnapshots(documentId: string) {
+ return await db.selectFrom('document_snapshot')
+  .select(['creatorId', 'documentId', 'id', 'name', 'yjsState'])
+  .where('documentId', '=', documentId)
+  .executeTakeFirst();
+}
+
+export async function getSnapshotById({ documentId, snapshotId }: { documentId: string, snapshotId: string }) {
+ return await db.selectFrom('document_snapshot')
+  .select(['creatorId', 'documentId', 'id', 'name', 'yjsState'])
+  .where('document_snapshot.id', '=', snapshotId)
+  .where('document_snapshot.documentId', '=', documentId)
+  .executeTakeFirstOrThrow(() => {
+   throw new AppError('Snapshot not found', StatusCodes.NOT_FOUND)
+  })
+}
+
+export async function createSnapshot(documentId: string, overrideInterval?: boolean) {
+ return await db.transaction().execute(async (trx) => {
+  const document = await trx.selectFrom('document')
+   .select(eb => ['lastSnapshotAt', 'id', 'document.ownerId', 'yjsState',
+    eb.or([
+     eb('document.lastSnapshotAt', 'is', null),
+     eb('document.lastSnapshotAt', '<', sql<Date>`now() - interval '00:15:00'`)
+    ]).as("safeToCreateSnapshot")
+   ])
+   .where('document.id', '=', documentId)
+   .forUpdate()
+   .executeTakeFirstOrThrow();
+
+  if (document.yjsState) {
+   const doc = new Y.Doc();
+   Y.applyUpdate(doc, document.yjsState);
+
+   // const snapshot = Y.snapshot(doc);
+   // const encodedSnapshot = Y.encodeSnapshot(snapshot);
+   if (document.safeToCreateSnapshot || overrideInterval === true) {
+    await trx.insertInto('document_snapshot').values({
+     yjsState: Buffer.from(Y.encodeStateAsUpdate(doc)),
+     documentId: document.id,
+    }).execute();
+
+    await trx.updateTable('document').set({
+     lastSnapshotAt: sql`now()`
+    })
+     .where('id', '=', document.id)
+     .execute();
+   }
+  }
+ });
+}
+
+// Based on this comment: https://discuss.yjs.dev/t/is-there-a-way-to-revert-to-a-specific-version/379/5
+function revertToSnapshot(
+ liveDoc: Y.Doc,
+ snapshotState: Uint8Array,
+) {
+ // 1. Reconstruct the document as it was at snapshot time
+ const snapshotDoc = new Y.Doc()
+ Y.applyUpdate(snapshotDoc, snapshotState)
+
+ const currentStateVector = Y.encodeStateVector(liveDoc)
+ const snapshotStateVector = Y.encodeStateVector(snapshotDoc)
+
+ // 2. Compute everything that changed AFTER the snapshot
+ const changesSinceSnapshot = Y.encodeStateAsUpdate(liveDoc, snapshotStateVector)
+
+ // 3. Set up UndoManager on the snapshot doc to track those changes
+ const snapshotOrigin = 'revert'
+ const undoManager = new Y.UndoManager(
+  [...snapshotDoc.share.keys()].map(key => snapshotDoc.getXmlFragment(key)),
+  { trackedOrigins: new Set([snapshotOrigin]) }
+ )
+
+ // 4. Apply the post-snapshot changes to the snapshot doc (with tracked origin)
+ Y.applyUpdate(snapshotDoc, changesSinceSnapshot, snapshotOrigin)
+
+ // 5. Undo them — this produces the inverse operations
+ undoManager.undo()
+
+ // 6. Extract just the new inverse update and apply to live doc
+ const revertUpdate = Y.encodeStateAsUpdate(snapshotDoc, currentStateVector)
+ Y.applyUpdate(liveDoc, revertUpdate)
+}
+
+export async function restoreSnapshotById(snapshotId: string, documentId: string,) {
+ return await db.transaction().execute(async (trx) => {
+  const snapshot = await trx.selectFrom('document_snapshot')
+   .select(['document_snapshot.creatorId', 'document_snapshot.id', 'name', 'document_snapshot.yjsState'])
+   .where('document_snapshot.documentId', '=', documentId)
+   .where('id', '=', snapshotId)
+   .executeTakeFirstOrThrow();
+
+  const document = await trx.selectFrom('document')
+   .select(['id', 'ownerId', 'yjsState'])
+   .where('document.id', '=', documentId)
+   .forUpdate()
+   .executeTakeFirstOrThrow();
+
+  const hocuspocusDocument = hocuspocus.documents.get(document.id)!;
+
+  if (hocuspocusDocument) {
+   revertToSnapshot(hocuspocusDocument, snapshot.yjsState)
+  } else if (document.yjsState) {
+   const tempDoc = new Y.Doc()
+   Y.applyUpdate(tempDoc, document.yjsState)
+   revertToSnapshot(tempDoc, snapshot.yjsState)
+
+   await trx.updateTable('document')
+    .set({ yjsState: Buffer.from(Y.encodeStateAsUpdate(tempDoc)) })
+    .where('id', '=', documentId)
+    .execute()
+  }
+
+  return {
+   snapshotId: snapshot.id,
+   connectionsCount: hocuspocus.getConnectionsCount()
+  }
+ })
+}
+
 
 export async function updateDocumentTitle(id: string, title: string) {
  return await db.updateTable('document').set({

@@ -16,20 +16,21 @@ datasource db {
 }
 
 model user {
- id            String  @id @default(dbgenerated("gen_random_uuid()"))
+ id            String  @id @unique @default(dbgenerated("gen_random_uuid()"))
  email         String  @unique
  emailVerified Boolean @default(false)
  name          String
  image         String?
  isAnonymous   Boolean @default(false)
 
- sessions            session[]
- accounts            account[]
+ sessions session[]
+ accounts account[]
 
- createdAt DateTime @ignore
- updatedAt DateTime @ignore
+ createdAt DateTime @ignore @db.Timestamptz(6)
+ updatedAt DateTime @ignore @db.Timestamptz(6)
 
  documentInvitation document_invitation[]
+ documentSnapshots  document_snapshot[]
 }
 
 model session {
@@ -40,8 +41,8 @@ model session {
  ipAddress String?
  userAgent String?
 
- createdAt DateTime @default(now()) @ignore
- updatedAt DateTime @default(now()) @ignore
+ createdAt DateTime @default(now()) @ignore @db.Timestamptz(6)
+ updatedAt DateTime @default(now()) @ignore @db.Timestamptz(6)
 
  // Relations
  user user @relation(fields: [userId], references: [id])
@@ -60,40 +61,59 @@ model account {
  idToken               String?
  password              String?
 
- createdAt DateTime @default(now()) @ignore
- updatedAt DateTime @default(now()) @ignore
+ createdAt DateTime @default(now()) @ignore @db.Timestamptz(6)
+ updatedAt DateTime @default(now()) @ignore @db.Timestamptz(6)
 
  // Relations
  user user @relation(fields: [userId], references: [id])
 }
 
 model verification {
- id         String   @id @default(dbgenerated("gen_random_uuid()"))
+ id         String   @id @unique @default(dbgenerated("gen_random_uuid()"))
  identifier String
  token      String?
  expiresAt  DateTime
 
- createdAt DateTime @ignore
- updatedAt DateTime @ignore
+ createdAt DateTime @ignore @db.Timestamptz(6)
+ updatedAt DateTime @ignore @db.Timestamptz(6)
 }
 
 model document {
- id                  String                 @unique @default(dbgenerated("gen_random_uuid()"))
- ownerId             String
- title               String                 @default("Untitled Document")
- yjsState            Bytes?
- visibility          Visibility             @default(PRIVATE)
- allowPublicEdits    Boolean                @default(false)
- createdAt           DateTime               @default(now()) @ignore
- updatedAt           DateTime               @default(now()) @ignore
+ id               String     @id @unique @default(dbgenerated("gen_random_uuid()"))
+ ownerId          String
+ title            String     @default("Untitled Document")
+ yjsState         Bytes?
+ visibility       Visibility @default(PRIVATE)
+ allowPublicEdits Boolean    @default(false)
+ lastSnapshotAt   DateTime?  @db.Timestamptz(6)
+
+ createdAt          DateTime              @default(now()) @ignore @db.Timestamptz(6)
+ updatedAt          DateTime              @default(now()) @ignore @db.Timestamptz(6)
+ documentInvitation document_invitation[]
+ documentSnapshots  document_snapshot[]
 
  @@index([ownerId])
- documentInvitation document_invitation[]
 }
 
+model document_snapshot {
+ id         String  @id @unique @default(dbgenerated("gen_random_uuid()"))
+ documentId String
+ yjsState   Bytes
+ creatorId  String?
+ name       String?
+
+ createdAt DateTime @default(now()) @ignore @db.Timestamptz(6)
+ updatedAt DateTime @default(now()) @ignore @db.Timestamptz(6)
+
+ // relations
+ document document @relation(fields: [documentId], references: [id])
+ user     user?    @relation(fields: [creatorId], references: [id])
+
+ @@index([documentId])
+}
 
 model document_invitation {
- id         String           @unique @default(dbgenerated("gen_random_uuid()"))
+ id         String           @id @unique @default(dbgenerated("gen_random_uuid()"))
  email      String
  inviterId  String
  documentId String
@@ -101,8 +121,8 @@ model document_invitation {
  status     InvitationStatus @default(PENDING)
  acceptedAt DateTime?
  revokedAt  DateTime?
- createdAt  DateTime         @default(now()) @ignore
- updatedAt  DateTime         @default(now()) @ignore
+ createdAt  DateTime         @default(now()) @ignore @db.Timestamptz(6)
+ updatedAt  DateTime         @default(now()) @ignore @db.Timestamptz(6)
 
  // Relations 
  inviter  user     @relation(fields: [inviterId], references: [id])
@@ -113,12 +133,12 @@ model document_invitation {
 }
 
 model permission {
- id         String   @unique @default(dbgenerated("gen_random_uuid()"))
+ id         String   @id @unique @default(dbgenerated("gen_random_uuid()"))
  documentId String
  userId     String
  role       Role
- createdAt  DateTime @default(now()) @ignore
- updatedAt  DateTime @default(now()) @ignore
+ createdAt  DateTime @default(now()) @ignore @db.Timestamptz(6)
+ updatedAt  DateTime @default(now()) @ignore @db.Timestamptz(6)
 
  @@unique([documentId, userId])
  @@index([userId])

@@ -25,4 +25,3 @@ export const auth = betterAuth({
  }
 });
 
-export const api = auth.api;

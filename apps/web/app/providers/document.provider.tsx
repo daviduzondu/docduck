@@ -15,7 +15,7 @@ export function DocumentProvider({ documentId, title, children }: { title: strin
  useEffect(() => {
   const ydoc = new Y.Doc();
   const socket = new HocuspocusProviderWebsocket({
-   url: `http://localhost:1711/collab`,
+   url: `http://localhost:1711/collab`,// TODO: replace 
   });
 
   const provider = new HocuspocusProvider({

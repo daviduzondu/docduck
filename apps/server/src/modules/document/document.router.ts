@@ -24,6 +24,31 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
    .handler(({ input, context }) =>
     documentService.getDocumentWithPermissions(input.params.documentId, context.user?.id)),
 
+ getSnapshots:
+  r.get('/{documentId}/snapshots', { inputStructure: 'detailed' })
+   .input(z.object({
+    params: z.object({ documentId: z.string() })
+   }))
+   .use(ensureCanEditDocument, input => input.params.documentId)
+   .handler(({ input }) => documentService.getSnapshots(input.params.documentId)),
+
+
+ getSnapshotById:
+  r.get('/{documentId}/snapshots/{snapshotId}', { inputStructure: 'detailed' })
+   .input(z.object({
+    params: z.object({ documentId: z.string(), snapshotId: z.string() })
+   }))
+   .use(ensureCanEditDocument, input => input.params.documentId)
+   .handler(({ input }) => documentService.getSnapshotById({ snapshotId: input.params.snapshotId, documentId: input.params.documentId })),
+
+ restoreSnapshotbyId:
+  r.post('/{documentId}/snapshots/{snapshotId}', { inputStructure: 'detailed' })
+   .input(z.object({
+    params: z.object({ documentId: z.string(), snapshotId: z.string() })
+   }))
+   .use(ensureCanEditDocument, input => input.params.documentId)
+   .handler(({ input }) => documentService.restoreSnapshotById(input.params.snapshotId, input.params.documentId)),
+
  createDocument:
   r.post('/new')
    .use(ensureAuth)
