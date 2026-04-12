@@ -9,7 +9,6 @@ import * as Y from 'yjs';
 import { sql } from "kysely";
 import { hocuspocus } from "@/lib/config/hocuspocus";
 
-
 type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
 type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role };
 
