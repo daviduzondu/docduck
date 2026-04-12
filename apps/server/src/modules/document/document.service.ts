@@ -119,6 +119,7 @@ function revertToSnapshot(
 }
 
 export async function restoreSnapshotById(snapshotId: string, documentId: string,) {
+ await createSnapshot(documentId, true);
  return await db.transaction().execute(async (trx) => {
   const snapshot = await trx.selectFrom('document_snapshot')
    .select(['document_snapshot.creatorId', 'document_snapshot.id', 'name', 'document_snapshot.yjsState'])
@@ -133,7 +134,6 @@ export async function restoreSnapshotById(snapshotId: string, documentId: string
    .executeTakeFirstOrThrow();
 
   const hocuspocusDocument = hocuspocus.documents.get(document.id)!;
-
   if (hocuspocusDocument) {
    revertToSnapshot(hocuspocusDocument, snapshot.yjsState)
   } else if (document.yjsState) {
