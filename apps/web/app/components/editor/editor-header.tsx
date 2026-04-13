@@ -22,6 +22,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { $api } from '@/lib/orpc.client';
 import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
+import { AwarenessStates } from '@/types';
 
 interface EditorHeaderProps {
  onEdit?: () => void;
@@ -29,10 +30,7 @@ interface EditorHeaderProps {
  canEdit: boolean
 }
 
-type AwarenessStates = {
- name: string, color: string, image?: string, isAnonymous: boolean, role: "VIEWER" | "EDITOR" | "OWNER"
- id: string
-}
+
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
  canEdit,

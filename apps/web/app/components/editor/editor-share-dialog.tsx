@@ -34,7 +34,7 @@ import {
  ItemMedia,
  ItemTitle,
 } from "@/components/ui/item"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import z from 'zod'
@@ -52,6 +52,8 @@ import { LocalErrorBoundary } from "@/components/error/error-boundary"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getUserColor } from "@/lib/utils"
 import { authClient } from "@/lib/auth.client"
+import { useAuth } from "@/providers/auth.provider"
+import { AwarenessStates } from "@/types"
 
 const shareFormSchema = z.object({
  invitees: z.array(z.object({
@@ -67,13 +69,15 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
  const [newRole, setNewRole] = useState<'EDITOR' | 'VIEWER'>("VIEWER");
  const [emailError, setEmailError] = useState("");
  const [tabValue, setTabValue] = useState<"people-with-access" | "invite-list">('people-with-access');
- const { documentId } = useDocument();
+ const { documentId, provider } = useDocument();
+ const { data } = useAuth();
  const getCollaboratorsQuery = useQuery(orpc.documents.getCollaborators.queryOptions({
   input: {
    params: {
     id: documentId
    }
-  }
+  },
+  enabled: Array.from((provider.awareness?.states.values()) ?? []).map<AwarenessStates>(x => (x.user)).filter(x => x.id === data?.user.id)[0]?.role === 'OWNER'
  }));
 
  const sendInvitationsMutation = useMutation(orpc.documents.createDocumentInvitations.mutationOptions({
@@ -128,11 +132,13 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
 
  return (
   <Dialog>
-   <DialogTrigger render={
-    <Button size="lg" onClick={onShare} className={'outline outline-accent-foreground'}>
-     <LockIcon data-icon="inline-end" />
-     Share
-    </Button>} />
+   <DialogTrigger
+    disabled={!getCollaboratorsQuery.isEnabled}
+    render={
+     <Button size="lg" onClick={onShare} className={'outline outline-accent-foreground'}>
+      <LockIcon data-icon="inline-end" />
+      Share
+     </Button>} />
    <DialogContent className="sm:max-w-md">
     <DialogHeader>
      <DialogTitle>Share with others</DialogTitle>
