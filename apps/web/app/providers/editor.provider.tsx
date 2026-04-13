@@ -74,6 +74,7 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
    }),
    StarterKit.configure({
     horizontalRule: false,
+    undoRedo: false,
     link: {
      openOnClick: false,
      enableClickSelection: true,

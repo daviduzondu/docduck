@@ -20,6 +20,7 @@ const link = new OpenAPILink(contract as AppRouter, {
  },
  interceptors: [
   onError((error) => {
+   if ((error)?.name === 'AbortError') return
    console.error(error)
   })
  ],

@@ -51,6 +51,7 @@ import { toast } from "sonner"
 import { LocalErrorBoundary } from "@/components/error/error-boundary"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getUserColor } from "@/lib/utils"
+import { authClient } from "@/lib/auth.client"
 
 const shareFormSchema = z.object({
  invitees: z.array(z.object({
@@ -72,7 +73,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
    params: {
     id: documentId
    }
-  },
+  }
  }));
 
  const sendInvitationsMutation = useMutation(orpc.documents.createDocumentInvitations.mutationOptions({

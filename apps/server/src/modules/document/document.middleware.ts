@@ -44,6 +44,7 @@ export const ensureDocumentOwner = base
   });
  });
 
+
 export const ensureCanEditDocument = base.middleware(async ({ context, next }, documentId: string) => {
  const { permissions } = await documentService.getDocumentWithPermissions(documentId, context.user?.id);
  if (!permissions.canEdit) throw new AppError("You're not allowed to perform this action", StatusCodes.FORBIDDEN);
