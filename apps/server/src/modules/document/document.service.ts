@@ -161,7 +161,7 @@ export async function restoreSnapshotById(snapshotId: string, documentId: string
  })
 }
 
-export async function addNewComment({ text, userId, documentId, relFrom, relTo }: { text: string, userId: string, documentId: string, relFrom: any[], relTo: any[] }) {
+export async function addNewComment({ text, userId, documentId }: { text: string, userId: string, documentId: string }) {
  const hocuspocusDocument = hocuspocus.documents.get(documentId);
  if (hocuspocusDocument) {
   const commentsMap = hocuspocusDocument.getMap<Comment>('comments');
@@ -177,8 +177,13 @@ export async function addNewComment({ text, userId, documentId, relFrom, relTo }
    commenterId: userId,
    parentId,
   });
+  return {
+   commentId,
+   parentId
+  }
+ } else {
+  throw new AppError("You're not connected to any document", StatusCodes.BAD_REQUEST)
  }
-
 }
 
 

@@ -74,21 +74,45 @@
   cursor: col-resize;
  }
 
+ /* SEARCH RESULTS */
+
  .search-result {
-  background-color: rgba(255, 230, 0, 0.4);
+  background-color: rgb(255, 230, 0);
   border-radius: 3px;
-  padding: 0 2px;
+  padding: 0 3px;
+  margin: 0 1px;
  }
 
  .search-result-current {
-  background-color: rgba(255, 170, 0, 0.9);
+  background-color: rgba(255, 115, 0, 0.937);
   color: #000;
   border-radius: 3px;
-  padding: 0 2px;
+  padding: 0 3px;
+  margin: 0 1px;
  }
 
+
+ /* COMMENTS */
+
  .comment {
-  background-color: var(--tt-color-highlight-brown);
+  background-color: rgba(237, 226, 21, 0.503);
+  /* lighter so it doesn't fight search */
+  border-bottom: 2px dotted rgba(180, 140, 0, 0.9);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 1px;
+  cursor: pointer;
+
+  position: relative;
+  z-index: 1;
+ }
+
+ .comment:hover,
+ .active-comment {
+  background-color: rgba(218, 113, 7, 0.61);
+  border-bottom-color: rgba(180, 140, 0, 1);
+  z-index: 2;
+  /* lift above search highlight */
  }
 }
 

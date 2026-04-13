@@ -12,23 +12,34 @@ import {
 } from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
 import { orpc } from "@/lib/orpc.client"
-import { getSelectionAsRelativePositions } from "@/lib/utils"
 import { useAuth } from "@/providers/auth.provider"
 import { useDocument } from "@/providers/document.provider"
 import { useMutation } from "@tanstack/react-query"
-import { Editor } from "@tiptap/core"
 import { useCurrentEditor } from "@tiptap/react"
 import { MessageSquareText } from "lucide-react"
 import { RefObject, useState } from "react"
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 
-export function InlineCommentPopover({ containerRef }: { containerRef: RefObject<HTMLDivElement> }) {
+export function InlineCommentPopover() {
  const [open, setOpen] = useState(false);
  const { editor } = useCurrentEditor();
  const [comment, setComment] = useState('');
  const { data } = useAuth();
  const { documentId } = useDocument();
- const addCommentMutation = useMutation(orpc.documents.addNewComment.mutationOptions());
+ const addCommentMutation = useMutation(orpc.documents.addNewComment.mutationOptions({
+  // onSuccess() {
+  //  toast.success("Comment added")
+  // },
+  onSuccess(data, variables, onMutateResult, context) {
+   const { commentId, parentId } = data;
+   editor?.commands.setComment(commentId);
+   toast.success("Comment added");
+  },
+  onError(error) {
+   toast.error("Failed to add comment", { description: error.message })
+  },
+ }));
 
  if (editor && data)
   return (
@@ -45,7 +56,6 @@ export function InlineCommentPopover({ containerRef }: { containerRef: RefObject
        <MessageSquareText /> Add comment
       </Button>} />
      <PopoverContent align="center"
-      container={containerRef.current}
      >
       <PopoverHeader>
        <PopoverTitle>Add new comment</PopoverTitle>
@@ -59,23 +69,11 @@ export function InlineCommentPopover({ containerRef }: { containerRef: RefObject
        <Button variant={'secondary'}
         disabled={comment.length <= 0}
         onClick={() => {
-         const commentId = uuidv4();
-         setOpen(false);
-         editor.commands.setComment(commentId);
-         const { from: relFrom, to: relTo } = getSelectionAsRelativePositions(editor)
          addCommentMutation.mutate({
           params: { documentId },
-          body: { text: comment, relFrom: Array.from(relFrom), relTo: Array.from(relTo) }
-         })
-         // addNewComment({
-         //  commentId,
-         //  comment,
-         //  userId: data.user.id,
-         //  provider
-         // })
-         // addNewComment({
-         //  comment: "Test comment"
-         // })
+          body: { text: comment }
+         });
+         setOpen(false);
         }}
        >Add</Button>
       </div>

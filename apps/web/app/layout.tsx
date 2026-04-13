@@ -25,7 +25,7 @@ export default function RootLayout({
     <TanstackQueryClientProvider>
      <AuthProvider>
       {children}
-      <Toaster />
+      <Toaster richColors theme="light"/>
      </AuthProvider>
     </TanstackQueryClientProvider>
    </body>

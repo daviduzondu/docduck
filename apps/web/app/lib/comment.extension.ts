@@ -1,6 +1,8 @@
 import { Mark, mergeAttributes } from "@tiptap/core";
 import type { Range } from "@tiptap/core";
 import type { Mark as PMMark } from "@tiptap/pm/model";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
 
 declare module "@tiptap/core" {
  interface Commands<ReturnType> {
@@ -15,6 +17,9 @@ declare module "@tiptap/core" {
    unsetComment: (commentId: string) => ReturnType;
   };
  }
+ interface Storage {
+  comment: CommentStorage
+ }
 }
 
 export interface MarkWithRange {
@@ -25,6 +30,7 @@ export interface MarkWithRange {
 export interface CommentOptions {
  HTMLAttributes: Record<string, any>;
  onCommentActivated: (commentId: string) => void;
+ activeCommentClass: string;
 }
 
 export interface CommentStorage {
@@ -38,8 +44,10 @@ const Comment = Mark.create<CommentOptions, CommentStorage>({
   return {
    HTMLAttributes: {},
    onCommentActivated: () => { },
+   activeCommentClass: ''
   };
  },
+
 
  addAttributes() {
   return {
@@ -61,6 +69,43 @@ const Comment = Mark.create<CommentOptions, CommentStorage>({
      null,
    },
   ];
+ },
+
+ addProseMirrorPlugins() {
+  const extensionThis = this;
+  return [
+   new Plugin({
+    key: new PluginKey("comment-active-decoration"),
+    props: {
+     decorations(state) {
+      const activeCommentId = extensionThis.storage.activeCommentId;
+      if (!activeCommentId) return DecorationSet.empty;
+
+      const decorations: Decoration[] = [];
+
+      state.doc.descendants((node, pos) => {
+       if (!node.isInline) return;
+
+       const hasActiveMark = node.marks.some(
+        (mark) =>
+         mark.type.name === "comment" &&
+         mark.attrs.commentId === activeCommentId
+       );
+
+       if (hasActiveMark) {
+        decorations.push(
+         Decoration.inline(pos, pos + node.nodeSize, {
+          class: extensionThis.options.activeCommentClass,
+         })
+        );
+       }
+      });
+
+      return DecorationSet.create(state.doc, decorations);
+     },
+    }
+   })
+  ]
  },
 
  renderHTML({ HTMLAttributes }) {
@@ -85,6 +130,7 @@ const Comment = Mark.create<CommentOptions, CommentStorage>({
   const commentMark = this.editor.schema.marks.comment;
 
   const activeCommentMark = marks.find((mark) => mark.type === commentMark);
+
 
   this.storage.activeCommentId = activeCommentMark?.attrs.commentId || null;
 
@@ -140,6 +186,10 @@ const Comment = Mark.create<CommentOptions, CommentStorage>({
      },
   };
  },
-});
+
+},
+
+
+);
 
 export default Comment;

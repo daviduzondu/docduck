@@ -57,14 +57,17 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
     }),
     body: z.object({
      text: z.string().min(1),
-     relFrom: z.array(z.any()),
-     relTo: z.array(z.any())
     })
    }))
    .use(ensureCanEditDocument, input => input.params.documentId)
    .use(ensureAuth)
-   .handler(({ input, context }) => documentService.addNewComment({ text: input.body.text, userId: context.user.id, documentId: input.params.documentId, relFrom: input.body.relFrom, relTo: input.body.relTo }))
- ,
+   .handler(({ input, context }) =>
+    documentService
+     .addNewComment({
+      text: input.body.text,
+      userId: context.user.id,
+      documentId: input.params.documentId
+     })),
 
  createDocument:
   r.post('/new')

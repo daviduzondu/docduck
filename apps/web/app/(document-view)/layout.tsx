@@ -8,7 +8,7 @@ export default function Layout({
  children: React.ReactNode;
 }>) {
  return (
-  <body className="overflow-hidden">
+  <div className="overflow-hidden">
    {/* <AuthProvider> */}
    <SidebarProvider>
     <EditorSidebarProvider>
@@ -16,6 +16,6 @@ export default function Layout({
     </EditorSidebarProvider>
    </SidebarProvider>
    {/* </AuthProvider> */}
-  </body>
+  </div>
  );
 }

@@ -21,6 +21,7 @@ import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { $api } from '@/lib/orpc.client';
 import { Badge } from '@/components/ui/badge';
+import { v4 as uuidv4 } from 'uuid';
 
 interface EditorHeaderProps {
  onEdit?: () => void;
@@ -30,6 +31,7 @@ interface EditorHeaderProps {
 
 type AwarenessStates = {
  name: string, color: string, image?: string, isAnonymous: boolean, role: "VIEWER" | "EDITOR" | "OWNER"
+ id: string
 }
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
@@ -38,7 +40,6 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  onShare,
 }) => {
  const [collaborators, setCollaborators] = useState<AwarenessStates[]>([]);
-
  const { open } = useSidebar();
  const { provider, documentId, title } = useDocument();
  useEffect(() => {
@@ -63,7 +64,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
       <div className={`truncate text-center`}>{title}</div>
      </div>}
     <div className="gap-2 items-center flex grow basis-0 justify-end">
-     <CollaboratorsHoverCard collaborators={collaborators} />
+     {collaborators.length > 0 && collaborators.every(collaborator => collaborator.id !== undefined) ? <CollaboratorsHoverCard collaborators={collaborators} /> : null}
      <EditorShareDialogButton onShare={onShare} />
     </div>
    </header>
@@ -135,7 +136,7 @@ function EditTitlePopover({ children, title, documentId, provider }: { children:
 }
 
 function CollaboratorAvatar({ collaborator }: { collaborator: AwarenessStates }) {
- return <Avatar key={collaborator.name}>
+ return <Avatar>
   <AvatarImage src={
    collaborator.name
     ? collaborator.isAnonymous
@@ -152,13 +153,15 @@ function CollaboratorsHoverCard({ collaborators }: { collaborators: AwarenessSta
  return (
   <HoverCard>
    <HoverCardTrigger delay={150}>
-    <AvatarGroup className='bg-card-foreground px-1 py-1 rounded-full w-fit'>
-     {collaborators.map((collaborator) => <CollaboratorAvatar collaborator={collaborator} key={collaborator.name + collaborator.color} />)}
+    <AvatarGroup className="bg-card-foreground px-1 py-1 rounded-full w-fit">
+     {collaborators.map((collaborator) => (
+      <CollaboratorAvatar key={collaborator.id} collaborator={collaborator} />
+     ))}
     </AvatarGroup>
    </HoverCardTrigger>
    <HoverCardContent side="bottom" align="center">
     <div className='uppercase text-xs font-semibold pb-2'>in this document</div>
-    {collaborators.map((collaborator) => <Item className='p-0 not-last:pb-3'>
+    {collaborators.map((collaborator) => <Item key={collaborator.id} className='p-0 not-last:pb-3'>
      <ItemMedia variant="icon">
       <CollaboratorAvatar collaborator={collaborator} />
      </ItemMedia>

@@ -60,12 +60,13 @@ import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 import { useAuth } from "../../../providers/auth.provider";
-import { addNewComment, getUserColor } from "@/lib/utils";
+import { getUserColor } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
 import { useDocument } from "@/providers/document.provider";
 import { MessageSquare, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InlineCommentPopover } from "@/components/editor/inline-comment-popover";
+import { v4 as uuidv4 } from 'uuid';
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -210,9 +211,9 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
 
  useEffect(() => {
   if (editor && data?.user?.name) {
-   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id), image: data.user.image, isAnonymous: false, role })
+   editor.commands.updateUser({ name: data.user.name, color: getUserColor(data.user.id), image: data.user.image, isAnonymous: false, role, id: data.user.id })
   } else if (editor && !data) {
-   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, color: getUserColor(anonymousUser.current), image: null, isAnonymous: true, role: canEdit ? "EDITOR" : "VIEWER" })
+   editor.commands.updateUser({ name: `Anonymous ${anonymousUser.current}`, id: uuidv4(), color: getUserColor(anonymousUser.current), image: null, isAnonymous: true, role: canEdit ? "EDITOR" : "VIEWER" })
   }
  }, [editor, data])
 
@@ -257,23 +258,11 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
     {editor ?
      <BubbleMenu
       editor={editor}
+      shouldShow={({ editor, from, to }) => (!editor.isActive('comment') && to > from)}
      >
-      {/* <Button size='sm' className={'cursor-pointer hover:bg-primary'}
-
-      onClick={()=>{
-       const commentId = uuidv4();
-       editor.commands.setComment(commentId);
-       addNewComment({
-        comment: "Test comment"
-       })
-      }}
-      >
-       <MessageSquareText /> Add comment
-      </Button> */}
-      <div ref={containerRef}>
-       <InlineCommentPopover containerRef={containerRef} />
-      </div>
+      <InlineCommentPopover />
      </BubbleMenu> : null}
+
 
     <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground"> <div className="flex gap-4"> <span>{editorData?.charactersCount} characters</span> <span>{editorData?.wordsCount} words</span> </div> <div className="flex gap-4"> </div> </footer>
    </EditorContext.Provider>
