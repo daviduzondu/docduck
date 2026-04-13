@@ -20,12 +20,13 @@ import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/imag
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension"
 
 // --- Lib ---
-import { handleImageUpload, MAX_FILE_SIZE } from "@/misc/tiptap-utils"
+import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 
-import SearchAndReplace from "@/misc/search-and-replace.extension";
+import SearchAndReplace from "@/lib/search-and-replace.extension";
 import { useEffect, useMemo } from 'react';
 import { useDocument } from '@/providers/document.provider';
-import Comment from '@/misc/comment.extension';
+import Comment from '@/lib/comment.extension';
+import * as Y from 'yjs';
 
 
 export default function TipTapEditorProvider({ children, canEdit }: { children: React.ReactNode, canEdit: boolean }) {
@@ -92,11 +93,9 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
    }),
   ],
   onSelectionUpdate: ({ editor }) => {
-   console.log('select update', editor.state.selection);
-   editor.commands.setComment('.random-id');
+   // console.log('select update', editor.state.selection);
   },
  });
-
 
  const providerValue = useMemo(() => ({ editor }), [editor])
 

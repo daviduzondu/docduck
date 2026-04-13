@@ -2,9 +2,13 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { createAvatar } from '@dicebear/core';
 import * as thumbs from '@dicebear/thumbs';
-import { Provider } from "react";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { StatelessMessage } from "@/types";
+import { createRelativePositionFromTypeIndex } from "yjs";
+import { Editor } from "@tiptap/core";
+import { ySyncPluginKey, absolutePositionToRelativePosition } from '@tiptap/y-tiptap'
+import * as Y from 'yjs';
+
 
 export function cn(...inputs: ClassValue[]) {
  return twMerge(clsx(inputs))
@@ -42,4 +46,19 @@ export const generateAnonymousAvatar = (seed: string) => createAvatar(thumbs, {
 
 export function sendStateless<T = any>(provider: HocuspocusProvider, data: StatelessMessage<T>) {
  provider.sendStateless(JSON.stringify(data));
+}
+
+// yjs docs are sparse, so the best source of truth is often the dmonad answering questions in Gitter, GitHub issues, or community forums. I'm going insane lol.
+export function getSelectionAsRelativePositions(editor: Editor) {
+  const { from, to } = editor.state.selection
+  console.log(editor.state.selection)
+  const ystate = ySyncPluginKey.getState(editor.state)
+
+  const relFrom = absolutePositionToRelativePosition(from, ystate.type, ystate.binding.mapping)
+  const relTo = absolutePositionToRelativePosition(to, ystate.type, ystate.binding.mapping)
+
+  return {
+    from: Y.encodeRelativePosition(relFrom),
+    to: Y.encodeRelativePosition(relTo),
+  }
 }

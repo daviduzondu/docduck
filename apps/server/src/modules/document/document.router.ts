@@ -49,6 +49,23 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
    .use(ensureCanEditDocument, input => input.params.documentId)
    .handler(({ input }) => documentService.restoreSnapshotById(input.params.snapshotId, input.params.documentId)),
 
+ addNewComment:
+  r.post('/{documentId}/comments', { inputStructure: 'detailed' })
+   .input(z.object({
+    params: z.object({
+     documentId: z.string()
+    }),
+    body: z.object({
+     text: z.string().min(1),
+     relFrom: z.array(z.any()),
+     relTo: z.array(z.any())
+    })
+   }))
+   .use(ensureCanEditDocument, input => input.params.documentId)
+   .use(ensureAuth)
+   .handler(({ input, context }) => documentService.addNewComment({ text: input.body.text, userId: context.user.id, documentId: input.params.documentId, relFrom: input.body.relFrom, relTo: input.body.relTo }))
+ ,
+
  createDocument:
   r.post('/new')
    .use(ensureAuth)

@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import { EditorContent, EditorContext, useCurrentEditor, useEditorState } from "@tiptap/react"
+import { BubbleMenu } from '@tiptap/react/menus';
 
 // --- UI Primitives ---
-import { Button } from "@/components/tiptap-ui-primitive/button"
+// import { Button } from "@/components/tiptap-ui-primitive/button"
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer"
 import {
  Toolbar,
@@ -59,9 +60,12 @@ import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 import { useAuth } from "../../../providers/auth.provider";
-import { getUserColor } from "@/misc/utils";
+import { addNewComment, getUserColor } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
 import { useDocument } from "@/providers/document.provider";
+import { MessageSquare, MessageSquareText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { InlineCommentPopover } from "@/components/editor/inline-comment-popover";
 
 const MainToolbarContent = ({
  onHighlighterClick,
@@ -181,6 +185,8 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
  const { data } = useAuth();
  const anonymousUser = useRef(faker.animal.type());
  const { editor } = useCurrentEditor();
+ const containerRef = useRef<HTMLDivElement>(null);
+
 
  const rect = useCursorVisibility({
   editor,
@@ -244,9 +250,30 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
      <EditorContent
       editor={editor}
       role="presentation"
-      className="simple-editor-content rounded-sm border min-h-full"
+      className="simple-editor-content rounded-sm border min-h-full relative"
      />
     </div>
+
+    {editor ?
+     <BubbleMenu
+      editor={editor}
+     >
+      {/* <Button size='sm' className={'cursor-pointer hover:bg-primary'}
+
+      onClick={()=>{
+       const commentId = uuidv4();
+       editor.commands.setComment(commentId);
+       addNewComment({
+        comment: "Test comment"
+       })
+      }}
+      >
+       <MessageSquareText /> Add comment
+      </Button> */}
+      <div ref={containerRef}>
+       <InlineCommentPopover containerRef={containerRef} />
+      </div>
+     </BubbleMenu> : null}
 
     <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground"> <div className="flex gap-4"> <span>{editorData?.charactersCount} characters</span> <span>{editorData?.wordsCount} words</span> </div> <div className="flex gap-4"> </div> </footer>
    </EditorContext.Provider>

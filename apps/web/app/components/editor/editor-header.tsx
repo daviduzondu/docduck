@@ -6,7 +6,7 @@ import { Edit3 } from 'lucide-react';
 import { EditorShareDialogButton } from './editor-share-dialog';
 import { useSidebar } from '../ui/sidebar';
 import { HocuspocusProvider, onAwarenessUpdateParameters } from '@hocuspocus/provider';
-import { generateAnonymousAvatar, sendStateless } from '@/misc/utils';
+import { generateAnonymousAvatar, sendStateless } from '@/lib/utils';
 import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { useDocument } from '@/providers/document.provider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/field"
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { $api } from '@/misc/orpc.client';
+import { $api } from '@/lib/orpc.client';
 import { Badge } from '@/components/ui/badge';
 
 interface EditorHeaderProps {

@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "./providers/auth.provider";
 import { Figtree } from "next/font/google";
-import { cn } from "@/misc/utils";
+import { cn } from "@/lib/utils";
 import TanstackQueryClientProvider from "@/providers/react-query.provider";
 import { Toaster } from "@/components/ui/sonner";
 

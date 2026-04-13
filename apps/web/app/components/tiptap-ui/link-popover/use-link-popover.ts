@@ -14,7 +14,7 @@ import {
   isMarkInSchema,
   isNodeTypeSelected,
   sanitizeUrl,
-} from "@/misc/tiptap-utils"
+} from "@/lib/tiptap-utils"
 
 /**
  * Configuration for the link popover functionality

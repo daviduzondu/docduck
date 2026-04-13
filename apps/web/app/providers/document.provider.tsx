@@ -17,7 +17,7 @@ export function DocumentProvider({ documentId, title, children }: { title: strin
   const socket = new HocuspocusProviderWebsocket({
    url: `http://localhost:1711/collab`,// TODO: replace 
   });
-  
+
 
   const provider = new HocuspocusProvider({
    websocketProvider: socket,
@@ -33,14 +33,21 @@ export function DocumentProvider({ documentId, title, children }: { title: strin
     }
    },
   });
-  provider.document.getMap('comments');
+  provider.document.on('update', ()=>{
+   console.log(provider.document)
+   console.log(provider.document.getMap('comments').toJSON())
+  })
+
   provider.attach();
+
+
+
 
   setData(prev => ({ ...prev, ydoc, provider }))
   return () => {
    provider.detach();
   }
- }, [])
+ }, []);
 
  if (data.ydoc && data.provider)
   return <HocuspocusContext.Provider value={data}>

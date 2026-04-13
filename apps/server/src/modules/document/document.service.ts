@@ -11,6 +11,13 @@ import { hocuspocus } from "@/lib/config/hocuspocus";
 
 type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
 type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role };
+type Comment = {
+ id: string,
+ resolved: boolean,
+ parentId: string | null,
+ text: string,
+ commenterId: string
+}
 
 export async function getDocumentWithPermissions(
  id: string,
@@ -100,10 +107,10 @@ function revertToSnapshot(
  // 2. Compute everything that changed AFTER the snapshot
  const changesSinceSnapshot = Y.encodeStateAsUpdate(liveDoc, snapshotStateVector)
 
+
  // 3. Set up UndoManager on the snapshot doc to track those changes
  const snapshotOrigin = 'revert'
- const undoManager = new Y.UndoManager(
-  [...snapshotDoc.share.keys()].map(key => snapshotDoc.getXmlFragment(key)),
+ const undoManager = new Y.UndoManager(snapshotDoc,
   { trackedOrigins: new Set([snapshotOrigin]) }
  )
 
@@ -152,6 +159,26 @@ export async function restoreSnapshotById(snapshotId: string, documentId: string
    connectionsCount: hocuspocus.getConnectionsCount()
   }
  })
+}
+
+export async function addNewComment({ text, userId, documentId, relFrom, relTo }: { text: string, userId: string, documentId: string, relFrom: any[], relTo: any[] }) {
+ const hocuspocusDocument = hocuspocus.documents.get(documentId);
+ if (hocuspocusDocument) {
+  const commentsMap = hocuspocusDocument.getMap<Comment>('comments');
+  const { id: commentId, resolved, parentId } = await db.insertInto('document_comment').values({
+   documentId,
+   text,
+   userId,
+  }).returning(['id', 'resolved', 'parentId']).executeTakeFirstOrThrow();
+  commentsMap.set(commentId, {
+   id: commentId,
+   text,
+   resolved,
+   commenterId: userId,
+   parentId,
+  });
+ }
+
 }
 
 

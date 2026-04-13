@@ -15,7 +15,9 @@
     "src/*"
    ]
   },
+ 
   "target": "esnext",
+  
   "module": "esnext",
   "moduleResolution": "bundler",
   // File Layout
@@ -23,8 +25,7 @@
   // Environment Settings
   // See also https://aka.ms/tsconfig/module
   "lib": [
-   "esnext",
-   "DOM"
+   "esnext"
   ],
   "types": [
    "node"

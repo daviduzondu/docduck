@@ -31,6 +31,7 @@ model user {
 
  documentInvitation document_invitation[]
  documentSnapshots  document_snapshot[]
+ documentComments   document_comment[]
 }
 
 model session {
@@ -91,6 +92,7 @@ model document {
  updatedAt          DateTime              @default(now()) @ignore @db.Timestamptz(6)
  documentInvitation document_invitation[]
  documentSnapshots  document_snapshot[]
+ documentComments   document_comment[]
 
  @@index([ownerId])
 }
@@ -130,6 +132,23 @@ model document_invitation {
 
  // \"status\"= 'PENDING' OR \"status\" = 'ACCEPTED' AND \"revokedAt\" IS NULL
  @@unique([email, documentId], where: raw("(\"status\" = 'PENDING' OR \"status\" = 'ACCEPTED') AND \"revokedAt\" IS NULL "), map: "unique_active_document_invitations_index")
+}
+
+model document_comment {
+ id         String   @id @default(dbgenerated("gen_random_uuid()"))
+ text       String
+ parentId   String?
+ userId     String
+ documentId String
+ resolved   Boolean  @default(false)
+ createdAt  DateTime @default(now()) @db.Timestamptz(6)
+ updatedAt  DateTime @default(now()) @db.Timestamptz(6)
+
+ // Relations
+ parent   document_comment?  @relation("CommentToReplies", fields: [parentId], references: [id])
+ replies  document_comment[] @relation("CommentToReplies")
+ document document           @relation(fields: [documentId], references: [id])
+ user     user               @relation(fields: [userId], references: [id])
 }
 
 model permission {

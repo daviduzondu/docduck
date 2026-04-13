@@ -44,6 +44,16 @@ export type document = {
     allowPublicEdits: Generated<boolean>;
     lastSnapshotAt: Timestamp | null;
 };
+export type document_comment = {
+    id: Generated<string>;
+    text: string;
+    parentId: string | null;
+    userId: string;
+    documentId: string;
+    resolved: Generated<boolean>;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Generated<Timestamp>;
+};
 export type document_invitation = {
     id: Generated<string>;
     email: string;
@@ -92,6 +102,7 @@ export type verification = {
 export type DB = {
     account: account;
     document: document;
+    document_comment: document_comment;
     document_invitation: document_invitation;
     document_snapshot: document_snapshot;
     permission: permission;
