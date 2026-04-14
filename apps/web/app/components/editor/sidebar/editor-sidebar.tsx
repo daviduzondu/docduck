@@ -15,7 +15,7 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
     }
    </div>
   </SidebarHeader>
-  <SidebarContent className="p-2 relative scroll-p-80">
+  <SidebarContent className="px-2 py-1 relative scroll-p-80">
    {
     view === 'search' ? <FindAndReplace />
      : view === 'comments' ? <Comments />
