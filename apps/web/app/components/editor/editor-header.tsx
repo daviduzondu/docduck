@@ -41,14 +41,20 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  const { open } = useSidebar();
  const { provider, documentId, title } = useDocument();
  useEffect(() => {
-  provider.on('awarenessUpdate', ({ states }: onAwarenessUpdateParameters) => {
-   setCollaborators(states.map(x => ({ ...x.user })))
-  });
- }, []);
+  const handleAwarenessUpdate = ({ states }: onAwarenessUpdateParameters) => {
+   setCollaborators(states.map(x => ({ ...x.user })));
+  };
+
+  provider.on('awarenessUpdate', handleAwarenessUpdate);
+
+  return () => {
+   provider.off('awarenessUpdate', handleAwarenessUpdate);
+  };
+ }, [provider]);
 
  if (collaborators.length >= 1)
   return (
-   <header className="flex w-full items-center px-3 py-2 justify-between sticky top-0">
+   <header className="flex w-full items-center px-3 py-2 justify-between ">
     <div className="text-2xl font-bold grow basis-0">DocDuck</div>
 
     {canEdit ?

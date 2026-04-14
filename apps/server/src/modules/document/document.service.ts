@@ -17,6 +17,8 @@ type Comment = {
  parentId: string | null,
  text: string,
  commenterId: string
+ createdAt: string
+ updatedAt: string
 }
 
 export async function getDocumentWithPermissions(
@@ -165,17 +167,19 @@ export async function addNewComment({ text, userId, documentId }: { text: string
  const hocuspocusDocument = hocuspocus.documents.get(documentId);
  if (hocuspocusDocument) {
   const commentsMap = hocuspocusDocument.getMap<Comment>('comments');
-  const { id: commentId, resolved, parentId } = await db.insertInto('document_comment').values({
+  const { id: commentId, resolved, parentId, ...rest } = await db.insertInto('document_comment').values({
    documentId,
    text,
    userId,
-  }).returning(['id', 'resolved', 'parentId']).executeTakeFirstOrThrow();
+  }).returning(['id', 'resolved', 'parentId', 'createdAt', 'updatedAt']).executeTakeFirstOrThrow();
   commentsMap.set(commentId, {
    id: commentId,
    text,
    resolved,
    commenterId: userId,
    parentId,
+   createdAt: rest.createdAt.toISOString(),
+   updatedAt: rest.updatedAt.toISOString()
   });
   return {
    commentId,

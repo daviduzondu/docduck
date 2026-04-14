@@ -67,6 +67,7 @@ import { MessageSquare, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InlineCommentPopover } from "@/components/editor/inline-comment-popover";
 import { v4 as uuidv4 } from 'uuid';
+import { EditorHeader } from "@/components/editor/editor-header";
 
 const MainToolbarContent = ({
  onHighlighterClick,

@@ -7,3 +7,13 @@ export type AwarenessStates = {
  name: string, color: string, image?: string, isAnonymous: boolean, role: "VIEWER" | "EDITOR" | "OWNER"
  id: string
 }
+
+export type Comment = {
+ id: string,
+ resolved: boolean,
+ parentId: string | null,
+ text: string,
+ commenterId: string
+ createdAt: string
+ updatedAt: string
+}

@@ -33,10 +33,7 @@ export function DocumentProvider({ documentId, title, children }: { title: strin
     }
    },
   });
-  provider.document.on('update', ()=>{
-   console.log(provider.document)
-   console.log(provider.document.getMap('comments').toJSON())
-  })
+  
 
   provider.attach();
 

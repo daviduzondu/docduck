@@ -48,10 +48,8 @@ import { orpc } from "@/lib/orpc.client"
 import { useDocument } from "@/providers/document.provider"
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from "sonner"
-import { LocalErrorBoundary } from "@/components/error/error-boundary"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getUserColor } from "@/lib/utils"
-import { authClient } from "@/lib/auth.client"
 import { useAuth } from "@/providers/auth.provider"
 import { AwarenessStates } from "@/types"
 

@@ -1,11 +1,12 @@
 import FindAndReplace from "@/components/editor/sidebar/find-and-replace";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader } from "../../ui/sidebar";
+import Comments from "@/components/editor/sidebar/comments";
 
 export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
  if (!view) return <></>
  return <Sidebar side="right" collapsible="offcanvas" className="absolute" >
   <SidebarHeader>
-   <div className="text-lg">
+   <div className="text-lg px-2">
     {
      view === 'comments' ? "Comments"
       : view === 'history' ? "Version History"
@@ -14,9 +15,11 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
     }
    </div>
   </SidebarHeader>
-  <SidebarContent className="p-1">
+  <SidebarContent className="p-2 relative scroll-p-80">
    {
-    view === 'search' ? <FindAndReplace /> : null
+    view === 'search' ? <FindAndReplace />
+     : view === 'comments' ? <Comments />
+      : null
    }
   </SidebarContent>
   <SidebarFooter />

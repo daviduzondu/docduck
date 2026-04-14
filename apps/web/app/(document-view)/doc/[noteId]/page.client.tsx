@@ -33,7 +33,7 @@ export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VI
   <div className="h-screen flex flex-col">
    <TipTapEditorProvider canEdit={canEdit}>
     <EditorHeader canEdit={canEdit} />
-    <div className="flex flex-1 relative">
+    <div className="flex flex-1 relative ">
      {/* Main editor area */}
      <div className="flex-1 relative">
       <SimpleEditor canEdit={canEdit} role={role} />
