@@ -6,11 +6,26 @@ import { $api, orpc } from "@/lib/orpc.client";
 import { getUserColor } from "@/lib/utils";
 import { useDocument } from "@/providers/document.provider";
 import { Comment } from "@/types";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { Editor, useCurrentEditor } from "@tiptap/react";
 import { useRef, useEffect, useState } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
+
+function getCommentText(editor: Editor, commentId: string): string {
+  const texts: string[] = [];
+
+  editor.state.doc.descendants((node) => {
+    if (node.isText) {
+      const hasCommentMark = node.marks.some(
+        (mark) => mark.type.name === 'comment' && mark.attrs.commentId === commentId
+      );
+      if (hasCommentMark) texts.push(node.text ?? '');
+    }
+  });
+
+  return texts.join('');
+}
 
 export default function Comments() {
  const { editor } = useCurrentEditor();
@@ -86,6 +101,7 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
 
  const commentRef = useRef<HTMLDivElement | null>(null);
  const isActive = activeCommentId === comment.id;
+ const {editor} = useCurrentEditor();
 
  useEffect(() => {
   if (isActive && commentRef.current) {
@@ -122,7 +138,8 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
       {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
      </span>
     </div>
-
+    <div>{getCommentText(editor!, comment.id)}</div>
+    {/* <div>{editor.selectElement("data-comment-id=$somerandomcommentId").textContent}</div> */}
     <Textarea
      readOnly
      value={comment.text}
