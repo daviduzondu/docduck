@@ -12,6 +12,7 @@ import { useDocument } from "@/providers/document.provider";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { History, RotateCcw } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 
 type Snapshot = Awaited<ReturnType<typeof $api.documents.getSnapshots>>[number];
 
@@ -51,6 +52,10 @@ export default function Snapshots() {
 function SnapshotCard({ snapshot }: { snapshot: Snapshot }) {
  const queryClient = useQueryClient();
  const documentId = useDocument(state => state.documentId);
+ const {setMode, setSnapshotId} = useDocument(useShallow(state=>({
+  setSnapshotId: state.setSnapshotId,
+  setMode: state.setMode
+ })));
 
  const { mutate: restore, isPending } = useMutation(
   orpc.documents.restoreSnapshotbyId.mutationOptions({
@@ -66,11 +71,14 @@ function SnapshotCard({ snapshot }: { snapshot: Snapshot }) {
 
  return (
   <Card className="transition-colors hover:bg-muted/50 rounded-xl cursor-pointer p-2">
-   <CardContent className="flex flex-col gap-2 p-2">
+   <CardContent className="flex flex-col gap-2 p-2" onClick={()=>{
+    setMode('diff')
+    setSnapshotId(snapshot.id);
+   }}>
     <div className="flex items-center justify-between gap-2">
      <div className="flex flex-col">
       <span className="text-base font-medium">
-       {snapshot.id}
+       {snapshot.name ?? "Untitled snapshot"}
       </span>
       <span className="text-sm text-muted-foreground">
        {formatDistanceToNow(new Date(snapshot.createdAt), {

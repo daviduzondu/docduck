@@ -4,9 +4,7 @@ import { createAvatar } from '@dicebear/core';
 import * as thumbs from '@dicebear/thumbs';
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { StatelessMessage } from "@/types";
-import { createRelativePositionFromTypeIndex } from "yjs";
 import { Editor } from "@tiptap/core";
-import { ySyncPluginKey, absolutePositionToRelativePosition } from '@tiptap/y-tiptap'
 import * as Y from 'yjs';
 
 
@@ -49,16 +47,43 @@ export function sendStateless<T = any>(provider: HocuspocusProvider, data: State
 }
 
 // yjs docs are sparse, so the best source of truth is often the dmonad answering questions in Gitter, GitHub issues, or community forums. I'm going insane lol.
-export function getSelectionAsRelativePositions(editor: Editor) {
-  const { from, to } = editor.state.selection
-  console.log(editor.state.selection)
-  const ystate = ySyncPluginKey.getState(editor.state)
+// export function getSelectionAsRelativePositions(editor: Editor) {
+//  const { from, to } = editor.state.selection
+//  console.log(editor.state.selection)
+//  const ystate = ySyncPluginKey.getState(editor.state)
 
-  const relFrom = absolutePositionToRelativePosition(from, ystate.type, ystate.binding.mapping)
-  const relTo = absolutePositionToRelativePosition(to, ystate.type, ystate.binding.mapping)
+//  const relFrom = absolutePositionToRelativePosition(from, ystate.type, ystate.binding.mapping)
+//  const relTo = absolutePositionToRelativePosition(to, ystate.type, ystate.binding.mapping)
+
+//  return {
+//   from: Y.encodeRelativePosition(relFrom),
+//   to: Y.encodeRelativePosition(relTo),
+//  }
+// }
+
+
+export function stripMarks(node: any, markNames = new Set()) {
+ if (!node) return node
+
+ // TEXT NODE
+ if (node.type === "text") {
+  if (!node.marks) return node
 
   return {
-    from: Y.encodeRelativePosition(relFrom),
-    to: Y.encodeRelativePosition(relTo),
+   ...node,
+   marks: node.marks.filter((mark: any) => !markNames.has(mark.type)),
   }
+ }
+
+ // NON-TEXT NODE
+ if (node.content && Array.isArray(node.content)) {
+  return {
+   ...node,
+   content: node.content.map((child: any) =>
+    stripMarks(child, markNames)
+   ),
+  }
+ }
+
+ return node
 }

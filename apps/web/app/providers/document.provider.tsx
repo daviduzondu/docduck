@@ -9,10 +9,16 @@ import { create, createStore, useStore } from 'zustand';
 
 export const useDocumentStore = createStore<DocumentState & DocumentActions>((set) => ({
  title: undefined,
- documentId: null,
- ydoc: null,
- provider: null,
+ documentId: undefined,
+ ydoc: undefined,
+ provider: undefined,
+ mode: 'editor',
+ snapshotId: undefined,
+ setSnapshotId: (id) => set({ snapshotId: id }),
  setTitle: (title) => set({ title }),
+ setMode(mode) {
+  set({ mode })
+ },
  initialize(documentId, title) {
   const ydoc = new Y.Doc();
   const socket = new HocuspocusProviderWebsocket({
@@ -39,12 +45,12 @@ export const useDocumentStore = createStore<DocumentState & DocumentActions>((se
   return () => {
    provider.detach();
    socket.destroy();
-   set({ ydoc: null, provider: null, documentId: null, title: undefined });
+   set({ ydoc: undefined, provider: undefined, documentId: undefined, title: undefined });
   }
  },
 }));
 
-export function useDocument<T = DocumentReadyState>(
+export function useDocument<T = DocumentReadyState & DocumentActions>(
  selector?: (state: DocumentReadyState & DocumentActions) => T
 ) {
  const { ydoc, provider } = useDocumentStore.getState();
@@ -67,7 +73,7 @@ export function DocumentProvider({
  documentId: string;
  children: React.ReactNode;
 }) {
- const initialize = useStore(useDocumentStore, (s) => s.initialize);
+ const initialize = useStore(useDocumentStore, (s) => s.initialize)
  const ready = useStore(useDocumentStore, (s) => !!(s.ydoc && s.provider));
 
  useEffect(() => {
@@ -83,9 +89,11 @@ export function DocumentProvider({
 
 type DocumentState = {
  title: string | undefined;
- documentId: string | null;
- ydoc: Y.Doc | null;
- provider: HocuspocusProvider | null;
+ documentId: string | undefined;
+ ydoc: Y.Doc | undefined;
+ provider: HocuspocusProvider | undefined;
+ mode: "editor" | 'diff';
+ snapshotId: string | undefined;
 };
 
 type DocumentReadyState = {
@@ -93,9 +101,13 @@ type DocumentReadyState = {
  documentId: string;
  ydoc: Y.Doc;
  provider: HocuspocusProvider;
+ mode: 'editor' | 'diff'
+ snapshotId: string;
 }
 
 type DocumentActions = {
  initialize: (documentId: string, title: string) => () => void;
  setTitle: (title: string) => void;
+ setMode: (mode: 'editor' | 'diff') => void;
+ setSnapshotId: (id: string) => void;
 };

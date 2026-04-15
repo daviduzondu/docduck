@@ -8,6 +8,8 @@ import { Role, Visibility } from "@/db/prisma/generated/types";
 import * as Y from 'yjs';
 import { sql } from "kysely";
 import { hocuspocus } from "@/lib/config/hocuspocus";
+import { fromUint8Array, toUint8Array } from 'js-base64'
+
 
 type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
 type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role };
@@ -60,13 +62,18 @@ export async function getSnapshots(documentId: string, page: number = 1) {
 }
 
 export async function getSnapshotById({ documentId, snapshotId }: { documentId: string, snapshotId: string }) {
- return await db.selectFrom('document_snapshot')
+ const result = await db.selectFrom('document_snapshot')
   .select(['creatorId', 'documentId', 'id', 'name', 'yjsState'])
   .where('document_snapshot.id', '=', snapshotId)
   .where('document_snapshot.documentId', '=', documentId)
   .executeTakeFirstOrThrow(() => {
    throw new AppError('Snapshot not found', StatusCodes.NOT_FOUND)
-  })
+  });
+
+ const snapshotDoc = new Y.Doc();
+ Y.applyUpdate(snapshotDoc, result.yjsState);
+
+ return { ...result, yjsState: fromUint8Array(Y.encodeStateAsUpdate(snapshotDoc)) }
 }
 
 export async function createSnapshot(documentId: string, overrideInterval?: boolean) {
@@ -117,8 +124,7 @@ function revertToSnapshot(
  const snapshotStateVector = Y.encodeStateVector(snapshotDoc)
 
  // 2. Compute everything that changed AFTER the snapshot
- const changesSinceSnapshot = Y.encodeStateAsUpdate(liveDoc, snapshotStateVector)
-
+ const changesSinceSnapshot = Y.encodeStateAsUpdate(liveDoc, snapshotStateVector);
 
  // 3. Set up UndoManager on the snapshot doc to track those changes
  const snapshotOrigin = 'revert'
@@ -132,6 +138,7 @@ function revertToSnapshot(
  // 5. Undo them — this produces the inverse operations
  undoManager.undo()
 
+ console.log(undoManager.doc)
  // 6. Extract just the new inverse update and apply to live doc
  const revertUpdate = Y.encodeStateAsUpdate(snapshotDoc, currentStateVector)
  Y.applyUpdate(liveDoc, revertUpdate)
@@ -178,7 +185,7 @@ export async function getSnapshotDiff({ snapshotId, documentId }: { snapshotId: 
  const document = await db.selectFrom('document').where('document.id', '=', documentId).select(['id', 'yjsState']).executeTakeFirstOrThrow();
  const snapshot = await db.selectFrom('document_snapshot').where('document_snapshot.id', '=', snapshotId).select(['id', 'yjsState']).executeTakeFirstOrThrow();
  const currentDoc = new Y.Doc();
- // Y.applyUpdate(currentDoc, document.yjsState!);
+ Y.applyUpdate(currentDoc, document.yjsState!);
 
  const snapshotDoc = new Y.Doc();
  Y.applyUpdate(snapshotDoc, snapshot.yjsState!);
@@ -190,9 +197,10 @@ export async function getSnapshotDiff({ snapshotId, documentId }: { snapshotId: 
  const diffDoc = new Y.Doc();
  const updates = Y.diffUpdate(document.yjsState!, snapshotDocVector);
  Y.applyUpdate(diffDoc, updates);
+ console.log("HELLO!")
 
  return {
-  diff: Y.encodeStateAsUpdate(diffDoc)
+  diff: fromUint8Array(Y.encodeStateAsUpdate(currentDoc))
  }
 }
 
