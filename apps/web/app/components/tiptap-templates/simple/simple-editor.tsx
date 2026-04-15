@@ -187,7 +187,6 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
  const { data } = useAuth();
  const anonymousUser = useRef(faker.animal.type());
  const { editor } = useCurrentEditor();
- const containerRef = useRef<HTMLDivElement>(null);
 
 
  const rect = useCursorVisibility({

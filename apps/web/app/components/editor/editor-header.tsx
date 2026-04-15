@@ -76,6 +76,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 };
 
 function EditTitlePopover({ children, title, documentId, provider }: { children: React.ReactNode, title: string, documentId: string, provider: HocuspocusProvider }) {
+ const { open } = useSidebar();
  const updateTitleSchema = z.object({
   title: z.string().trim().nonempty({ error: "Title cannot be empty" }),
  });
@@ -108,7 +109,7 @@ function EditTitlePopover({ children, title, documentId, provider }: { children:
   <PopoverTrigger className={"active:not-aria-[haspopup]:translate-y-px cursor-pointer p-0"}>
    {children}
   </PopoverTrigger>
-  <PopoverContent side="bottom" align="center" className={'w-lg'}>
+  <PopoverContent side="bottom" align="center" className={`w-lg ${open ? 'mr-[24rem]' : ''}`}>
    <form id='update-title-form' onSubmit={form.handleSubmit(onSubmit)}>
     <Controller
      name="title"

@@ -16,7 +16,7 @@ import { History, RotateCcw } from "lucide-react";
 type Snapshot = Awaited<ReturnType<typeof $api.documents.getSnapshots>>[number];
 
 export default function Snapshots() {
- const { documentId } = useDocument();
+ const documentId = useDocument(state => state.documentId)
  const { data: snapshots } = useSuspenseQuery(
   orpc.documents.getSnapshots.queryOptions({
    input: { params: { documentId } },
@@ -50,7 +50,7 @@ export default function Snapshots() {
 
 function SnapshotCard({ snapshot }: { snapshot: Snapshot }) {
  const queryClient = useQueryClient();
- const { documentId } = useDocument();
+ const documentId = useDocument(state => state.documentId);
 
  const { mutate: restore, isPending } = useMutation(
   orpc.documents.restoreSnapshotbyId.mutationOptions({
@@ -70,7 +70,7 @@ function SnapshotCard({ snapshot }: { snapshot: Snapshot }) {
     <div className="flex items-center justify-between gap-2">
      <div className="flex flex-col">
       <span className="text-base font-medium">
-       {snapshot.name ?? "Untitled snapshot"}
+       {snapshot.id}
       </span>
       <span className="text-sm text-muted-foreground">
        {formatDistanceToNow(new Date(snapshot.createdAt), {
@@ -80,7 +80,7 @@ function SnapshotCard({ snapshot }: { snapshot: Snapshot }) {
      </div>
      <Button
       size="sm"
-      variant="outline"
+      variant="secondary"
       disabled={isPending}
       onClick={() => {
        restore({ params: { documentId, snapshotId: snapshot.id } })

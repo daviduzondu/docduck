@@ -31,8 +31,14 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
     query: z.object({ page: z.coerce.number().optional() }).optional()
    }))
    .use(ensureCanEditDocument, input => input.params.documentId)
-   .handler(({ input }) => documentService.getSnapshots(input.params.documentId, input.query.page)),
+   .handler(({ input }) => documentService.getSnapshots(input.params.documentId, input.query?.page)),
 
+ getSnapshotDiff:
+  r.get('/{documentId}/snapshots/{snapshotId}/diff', { inputStructure: 'detailed' })
+   .input(z.object({
+    params: z.object({ documentId: z.string(), snapshotId: z.string() })
+   }))
+   .handler(({ input }) => documentService.getSnapshotDiff({ documentId: input.params.documentId, snapshotId: input.params.snapshotId })),
 
  getSnapshotById:
   r.get('/{documentId}/snapshots/{snapshotId}', { inputStructure: 'detailed' })

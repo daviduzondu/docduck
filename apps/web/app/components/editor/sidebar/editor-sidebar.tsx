@@ -2,6 +2,8 @@ import FindAndReplace from "@/components/editor/sidebar/find-and-replace";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "../../ui/sidebar";
 import Comments from "@/components/editor/sidebar/comments";
 import Snapshots from "@/components/editor/sidebar/snapshots";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
 
 export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
  if (!view) return <></>
@@ -10,7 +12,11 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
    <div className="text-lg ">
     {
      view === 'comments' ? "Comments"
-      : view === 'history' ? "Version History"
+      : view === 'history' ?
+       <div className="flex items-center justify-between">Version History <Button size={'sm'} variant={'outline'}>
+        <PlusCircle  />
+        New version</Button>
+       </div>
        : view === "search" ? "Find & Replace"
         : null
     }

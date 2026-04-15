@@ -173,6 +173,29 @@ export async function restoreSnapshotById(snapshotId: string, documentId: string
  })
 }
 
+// TODO: This endpoint might not be needed
+export async function getSnapshotDiff({ snapshotId, documentId }: { snapshotId: string, documentId: string }) {
+ const document = await db.selectFrom('document').where('document.id', '=', documentId).select(['id', 'yjsState']).executeTakeFirstOrThrow();
+ const snapshot = await db.selectFrom('document_snapshot').where('document_snapshot.id', '=', snapshotId).select(['id', 'yjsState']).executeTakeFirstOrThrow();
+ const currentDoc = new Y.Doc();
+ // Y.applyUpdate(currentDoc, document.yjsState!);
+
+ const snapshotDoc = new Y.Doc();
+ Y.applyUpdate(snapshotDoc, snapshot.yjsState!);
+
+ const snapshotDocVector = Y.encodeStateVector(snapshotDoc!)
+
+ // const changesSinceSnapshot = Y.encodeStateAsUpdate(currentDoc, snapshotDocVector); // snapshotDocVector here is for efficiency or something idk
+
+ const diffDoc = new Y.Doc();
+ const updates = Y.diffUpdate(document.yjsState!, snapshotDocVector);
+ Y.applyUpdate(diffDoc, updates);
+
+ return {
+  diff: Y.encodeStateAsUpdate(diffDoc)
+ }
+}
+
 export async function addNewComment({ text, userId, documentId }: { text: string, userId: string, documentId: string }) {
  const hocuspocusDocument = hocuspocus.documents.get(documentId);
  if (hocuspocusDocument) {
