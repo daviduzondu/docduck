@@ -26,8 +26,8 @@ model user {
  sessions session[]
  accounts account[]
 
- createdAt DateTime @ignore @db.Timestamptz(6)
- updatedAt DateTime @ignore @db.Timestamptz(6)
+ createdAt DateTime @default(now()) @ignore @db.Timestamptz(6)
+ updatedAt DateTime @default(now()) @ignore @db.Timestamptz(6)
 
  documentInvitation document_invitation[]
  documentSnapshots  document_snapshot[]

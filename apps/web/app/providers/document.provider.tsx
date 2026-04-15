@@ -33,19 +33,15 @@ export function DocumentProvider({ documentId, title, children }: { title: strin
     }
    },
   });
-  
-
-  provider.attach();
-
-
-
-
+  provider.attach()
   setData(prev => ({ ...prev, ydoc, provider }))
   return () => {
    provider.detach();
+   socket.destroy();
   }
- }, []);
+ }, [documentId]);
 
+ if (!data.ydoc || !data.provider) return <span>"Loading..."</span>
  if (data.ydoc && data.provider)
   return <HocuspocusContext.Provider value={data}>
    {children}

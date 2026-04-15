@@ -117,7 +117,7 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
   <Card
    ref={commentRef}
    className={`cursor-pointer transition-colors ${isActive
-    ? 'outline-[3px] outline-[rgba(218,113,7,0.61)] bg-[rgba(227,125,23,0.05)]'
+    ? 'outline-[3px] outline-primary bg-primary/10'
     : 'bg-transparent'
     } p-2 rounded-xl`}
   >
@@ -139,7 +139,7 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
       {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
      </span>
     </div>
-    <div className="flex">
+    <div className="flex text-muted-foreground">
      <span>“</span>
      <div className="truncate">{getCommentText(editor!, comment.id)}</div>
      <span>”</span>

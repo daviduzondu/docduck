@@ -26,7 +26,6 @@ export async function getDocumentWithPermissions(
  userId: string | null = null
 ): Promise<{ meta: DocumentMeta; permissions: DocumentPermissions }> {
 
-
  const result = await db.selectFrom('document')
   .leftJoin('permission', (join) => join.onRef('permission.documentId', '=', 'document.id').on(eb => eb('permission.userId', '=', userId).or('permission.userId', 'is', null)))
   .where('document.id', '=', id)
@@ -48,6 +47,7 @@ export async function getSnapshots(documentId: string, page: number = 1) {
   .select(['creatorId', 'documentId', 'id', 'name', 'yjsState', 'createdAt'])
   .where('documentId', '=', documentId)
   .offset(offset)
+  .orderBy('createdAt', 'desc')
   .limit(15)
   .execute();
 
