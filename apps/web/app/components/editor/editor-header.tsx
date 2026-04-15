@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarGroup, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
-import { Edit3 } from 'lucide-react';
+import { Edit3, RotateCcw, X } from 'lucide-react';
 import { EditorShareDialogButton } from './editor-share-dialog';
 import { useSidebar } from '../ui/sidebar';
 import { HocuspocusProvider, onAwarenessUpdateParameters } from '@hocuspocus/provider';
@@ -19,10 +19,12 @@ import {
 } from "@/components/ui/field"
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { $api } from '@/lib/orpc.client';
+import { $api, orpc } from '@/lib/orpc.client';
 import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import { AwarenessStates } from '@/types';
+import { useShallow } from 'zustand/react/shallow';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface EditorHeaderProps {
  onEdit?: () => void;
@@ -37,9 +39,33 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  onEdit,
  onShare,
 }) => {
+ const queryClient = useQueryClient();
+
  const [collaborators, setCollaborators] = useState<AwarenessStates[]>([]);
  const { open } = useSidebar();
- const { provider, documentId, title } = useDocument();
+ const { mode, documentId, snapshotId, title, provider, setMode } = useDocument(
+  useShallow(state => ({
+   mode: state.mode,
+   documentId: state.documentId,
+   snapshotId: state.snapshotId,
+   title: state.title,
+   provider: state.provider,
+   setMode: state.setMode
+  }))
+ );
+ const { mutate: restore, isPending } = useMutation(
+  orpc.documents.restoreSnapshotbyId.mutationOptions({
+   onSuccess: () => {
+    queryClient.invalidateQueries(
+     orpc.documents.getSnapshots.queryOptions({
+      input: { params: { documentId } },
+     })
+    );
+    setMode('editor')
+   },
+  })
+ );
+
  useEffect(() => {
   const handleAwarenessUpdate = ({ states }: onAwarenessUpdateParameters) => {
    setCollaborators(states.map(x => ({ ...x.user })));
@@ -52,12 +78,16 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   };
  }, [provider]);
 
- if (collaborators.length >= 1)
-  return (
-   <header className="flex w-full items-center px-3 py-2 justify-between ">
-    <div className="text-2xl font-bold grow basis-0">DocDuck</div>
+ return (
+  <header className="flex w-full items-center px-3 py-2 justify-between">
+   {mode === 'editor' ? <div className="text-2xl font-bold grow basis-0">DocDuck</div> :
+    <div className={'grow'}>
+     <Button variant={'secondary'} className={'cursor-pointer'} onClick={() => setMode('editor')}><X /> Return to editor</Button>
+    </div>
+   }
 
-    {canEdit ?
+   {mode === 'editor' ?
+    canEdit ?
      <EditTitlePopover title={title} documentId={documentId} provider={provider}>
       <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[24rem]' : ''}`}>
        <div className={`truncate text-center`}>{title}</div>
@@ -66,13 +96,28 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
      </EditTitlePopover>
      : <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[24rem]' : ''}`}>
       <div className={`truncate text-center`}>{title}</div>
-     </div>}
-    <div className="gap-2 items-center flex grow basis-0 justify-end">
-     {collaborators.length > 0 && collaborators.every(collaborator => collaborator.id !== undefined) ? <CollaboratorsHoverCard collaborators={collaborators} /> : null}
-     <EditorShareDialogButton onShare={onShare} />
+     </div> :
+    <div className={`${open ? 'mr-[24rem]' : ''} bg-red- w-full text-center`}>
+     {/* <Button >Restore this version</Button> */}
+
+     <Button
+      size="lg"
+      disabled={isPending}
+      onClick={() => {
+       restore({ params: { documentId, snapshotId } })
+      }}
+     >
+      <RotateCcw className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`} />
+      {isPending ? "Restoring..." : "Restore this version"}
+     </Button>
     </div>
-   </header>
-  );
+   }
+   <div className="gap-2 items-center flex grow basis-0 justify-end">
+    {collaborators.length > 0 && collaborators.every(collaborator => collaborator.id !== undefined) ? <CollaboratorsHoverCard collaborators={collaborators} /> : null}
+    <EditorShareDialogButton onShare={onShare} />
+   </div>
+  </header>
+ );
 };
 
 function EditTitlePopover({ children, title, documentId, provider }: { children: React.ReactNode, title: string, documentId: string, provider: HocuspocusProvider }) {

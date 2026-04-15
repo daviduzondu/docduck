@@ -75,7 +75,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
     id: documentId
    }
   },
-  enabled: Array.from((provider.awareness?.states.values()) ?? []).map<AwarenessStates>(x => (x.user)).filter(x => x.id === data?.user.id)[0]?.role === 'OWNER'
+  enabled: Array.from((provider.awareness?.states.values()) ?? []).map<AwarenessStates>(x => (x.user)).filter(x => x?.id === data?.user.id)[0]?.role === 'OWNER'
  }));
 
  const sendInvitationsMutation = useMutation(orpc.documents.createDocumentInvitations.mutationOptions({

@@ -50,24 +50,13 @@ export default function Snapshots() {
 }
 
 function SnapshotCard({ snapshot }: { snapshot: Snapshot }) {
- const queryClient = useQueryClient();
  const documentId = useDocument(state => state.documentId);
  const {setMode, setSnapshotId} = useDocument(useShallow(state=>({
   setSnapshotId: state.setSnapshotId,
   setMode: state.setMode
  })));
 
- const { mutate: restore, isPending } = useMutation(
-  orpc.documents.restoreSnapshotbyId.mutationOptions({
-   onSuccess: () => {
-    queryClient.invalidateQueries(
-     orpc.documents.getSnapshots.queryOptions({
-      input: { params: { documentId } },
-     })
-    );
-   },
-  })
- );
+
 
  return (
   <Card className="transition-colors hover:bg-muted/50 rounded-xl cursor-pointer p-2">
@@ -78,25 +67,11 @@ function SnapshotCard({ snapshot }: { snapshot: Snapshot }) {
     <div className="flex items-center justify-between gap-2">
      <div className="flex flex-col">
       <span className="text-base font-medium">
-       {snapshot.name ?? "Untitled snapshot"}
-      </span>
-      <span className="text-sm text-muted-foreground">
-       {formatDistanceToNow(new Date(snapshot.createdAt), {
+       {snapshot.name ?? formatDistanceToNow(new Date(snapshot.createdAt), {
         addSuffix: true,
        })}
       </span>
      </div>
-     <Button
-      size="sm"
-      variant="secondary"
-      disabled={isPending}
-      onClick={() => {
-       restore({ params: { documentId, snapshotId: snapshot.id } })
-      }}
-     >
-      <RotateCcw className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`} />
-      {isPending ? "Restoring..." : "Restore"}
-     </Button>
     </div>
 
     {snapshot.preview && (

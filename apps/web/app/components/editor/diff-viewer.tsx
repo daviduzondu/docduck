@@ -3,20 +3,15 @@
 import { orpc } from "@/lib/orpc.client";
 import { useDocument } from "@/providers/document.provider";
 import { useQuery } from "@tanstack/react-query";
-import Collaboration from "@tiptap/extension-collaboration";
-import { Content, EditorContent, useCurrentEditor, useEditor } from "@tiptap/react";
-import { Editor } from '@tiptap/core';
+import { EditorContent, useCurrentEditor, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import * as Y from 'yjs';
 import { useShallow } from "zustand/react/shallow";
-import { fromUint8Array, toUint8Array } from 'js-base64';
+import { toUint8Array } from 'js-base64';
 import Comment from '@/lib/comment.extension';
 import { Image } from "@tiptap/extension-image"
-
-import { yDocToProsemirrorJSON, yXmlFragmentToProseMirrorRootNode } from "@tiptap/y-tiptap";
+import { yXmlFragmentToProseMirrorRootNode } from "@tiptap/y-tiptap";
 import { TextStyleKit } from "@tiptap/extension-text-style";
-import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node";
-import { MAX_FILE_SIZE, handleImageUpload } from "@/lib/tiptap-utils";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
 import TextAlign from "@tiptap/extension-text-align";
@@ -27,6 +22,16 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { stripMarks } from "@/lib/utils";
 import ComparePlugin from "@/lib/compare.extension";
+
+import "@/components/tiptap-node/blockquote-node/blockquote-node.scss"
+import "@/components/tiptap-node/code-block-node/code-block-node.scss"
+import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss"
+import "@/components/tiptap-node/list-node/list-node.scss"
+import "@/components/tiptap-node/image-node/image-node.scss"
+import "@/components/tiptap-node/heading-node/heading-node.scss"
+import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
+import "@/components/tiptap-templates/simple/simple-editor.scss"
+
 
 export default function Diff() {
  const { mode, documentId, snapshotId } = useDocument(
@@ -40,7 +45,6 @@ export default function Diff() {
   input: {
    params: { documentId, snapshotId }
   },
-
  }))
 
  if (getSnapshotByIdQuery.isPending) return <div>Loading...</div>;
@@ -55,10 +59,13 @@ export default function Diff() {
 function Viewer({ document }: { document: Y.Doc }) {
  const provider = useDocument(state => state.provider);
  const { editor: currentEditor } = useCurrentEditor();
- console.log(yXmlFragmentToProseMirrorRootNode(provider.document.getXmlFragment('default'), currentEditor!.schema).toJSON())
- const editor = new Editor({
+ const editor = useEditor({
+  immediatelyRender: true,
   editorProps: {
    editable: () => false,
+   attributes: {
+    class: "simple-editor",
+   }
   },
   content: stripMarks(yXmlFragmentToProseMirrorRootNode(document.getXmlFragment('default'), currentEditor!.schema).toJSON(), new Set(['comment'])),
   extensions: [
@@ -101,10 +108,12 @@ function Viewer({ document }: { document: Y.Doc }) {
  });
 
  return <div className="simple-editor-wrapper">
-  <EditorContent
-   editor={editor}
-   role="presentation"
-   className="simple-editor-content rounded-sm border h-full min-h-full relative"
-  />
+  <div>
+   <EditorContent
+    editor={editor}
+    role="presentation"
+    className="simple-editor-content rounded-sm border h-full min-h-full relative"
+   />
+  </div>
  </div>
 }
