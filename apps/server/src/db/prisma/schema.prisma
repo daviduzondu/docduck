@@ -104,7 +104,7 @@ model document_snapshot {
  creatorId  String?
  name       String?
 
- createdAt DateTime @default(now()) @ignore @db.Timestamptz(6)
+ createdAt DateTime @default(now()) @db.Timestamptz(6)
  updatedAt DateTime @default(now()) @ignore @db.Timestamptz(6)
 
  // relations

@@ -27,10 +27,11 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
  getSnapshots:
   r.get('/{documentId}/snapshots', { inputStructure: 'detailed' })
    .input(z.object({
-    params: z.object({ documentId: z.string() })
+    params: z.object({ documentId: z.string() }),
+    query: z.object({ page: z.coerce.number().optional() }).optional()
    }))
    .use(ensureCanEditDocument, input => input.params.documentId)
-   .handler(({ input }) => documentService.getSnapshots(input.params.documentId)),
+   .handler(({ input }) => documentService.getSnapshots(input.params.documentId, input.query.page)),
 
 
  getSnapshotById:

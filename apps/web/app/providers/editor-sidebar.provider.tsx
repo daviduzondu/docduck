@@ -12,6 +12,7 @@ const ViewContext = createContext<ViewContextType | undefined>(undefined);
 
 export function EditorSidebarProvider({ children }: { children: React.ReactNode }) {
  const [view, setView] = useState<View>(undefined);
+ 
  return <ViewContext.Provider value={{ view, setView }}>
   {children}
  </ViewContext.Provider>

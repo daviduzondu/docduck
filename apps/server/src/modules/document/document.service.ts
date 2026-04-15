@@ -42,11 +42,21 @@ export async function getDocumentWithPermissions(
  }
 }
 
-export async function getSnapshots(documentId: string) {
- return await db.selectFrom('document_snapshot')
-  .select(['creatorId', 'documentId', 'id', 'name', 'yjsState'])
+export async function getSnapshots(documentId: string, page: number = 1) {
+ const offset = (page - 1) * 15;
+ const results = await db.selectFrom('document_snapshot')
+  .select(['creatorId', 'documentId', 'id', 'name', 'yjsState', 'createdAt'])
   .where('documentId', '=', documentId)
-  .executeTakeFirst();
+  .offset(offset)
+  .limit(15)
+  .execute();
+
+ return results.map(result => {
+  const doc = new Y.Doc();
+  Y.applyUpdate(doc, result.yjsState);
+  const firstFewLines = doc.getXmlFragment('default').slice(0, 2);
+  return ({ ...result, preview: firstFewLines.map(line => line.toJSON()).join(''), yjsState: undefined });
+ })
 }
 
 export async function getSnapshotById({ documentId, snapshotId }: { documentId: string, snapshotId: string }) {

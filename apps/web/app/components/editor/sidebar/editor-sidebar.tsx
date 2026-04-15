@@ -1,6 +1,7 @@
 import FindAndReplace from "@/components/editor/sidebar/find-and-replace";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader } from "../../ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "../../ui/sidebar";
 import Comments from "@/components/editor/sidebar/comments";
+import Snapshots from "@/components/editor/sidebar/snapshots";
 
 export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
  if (!view) return <></>
@@ -19,7 +20,8 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
    {
     view === 'search' ? <FindAndReplace />
      : view === 'comments' ? <Comments />
-      : null
+      : view === 'history' ? <Snapshots />
+       : null
    }
   </SidebarContent>
   <SidebarFooter />

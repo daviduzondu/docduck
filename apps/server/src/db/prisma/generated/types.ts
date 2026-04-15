@@ -70,6 +70,7 @@ export type document_snapshot = {
     yjsState: Buffer;
     creatorId: string | null;
     name: string | null;
+    createdAt: Generated<Timestamp>;
 };
 export type permission = {
     id: Generated<string>;
