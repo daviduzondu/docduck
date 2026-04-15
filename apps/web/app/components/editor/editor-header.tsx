@@ -59,12 +59,12 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
     {canEdit ?
      <EditTitlePopover title={title} documentId={documentId} provider={provider}>
-      <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[20em]' : ''}`}>
+      <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[24rem]' : ''}`}>
        <div className={`truncate text-center`}>{title}</div>
        <Edit3 className={"size-3.5"} />
       </div>
      </EditTitlePopover>
-     : <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[20em]' : ''}`}>
+     : <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[24rem]' : ''}`}>
       <div className={`truncate text-center`}>{title}</div>
      </div>}
     <div className="gap-2 items-center flex grow basis-0 justify-end">

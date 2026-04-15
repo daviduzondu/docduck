@@ -30,7 +30,7 @@ export default function FindAndReplace() {
 
  return (
   <div className="flex flex-col h-full overflow-hidden">
-   <div className="flex flex-col space-y-2.5 shrink-0 px-1 my-2">
+   <div className="flex flex-col space-y-2.5 shrink-0">
     <InputGroup>
      <InputGroupInput
       placeholder="Search..."

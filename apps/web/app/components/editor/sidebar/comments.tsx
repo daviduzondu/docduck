@@ -11,20 +11,21 @@ import { Editor, useCurrentEditor } from "@tiptap/react";
 import { useRef, useEffect, useState } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
+import { Quote } from "lucide-react";
 
 function getCommentText(editor: Editor, commentId: string): string {
-  const texts: string[] = [];
+ const texts: string[] = [];
 
-  editor.state.doc.descendants((node) => {
-    if (node.isText) {
-      const hasCommentMark = node.marks.some(
-        (mark) => mark.type.name === 'comment' && mark.attrs.commentId === commentId
-      );
-      if (hasCommentMark) texts.push(node.text ?? '');
-    }
-  });
+ editor.state.doc.descendants((node) => {
+  if (node.isText) {
+   const hasCommentMark = node.marks.some(
+    (mark) => mark.type.name === 'comment' && mark.attrs.commentId === commentId
+   );
+   if (hasCommentMark) texts.push(node.text ?? '');
+  }
+ });
 
-  return texts.join('');
+ return texts.join('');
 }
 
 export default function Comments() {
@@ -101,7 +102,7 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
 
  const commentRef = useRef<HTMLDivElement | null>(null);
  const isActive = activeCommentId === comment.id;
- const {editor} = useCurrentEditor();
+ const { editor } = useCurrentEditor();
 
  useEffect(() => {
   if (isActive && commentRef.current) {
@@ -116,7 +117,7 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
   <Card
    ref={commentRef}
    className={`cursor-pointer transition-colors ${isActive
-    ? 'outline outline-[3px] outline-[rgba(218,113,7,0.61)] bg-[rgba(218,113,7,0.08)]'
+    ? 'outline-[3px] outline-[rgba(218,113,7,0.61)] bg-[rgba(227,125,23,0.05)]'
     : 'bg-transparent'
     } p-2 rounded-xl`}
   >
@@ -138,7 +139,11 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
       {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
      </span>
     </div>
-    <div>{getCommentText(editor!, comment.id)}</div>
+    <div className="flex">
+     <span>“</span>
+     <div className="truncate">{getCommentText(editor!, comment.id)}</div>
+     <span>”</span>
+    </div>
     {/* <div>{editor.selectElement("data-comment-id=$somerandomcommentId").textContent}</div> */}
     <Textarea
      readOnly

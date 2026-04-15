@@ -5,8 +5,8 @@ import Comments from "@/components/editor/sidebar/comments";
 export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
  if (!view) return <></>
  return <Sidebar side="right" collapsible="offcanvas" className="absolute" >
-  <SidebarHeader>
-   <div className="text-lg px-2">
+  <SidebarHeader className="">
+   <div className="text-lg ">
     {
      view === 'comments' ? "Comments"
       : view === 'history' ? "Version History"
