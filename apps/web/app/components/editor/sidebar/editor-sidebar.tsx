@@ -13,9 +13,10 @@ export default function EditorSidebar({ view, canEdit }: { view: "comments" | "h
     {
      view === 'comments' ? "Comments"
       : view === 'history' ?
-       <div className="flex items-center justify-between">Version History <Button size={'sm'} variant={'outline'}>
+       <div className="flex items-center justify-between">Version History 
+       {/* <Button size={'sm'} variant={'outline'}>
         <PlusCircle />
-        New version</Button>
+        New version</Button> */}
        </div>
        : view === "search" ? `Find ${canEdit ? "& Replace" : ''}`
         : null

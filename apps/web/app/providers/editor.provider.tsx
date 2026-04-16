@@ -77,6 +77,7 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
    StarterKit.configure({
     horizontalRule: false,
     undoRedo: false,
+    
     link: {
      openOnClick: false,
      enableClickSelection: true,
@@ -103,18 +104,18 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
    }),
    TaskItem.configure({ nested: true }),
    Highlight.configure({ multicolor: true }),
-   Image,
+   // Image,
    Typography,
    Superscript,
    Subscript,
    Selection,
-   ImageUploadNode.configure({
-    accept: "image/*",
-    maxSize: MAX_FILE_SIZE,
-    limit: 3,
-    upload: handleImageUpload,
-    onError: (error) => console.error("Upload failed:", error),
-   }),
+   // ImageUploadNode.configure({
+   //  accept: "image/*",
+   //  maxSize: MAX_FILE_SIZE,
+   //  limit: 3,
+   //  upload: handleImageUpload,
+   //  onError: (error) => console.error("Upload failed:", error),
+   // }),
   ],
 
   onSelectionUpdate: ({ editor }) => {

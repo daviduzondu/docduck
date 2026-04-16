@@ -49,4 +49,23 @@ export const ensureCanEditDocument = base
   return next({
    context: { ...context }
   })
- }) 
+ })
+
+
+
+export const ensureCommentAuthor = base
+ .$context<Required<AppContext>>()
+ .middleware(async ({ context, next, errors }, { documentId, commentId }: { documentId: string, commentId: string }) => {
+  const comment = await db.selectFrom('document_comment')
+   .where('document_comment.documentId', '=', documentId)
+   .where('document_comment.userId', '=', context.user.id)
+   .where('document_comment.id', '=', commentId)
+   .select(['userId'])
+   .executeTakeFirst();
+  if (comment?.userId !== context.user.id) throw errors.FORBIDDEN({
+   message: "You're not the author of this comment"
+  });
+  return next({
+   context
+  });
+ })

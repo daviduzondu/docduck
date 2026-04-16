@@ -217,7 +217,6 @@ export async function getSnapshotDiff({ snapshotId, documentId }: { snapshotId: 
  const diffDoc = new Y.Doc();
  const updates = Y.diffUpdate(document.yjsState!, snapshotDocVector);
  Y.applyUpdate(diffDoc, updates);
- console.log("HELLO!")
 
  return {
   diff: fromUint8Array(Y.encodeStateAsUpdate(currentDoc))
@@ -254,6 +253,30 @@ export async function addNewComment({ text, userId, documentId }: { text: string
  }
 }
 
+export async function editComment({ text, documentId, commentId }: { text: string, documentId: string, commentId: string }) {
+ const comment = await db.updateTable('document_comment')
+  .set({ text })
+  .where('document_comment.id', '=', commentId)
+  .returning(['id', 'parentId', 'updatedAt'])
+  .executeTakeFirstOrThrow();
+
+  const hocuspocusDocument = hocuspocus.documents.get(documentId);
+
+ if (hocuspocusDocument && comment.id) {
+  const commentsMap = hocuspocusDocument.getMap<Comment>('comments');
+  commentsMap.set(commentId, {
+   ...commentsMap.get(commentId)!,
+   text,
+   updatedAt: comment.updatedAt.toISOString()
+  });
+  return {
+   commentId: comment.id,
+   parentId: comment.parentId
+  };
+ } else {
+  throw new AppError("You're not connected to any document", StatusCodes.BAD_REQUEST);
+ }
+}
 
 export async function updateDocumentTitle(id: string, title: string) {
  return await db.updateTable('document').set({

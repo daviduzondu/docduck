@@ -3,18 +3,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { $api, orpc } from "@/lib/orpc.client";
-import { getUserColor } from "@/lib/utils";
+import { cn, getUserColor } from "@/lib/utils";
 import { useDocument } from "@/providers/document.provider";
 import { Comment } from "@/types";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { Editor, useCurrentEditor } from "@tiptap/react";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, SetStateAction, Dispatch } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { EllipsisVertical, Quote, Loader } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { isDefinedError } from "@orpc/client";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
+import { useAuth } from "@/providers/auth.provider";
 
 function getCommentText(editor: Editor, commentId: string): string {
  const texts: string[] = [];
@@ -57,6 +59,7 @@ export default function Comments() {
 
  useEffect(() => {
   const handleDocUpdate = () => {
+   console.log("Document updated, refreshing comments");
    setComments({ ...provider.document.getMap('comments').toJSON() });
   };
 
@@ -120,8 +123,25 @@ export default function Comments() {
 function CommentCard({ comment, activeCommentId, userData }: { comment: Comment, activeCommentId: string | null | undefined, userData: Awaited<ReturnType<typeof $api.users.getBasicUserInfo>> }) {
 
  const commentRef = useRef<HTMLDivElement | null>(null);
+ const textAreaRef = useRef<HTMLTextAreaElement | null>(null)
  const isActive = activeCommentId === comment.id;
+ const [isEditing, setIsEditing] = useState(false);
+ const [isFocused, setIsFocused] = useState(false);
+ const [textAreaValue, setTextAreaValue] = useState(comment.text);
  const { editor } = useCurrentEditor();
+ const documentId = useDocument(state => state.documentId);
+ const { data } = useAuth();
+ const { mutate } = useMutation(orpc.documents.editComment.mutationOptions({
+  onSuccess() {
+   setIsEditing(false);
+   toast.success("Comment updated");
+  },
+  onError(error) {
+   textAreaRef.current?.focus();
+   setTextAreaValue(comment.text);
+   toast.error("Failed to update comment", { description: isDefinedError(error) ? error.message : "Something went wrong" });
+  }
+ }))
 
  useEffect(() => {
   if (isActive && commentRef.current) {
@@ -130,12 +150,25 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
  }, [isActive]);
 
 
+ useEffect(() => {
+  textAreaRef.current?.focus();
+ }, [isEditing])
+
+ useEffect(() => {
+  if (!isEditing) {
+   setTextAreaValue(comment.text);
+  }
+ }, [comment.text, isEditing]);
+
  const { name, image } = userData;
 
  return (
   <Card
    ref={commentRef}
-   className={`cursor-pointer transition-colors ${isActive
+   tabIndex={0}
+   onFocus={() => setIsFocused(true)}
+   onBlur={() => setIsFocused(false)}
+   className={`cursor-pointer transition-all ${isActive
     ? 'outline-[3px] outline-primary bg-primary/10'
     : 'bg-transparent'
     } p-2 rounded-xl`}
@@ -159,10 +192,8 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
        </div>
       </div>
      </div>
-     <CommentDropdownMenu commentId={comment.id} />
-     {/* <span className="text-xs text-muted-foreground shrink-0">
-      {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-     </span> */}
+     <CommentDropdownMenu commentId={comment.id} setIsEditing={setIsEditing} canEdit={comment.commenterId === data?.user?.id} />
+
     </div>
     <div className="flex text-muted-foreground">
      <span>“</span>
@@ -170,18 +201,47 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
      <span>”</span>
     </div>
     {/* <div>{editor.selectElement("data-comment-id=$somerandomcommentId").textContent}</div> */}
-    <Textarea
-     readOnly
-     value={comment.text}
-     className="h-20 rounded-lg resize-none"
-    />
+    <InputGroup className={cn("has-data-[align=block-end]:rounded-lg has-[textarea]:rounded-lg")}>
+     <InputGroupTextarea
+      ref={textAreaRef}
+      readOnly={!isEditing}
+      value={textAreaValue}
+      onChange={(e) => setTextAreaValue(e.target.value)}
+     // className={}
+     />
+     {isEditing && isFocused ? <InputGroupAddon align="block-end" className=" w-full flex justify-between">
+      <Button size="sm" variant="outline"
+       onMouseDown={(e) => {
+        e.preventDefault(); // stops focus from shifting
+        setTextAreaValue(comment.text);
+        setIsEditing(false);
+       }}>
+       Cancel
+      </Button>
+      <Button size="sm" variant="outline"
+       onMouseDown={() => {
+        // textAreaRef.current
+        textAreaRef.current &&
+         mutate({
+          params: { documentId, commentId: comment.id },
+          body: { text: textAreaRef.current?.value }
+         })
+       }}
+       disabled={textAreaRef.current ? textAreaRef.current?.value?.trim()?.length <= 0 : true}
+
+      >
+       Submit
+      </Button>
+     </InputGroupAddon> : null}
+
+    </InputGroup>
    </CardContent>
   </Card>
  );
 }
 
 
-function CommentDropdownMenu({ commentId }: { commentId: string }) {
+function CommentDropdownMenu({ commentId, setIsEditing, canEdit }: { commentId: string, setIsEditing: Dispatch<SetStateAction<boolean>>, canEdit: boolean }) {
  const documentId = useDocument(state => state.documentId);
  const { editor } = useCurrentEditor();
  const { mutate, isPending } = useMutation(orpc.documents.resolveComment.mutationOptions({
@@ -203,12 +263,20 @@ function CommentDropdownMenu({ commentId }: { commentId: string }) {
      onClick={() => {
       mutate({ params: { documentId, commentId } })
      }}>{isPending ? "Resolving" : "Resolve"}</DropdownMenuItem>
-    <DropdownMenuItem>Edit</DropdownMenuItem>
+    {canEdit ? <DropdownMenuItem
+     onClick={() => {
+      setIsEditing(true)
+     }}
+    >Edit</DropdownMenuItem> : null}
    </DropdownMenuGroup>
-   <DropdownMenuSeparator />
-   <DropdownMenuGroup>
-    <DropdownMenuItem>Delete</DropdownMenuItem>
-   </DropdownMenuGroup>
+   {canEdit ?
+    <>
+     <DropdownMenuSeparator />
+     <DropdownMenuGroup>
+      <DropdownMenuItem>Delete</DropdownMenuItem>
+     </DropdownMenuGroup>
+    </>
+    : null}
   </DropdownMenuContent>
  </DropdownMenu>
 }

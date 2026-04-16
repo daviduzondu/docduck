@@ -4,7 +4,7 @@ import * as invitationService from '@/modules/invitation/invitation.service';
 
 import { base, r } from '@/orpc/os';
 import { ctx, ensureAuth } from '@/modules/auth/auth.middleware';
-import { ensureCanEditDocument, ensureDocumentOwner } from '@/modules/document/document.middleware';
+import { ensureCanEditDocument, ensureCommentAuthor, ensureDocumentOwner } from '@/modules/document/document.middleware';
 import z from 'zod';
 
 export const documentRouter = base.prefix("/documents").use(ctx).router({
@@ -76,6 +76,26 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
       documentId: input.params.documentId
      })),
 
+ editComment:
+  r.patch('/{documentId}/comments/{commentId}', { inputStructure: 'detailed' })
+   .input(z.object({
+    params: z.object({
+     documentId: z.string(),
+     commentId: z.string(),
+    }),
+    body: z.object({
+     text: z.string().min(1),
+    })
+   }))
+   .use(ensureCanEditDocument, input => input.params.documentId)
+   .use(ensureAuth)
+   .use(ensureCommentAuthor, input => ({ documentId: input.params.documentId, commentId: input.params.commentId }))
+   .handler(({ input, }) => documentService.editComment({
+    text: input.body.text,
+    documentId: input.params.documentId,
+    commentId: input.params.commentId
+   })),
+
  resolveComment:
   r.patch('/{documentId}/comments/{commentId}/resolve', { inputStructure: 'detailed' })
    .input(z.object({
@@ -85,7 +105,7 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
     })
    }))
    .use(ensureCanEditDocument, input => input.params.documentId)
-   .handler(({ input: { params: { documentId, commentId } }, context }) => { documentService.resolveComment({ documentId, commentId }) }),
+   .handler(({ input: { params: { documentId, commentId } } }) => { documentService.resolveComment({ documentId, commentId }) }),
 
  createDocument:
   r.post('/new')
