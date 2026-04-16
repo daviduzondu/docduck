@@ -11,12 +11,13 @@ import { Editor, useCurrentEditor } from "@tiptap/react";
 import { useRef, useEffect, useState, SetStateAction, Dispatch } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { EllipsisVertical, Quote, Loader } from "lucide-react";
+import { EllipsisVertical, Quote, Loader, MessageSquareOff } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { isDefinedError } from "@orpc/client";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
 import { useAuth } from "@/providers/auth.provider";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 
 function getCommentText(editor: Editor, commentId: string): string {
  const texts: string[] = [];
@@ -76,6 +77,23 @@ export default function Comments() {
   };
  }, [editor, provider.document]);
 
+ const visibleComments = sortedComments.filter(c => !c.resolved);
+
+ if (visibleComments.length === 0) {
+  return <Empty>
+   <EmptyHeader>
+    <EmptyMedia variant="icon">
+     <MessageSquareOff />
+    </EmptyMedia>
+    <EmptyTitle>Whoops! No comments here</EmptyTitle>
+    <EmptyDescription>
+     To create your first comment, highlight text in the Doc and click{" "}
+     <span className="font-medium text-foreground">Add Comment</span>
+    </EmptyDescription>
+   </EmptyHeader>
+  </Empty>
+ }
+
  return (
   <div>
    <div className="flex flex-col space-y-4">
@@ -86,7 +104,7 @@ export default function Comments() {
       >Retry</Button>
      </div>
     )}
-    {sortedComments.filter(comment => !comment.resolved).map((comment) => {
+    {visibleComments.map((comment) => {
      const userDataById = new Map(
       sortedComments
        .map(c => c.commenterId)
@@ -151,8 +169,10 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
 
 
  useEffect(() => {
-  textAreaRef.current?.focus();
- }, [isEditing])
+  if (isEditing) {
+   textAreaRef.current?.focus();
+  }
+ }, [isEditing]);
 
  useEffect(() => {
   if (!isEditing) {
@@ -269,14 +289,6 @@ function CommentDropdownMenu({ commentId, setIsEditing, canEdit }: { commentId: 
      }}
     >Edit</DropdownMenuItem> : null}
    </DropdownMenuGroup>
-   {canEdit ?
-    <>
-     <DropdownMenuSeparator />
-     <DropdownMenuGroup>
-      <DropdownMenuItem>Delete</DropdownMenuItem>
-     </DropdownMenuGroup>
-    </>
-    : null}
   </DropdownMenuContent>
  </DropdownMenu>
 }

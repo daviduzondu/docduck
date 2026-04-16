@@ -10,7 +10,7 @@ import { useCurrentEditor } from "@tiptap/react";
 import { LetterText, Regex, ReplaceAll, SearchXIcon } from "lucide-react";
 import { Ref, useEffect, useRef, useState } from "react";
 
-export default function FindAndReplace({ canEdit }: { canEdit: booelan }) {
+export default function FindAndReplace({ canEdit }: { canEdit: boolean }) {
  const { editor } = useCurrentEditor();
  const { open } = useSidebar();
  const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -27,6 +27,7 @@ export default function FindAndReplace({ canEdit }: { canEdit: booelan }) {
    setResults([...editor.storage.searchAndReplace.results]);
   });
  }, []);
+
 
  return (
   <div className="flex flex-col h-full overflow-hidden">
@@ -107,7 +108,27 @@ export default function FindAndReplace({ canEdit }: { canEdit: booelan }) {
     </p> : null}
    </div>
 
+
+
    <div className="flex flex-col gap-3 flex-1 overflow-y-auto px-1 pt-2">
+      {searchInputRef.current?.value.trim().length === 0 ? (
+     <Empty className="flex-1 justify-center">
+      <EmptyHeader>
+       <EmptyMedia variant="icon">
+        <SearchXIcon />
+       </EmptyMedia>
+       <EmptyTitle>Start typing to search</EmptyTitle>
+       <EmptyDescription>
+        Results appear as you type. Toggle{" "}
+        <span className="text-foreground font-medium">Match Case</span> or{" "}
+        <span className="text-foreground font-medium">Regex</span> to refine your search.
+        {canEdit ? (
+         <p className="mt-4"> Enter a replacement term and press <span className="text-foreground font-medium">Enter</span> to replace one, or enable <span className="text-foreground font-medium">Replace All</span> to swap every occurrence.</p>
+        ) : null}
+       </EmptyDescription>
+      </EmptyHeader>
+     </Empty>
+    ) : null}
     {results.length > 0 ? (
      <>
 
@@ -154,6 +175,6 @@ export default function FindAndReplace({ canEdit }: { canEdit: booelan }) {
     ) : null}
    </div>
 
-  </div>
+  </div >
  );
 }
