@@ -31,7 +31,7 @@ export function InlineCommentPopover() {
   // onSuccess() {
   //  toast.success("Comment added")
   // },
-  onSuccess(data, variables, onMutateResult, context) {
+  onSuccess(data) {
    const { commentId, parentId } = data;
    editor?.commands.setComment(commentId);
    toast.success("Comment added");

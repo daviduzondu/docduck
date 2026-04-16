@@ -219,51 +219,51 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
 
  return (
   <div className="simple-editor-wrapper">
-    <div>
-     {/* Toolbar */}
-     <Toolbar
-      // 
-      className=""
-      ref={toolbarRef}
-      style={
-       isMobile
-        ? {
-         bottom: `calc(100% - ${height - rect.y}px)`,
-        }
-        : {}
-      }
-     >
-      {mobileView === "main" ? (
-       <MainToolbarContent
-        onHighlighterClick={() => setMobileView("highlighter")}
-        onLinkClick={() => setMobileView("link")}
-        isMobile={isMobile}
-       />
-      ) : (
-       <MobileToolbarContent
-        type={mobileView === "highlighter" ? "highlighter" : "link"}
-        onBack={() => setMobileView("main")}
-       />
-      )}
-     </Toolbar>
+   <div>
+    {/* Toolbar */}
+    <Toolbar
+     // 
+     className=""
+     ref={toolbarRef}
+     style={
+      isMobile
+       ? {
+        bottom: `calc(100% - ${height - rect.y}px)`,
+       }
+       : {}
+     }
+    >
+     {mobileView === "main" ? (
+      <MainToolbarContent
+       onHighlighterClick={() => setMobileView("highlighter")}
+       onLinkClick={() => setMobileView("link")}
+       isMobile={isMobile}
+      />
+     ) : (
+      <MobileToolbarContent
+       type={mobileView === "highlighter" ? "highlighter" : "link"}
+       onBack={() => setMobileView("main")}
+      />
+     )}
+    </Toolbar>
 
-     <EditorContent
-      editor={editor}
-      role="presentation"
-      className="simple-editor-content rounded-sm border relative"
-     />
-    </div>
+    <EditorContent
+     editor={editor}
+     role="presentation"
+     className={`simple-editor-content rounded-sm border relative ${canEdit ? 'can-edit' : ''}`}
+    />
+   </div>
 
-    {editor ?
-     <BubbleMenu
-      editor={editor}
-      shouldShow={({ editor, from, to }) => (!editor.isActive('comment') && to > from)}
-     >
-      <InlineCommentPopover />
-     </BubbleMenu> : null}
+   {editor ?
+    <BubbleMenu
+     editor={editor}
+     shouldShow={({ editor, from, to }) => (!editor.isActive('comment') && to > from)}
+    >
+     <InlineCommentPopover />
+    </BubbleMenu> : null}
 
 
-    <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground"> <div className="flex gap-4"> <span>{editorData?.charactersCount} characters</span> <span>{editorData?.wordsCount} words</span> </div> <div className="flex gap-4"> </div> </footer>
+   <footer className="fixed bottom-0 border-t z-40 px-3 flex justify-between items-center w-full text-sm bg-background text-accent-foreground"> <div className="flex gap-4"> <span>{editorData?.charactersCount} characters</span> <span>{editorData?.wordsCount} words</span> </div> <div className="flex gap-4"> </div> </footer>
   </div>
  );
 }

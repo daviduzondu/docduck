@@ -91,30 +91,6 @@
   margin: 0 1px;
  }
 
-
- /* COMMENTS */
-
- .comment:not(:has(.comment-resolved)) {
-  background-color: rgba(237, 226, 21, 0.503);
-  /* lighter so it doesn't fight search */
-  border-bottom: 2px dotted rgba(180, 140, 0, 0.9);
-  border-radius: 2px;
-  padding: 0 2px;
-  margin: 0 1px;
-  cursor: pointer;
-
-  position: relative;
-  z-index: 1;
- }
-
- .comment:not(:has(.comment-resolved)):hover,
- .active-comment:not(.comment-resolved) {
-  background-color: rgba(218, 113, 7, 0.61);
-  border-bottom-color: rgba(180, 140, 0, 1);
-  z-index: 2;
-  /* lift above search highlight */
- }
-
  .diff-added {
   background: rgba(12, 244, 97, 0.516);
   color: inherit;
@@ -149,6 +125,28 @@
   opacity: 0.9;
  }
 }
+
+ /* COMMENTS */
+ .can-edit .comment:not(:has(.comment-resolved)) {
+  background-color: rgba(237, 226, 21, 0.503);
+  /* lighter so it doesn't fight search */
+  border-bottom: 2px dotted rgba(180, 140, 0, 0.9);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 1px;
+  cursor: pointer;
+
+  position: relative;
+  z-index: 1;
+ }
+
+ .can-edit .comment:not(:has(.comment-resolved)):hover,
+ .can-edit .active-comment:not(.comment-resolved) {
+  background-color: rgba(218, 113, 7, 0.61);
+  border-bottom-color: rgba(180, 140, 0, 1);
+  z-index: 2;
+  /* lift above search highlight */
+ }
 
 /* =====================
      TEXT DECORATION

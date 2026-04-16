@@ -10,7 +10,7 @@ import { useCurrentEditor } from "@tiptap/react";
 import { LetterText, Regex, ReplaceAll, SearchXIcon } from "lucide-react";
 import { Ref, useEffect, useRef, useState } from "react";
 
-export default function FindAndReplace() {
+export default function FindAndReplace({ canEdit }: { canEdit: booelan }) {
  const { editor } = useCurrentEditor();
  const { open } = useSidebar();
  const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -73,7 +73,7 @@ export default function FindAndReplace() {
      </InputGroupAddon>
     </InputGroup>
 
-    <InputGroup>
+    {canEdit ? <InputGroup>
      <InputGroupInput
       placeholder="Replace..."
       ref={replaceInputRef}
@@ -101,7 +101,7 @@ export default function FindAndReplace() {
        )}
       />
      </InputGroupAddon>
-    </InputGroup>
+    </InputGroup> : null}
     {results.length > 0 ? <p className="text-sm text-muted-foreground text-center">
      {results.length} {results.length === 1 ? "result" : "results"} found
     </p> : null}

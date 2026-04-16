@@ -48,6 +48,7 @@ export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VI
       {/* Floating buttons */}
       <div className="absolute bottom-22 right-3 flex flex-col gap-3">
        <Button
+        disabled={!canEdit}
         onClick={() => handleSidebar('comments')}
         className="bg-foreground text-background dark:hover:text-foreground" size="icon-lg">
         <MessageSquare />
@@ -71,7 +72,7 @@ export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VI
       </div>
      </div>
      {/* Sidebar */}
-     <EditorSidebar view={currentView} />
+     <EditorSidebar view={currentView} canEdit={canEdit}/>
     </div>
    </TipTapEditorProvider>
   </div>

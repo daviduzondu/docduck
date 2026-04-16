@@ -40,6 +40,7 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
   editable: canEdit,
   editorProps: {
    handleClick(view, pos, event) {
+    if (!canEdit) return false;
     const { state } = view
     const $pos = state.doc.resolve(pos)
 

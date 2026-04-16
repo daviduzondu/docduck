@@ -5,7 +5,7 @@ import Snapshots from "@/components/editor/sidebar/snapshots";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
-export default function EditorSidebar({ view }: { view: "comments" | "history" | "search" | undefined }) {
+export default function EditorSidebar({ view, canEdit }: { view: "comments" | "history" | "search" | undefined, canEdit: boolean }) {
  if (!view) return <></>
  return <Sidebar side="right" collapsible="offcanvas" className="absolute" >
   <SidebarHeader className="">
@@ -14,17 +14,17 @@ export default function EditorSidebar({ view }: { view: "comments" | "history" |
      view === 'comments' ? "Comments"
       : view === 'history' ?
        <div className="flex items-center justify-between">Version History <Button size={'sm'} variant={'outline'}>
-        <PlusCircle  />
+        <PlusCircle />
         New version</Button>
        </div>
-       : view === "search" ? "Find & Replace"
+       : view === "search" ? `Find ${canEdit ? "& Replace" : ''}`
         : null
     }
    </div>
   </SidebarHeader>
   <SidebarContent className="px-2 py-1 h-full pb-20 relative scroll-p-80">
    {
-    view === 'search' ? <FindAndReplace />
+    view === 'search' ? <FindAndReplace canEdit={canEdit} />
      : view === 'comments' ? <Comments />
       : view === 'history' ? <Snapshots />
        : null
