@@ -4,27 +4,6 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { diffChars, diffWords, diffWordsWithSpace, diffSentences, DiffWordsOptionsAbortable } from "diff";
 
 
-function diffRatio(oldText: string, newText: string) {
- const maxLen = Math.max(oldText.length, newText.length)
- if (maxLen === 0) return 0
-
- return Math.abs(oldText.length - newText.length) / maxLen
-}
-
-function chooseDiff(oldText: string, newText: string) {
- const ratio = diffRatio(oldText, newText)
-
- if (ratio < 0.15) {
-  return diffChars(oldText, newText)
- }
-
- if (ratio < 0.5) {
-  return diffWordsWithSpace(oldText, newText)
- }
-
- return diffSentences(oldText, newText)
-}
-
 interface ComparePluginOptions {
  comparisonContent: any;
 }
@@ -138,7 +117,16 @@ const ComparePlugin = Extension.create<ComparePluginOptions>({
         const oldText = nodeToText(oldNode);
         const newText = nodeToText(newNode);
 
-        const diff = diffWordsWithSpace(oldText, newText).filter(d => d.removed).length > 30 ? diffWordsWithSpace(oldText, newText) : diffSentences(oldText, newText);
+        // const diff = diffWordsWithSpace(oldText, newText).filter(d => d.removed).length > 30 ? diffWordsWithSpace(oldText, newText) : diffSentences(oldText, newText);
+        // const wordDiff = diffWordsWithSpace(oldText, newText);
+        // const changedChunkCount = wordDiff.filter(d => d.added || d.removed).length;
+        // const diff = changedChunkCount > 60 ? diffSentences(oldText, newText) : wordDiff;
+        const wordDiff = diffWordsWithSpace(oldText, newText);
+        const totalChunks = wordDiff.length;
+        const changedChunks = wordDiff.filter(d => d.added || d.removed).length;
+        const changeRatio = changedChunks / totalChunks;
+
+        const diff = changeRatio > 0.6 ? diffSentences(oldText, newText) : wordDiff;
         let nodePos = pos + 1; // +1 to skip the node start tag
 
         diff.forEach((part) => {

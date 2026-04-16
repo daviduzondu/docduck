@@ -87,7 +87,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  return (
   <header className="flex w-full items-center px-3 py-2 justify-between">
    {mode === 'editor' ? <div className="text-2xl font-bold grow basis-0">DocDuck</div> :
-    <div className={'grow'}>
+    <div className={'grow basis-0'}>
      <Button variant={'secondary'} className={'cursor-pointer'} onClick={() => setMode('editor')}><X /> Return to editor</Button>
     </div>
    }
@@ -103,7 +103,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
      : <div className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[24rem]' : ''}`}>
       <div className={`truncate text-center`}>{title}</div>
      </div> :
-    <div className={`${open ? 'mr-[24rem]' : ''} bg-red- w-full text-center`}>
+    <div className={`${open ? 'mr-[20rem]' : ''} w-full inline-flex items-center justify-center `}>
      {/* <Button >Restore this version</Button> */}
 
      <Button
