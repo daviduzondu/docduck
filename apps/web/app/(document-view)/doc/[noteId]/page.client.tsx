@@ -54,6 +54,7 @@ export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VI
        </Button>
        <Button
         onClick={() => handleSidebar('history')}
+        disabled={!canEdit}
         className="bg-foreground text-background dark:hover:text-foreground" size="icon-lg">
         <History />
        </Button>

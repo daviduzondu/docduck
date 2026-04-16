@@ -250,7 +250,7 @@ export function SimpleEditor({ canEdit, role }: { canEdit: boolean, role: "VIEWE
      <EditorContent
       editor={editor}
       role="presentation"
-      className="simple-editor-content rounded-sm border h-full min-h-full relative"
+      className="simple-editor-content rounded-sm border relative"
      />
     </div>
 

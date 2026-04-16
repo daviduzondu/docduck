@@ -49,7 +49,7 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
    .handler(({ input }) => documentService.getSnapshotById({ snapshotId: input.params.snapshotId, documentId: input.params.documentId })),
 
  restoreSnapshotbyId:
-  r.post('/{documentId}/snapshots/{snapshotId}', { inputStructure: 'detailed' })
+  r.post('/{documentId}/snapshots/{snapshotId}/restore', { inputStructure: 'detailed' })
    .input(z.object({
     params: z.object({ documentId: z.string(), snapshotId: z.string() })
    }))
@@ -75,6 +75,17 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
       userId: context.user.id,
       documentId: input.params.documentId
      })),
+
+ resolveComment:
+  r.patch('/{documentId}/comments/{commentId}/resolve', { inputStructure: 'detailed' })
+   .input(z.object({
+    params: z.object({
+     documentId: z.string(),
+     commentId: z.string(),
+    })
+   }))
+   .use(ensureCanEditDocument, input => input.params.documentId)
+   .handler(({ input: { params: { documentId, commentId } }, context }) => { documentService.resolveComment({ documentId, commentId }) }),
 
  createDocument:
   r.post('/new')

@@ -3,6 +3,7 @@
 import { StatelessMessage } from "@/types";
 import { HocuspocusProvider, HocuspocusProviderWebsocket } from "@hocuspocus/provider";
 import React, { useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 import * as Y from 'yjs';
 import { create, createStore, useStore } from 'zustand';
 
@@ -35,7 +36,9 @@ export const useDocumentStore = createStore<DocumentState & DocumentActions>((se
     const message: StatelessMessage<string> = JSON.parse(payload);
     if (message.type === 'update:title') {
      set({ title: message.data })
-     // setData(prev => ({ ...prev, title: message.data }))
+    }
+    if (message.type === 'notify') {
+     toast.info(message.data)
     }
    },
   });

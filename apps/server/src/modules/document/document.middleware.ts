@@ -24,7 +24,7 @@ import * as documentService from '@/modules/document/document.service';
 
 export const ensureDocumentOwner = base
  .$context<Required<AppContext>>()
- .middleware(async ({ context, next }, documentId: string) => {
+ .middleware(async ({ context, next, errors }, documentId: string) => {
   const doc = await db
    .selectFrom('document')
    .select(['ownerId'])
@@ -33,10 +33,7 @@ export const ensureDocumentOwner = base
    .executeTakeFirst();
 
   if (!doc) {
-   throw new AppError(
-    `You're not the owner of this document`,
-    StatusCodes.NOT_FOUND
-   );
+   throw errors.FORBIDDEN();
   }
 
   return next({
@@ -45,10 +42,11 @@ export const ensureDocumentOwner = base
  });
 
 
-export const ensureCanEditDocument = base.middleware(async ({ context, next }, documentId: string) => {
- const { permissions } = await documentService.getDocumentWithPermissions(documentId, context.user?.id);
- if (!permissions.canEdit) throw new AppError("You're not allowed to perform this action", StatusCodes.FORBIDDEN);
- return next({
-  context: { ...context }
- })
-}) 
+export const ensureCanEditDocument = base
+ .middleware(async ({ context, next, errors }, documentId: string) => {
+  const { permissions } = await documentService.getDocumentWithPermissions(documentId, context.user?.id);
+  if (!permissions.canEdit) throw errors.FORBIDDEN();
+  return next({
+   context: { ...context }
+  })
+ }) 

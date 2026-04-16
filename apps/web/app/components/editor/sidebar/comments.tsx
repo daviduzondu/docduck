@@ -6,12 +6,15 @@ import { $api, orpc } from "@/lib/orpc.client";
 import { getUserColor } from "@/lib/utils";
 import { useDocument } from "@/providers/document.provider";
 import { Comment } from "@/types";
-import { useQueries } from "@tanstack/react-query";
+import { useMutation, useQueries } from "@tanstack/react-query";
 import { Editor, useCurrentEditor } from "@tiptap/react";
 import { useRef, useEffect, useState } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { Quote } from "lucide-react";
+import { EllipsisVertical, Quote, Loader } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { isDefinedError } from "@orpc/client";
 
 function getCommentText(editor: Editor, commentId: string): string {
  const texts: string[] = [];
@@ -37,10 +40,13 @@ export default function Comments() {
  const sortedComments = Object.values(comments)
   .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+ const uniqueUserIds = Array.from(
+  new Set(sortedComments.map(c => c.commenterId))
+ );
  const userQueries = useQueries({
-  queries: sortedComments.map(comment =>
+  queries: uniqueUserIds.map(userId =>
    orpc.users.getBasicUserInfo.queryOptions({
-    input: { params: { userId: comment.commenterId } }
+    input: { params: { userId } }
    })
   ),
  });
@@ -77,20 +83,33 @@ export default function Comments() {
       >Retry</Button>
      </div>
     )}
-    {sortedComments.map((comment, i) => {
-     const query = userQueries[i];
-     if (query) {
-      if (query?.isPending) return <CommentSkeleton key={comment.id} />;
-      if (query?.isError) return null;
-      return (
-       <CommentCard
-        key={comment.id}
-        comment={comment}
-        activeCommentId={activeCommentId}
-        userData={query.data}
-       />
-      );
+    {sortedComments.filter(comment => !comment.resolved).map((comment) => {
+     const userDataById = new Map(
+      sortedComments
+       .map(c => c.commenterId)
+       .filter((id, index, arr) => arr.indexOf(id) === index)
+       .map((id, i) => [id, userQueries[i]])
+     );
+     const query = userDataById.get(comment.commenterId);
+
+     if (!query) return null;
+
+     if (query.isPending) {
+      return <CommentSkeleton key={comment.id} />;
      }
+
+     if (query.isError) {
+      return null;
+     }
+
+     return (
+      <CommentCard
+       key={comment.id}
+       comment={comment}
+       activeCommentId={activeCommentId}
+       userData={query.data}
+      />
+     );
     })}
    </div>
   </div>
@@ -133,11 +152,17 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
         {name[0]}
        </AvatarFallback>
       </Avatar>
-      <span className="font-medium text-sm">{name}</span>
+      <div className="">
+       <div className="font-medium text-sm">{name}</div>
+       <div className="text-xs text-muted-foreground shrink-0">
+        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+       </div>
+      </div>
      </div>
-     <span className="text-xs text-muted-foreground shrink-0">
+     <CommentDropdownMenu commentId={comment.id} />
+     {/* <span className="text-xs text-muted-foreground shrink-0">
       {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-     </span>
+     </span> */}
     </div>
     <div className="flex text-muted-foreground">
      <span>“</span>
@@ -155,6 +180,38 @@ function CommentCard({ comment, activeCommentId, userData }: { comment: Comment,
  );
 }
 
+
+function CommentDropdownMenu({ commentId }: { commentId: string }) {
+ const documentId = useDocument(state => state.documentId);
+ const { editor } = useCurrentEditor();
+ const { mutate, isPending } = useMutation(orpc.documents.resolveComment.mutationOptions({
+  onSuccess() {
+   editor?.commands.resolveComment(commentId)
+  },
+  onError(error) {
+   toast.error("Failed to resolve comment", { description: isDefinedError(error) ? error.message : "Something went wrong" })
+  }
+ }))
+ return <DropdownMenu>
+  <DropdownMenuTrigger render={<Button variant={'ghost'} size={'icon-sm'} />}>
+   {isPending ? <Loader className="animate-spin" /> : <EllipsisVertical />}
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+   <DropdownMenuGroup>
+    <DropdownMenuItem
+     disabled={isPending}
+     onClick={() => {
+      mutate({ params: { documentId, commentId } })
+     }}>{isPending ? "Resolving" : "Resolve"}</DropdownMenuItem>
+    <DropdownMenuItem>Edit</DropdownMenuItem>
+   </DropdownMenuGroup>
+   <DropdownMenuSeparator />
+   <DropdownMenuGroup>
+    <DropdownMenuItem>Delete</DropdownMenuItem>
+   </DropdownMenuGroup>
+  </DropdownMenuContent>
+ </DropdownMenu>
+}
 
 function CommentSkeleton() {
  return (

@@ -2,7 +2,7 @@
 
 import { orpc } from "@/lib/orpc.client";
 import { useDocument } from "@/providers/document.provider";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EditorContent, useCurrentEditor, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import * as Y from 'yjs';
@@ -31,25 +31,28 @@ import "@/components/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap-node/heading-node/heading-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
+import { Loader } from "lucide-react";
 
 
 export default function Diff() {
- const { mode, documentId, snapshotId } = useDocument(
-  useShallow(state => ({
-   mode: state.mode,
-   documentId: state.documentId,
-   snapshotId: state.snapshotId
-  }))
- );
+ const queryClient = useQueryClient();
+ const { mode, documentId, snapshotId } = useDocument();
  const getSnapshotByIdQuery = useQuery(orpc.documents.getSnapshotById.queryOptions({
   input: {
    params: { documentId, snapshotId }
   },
  }))
 
- if (getSnapshotByIdQuery.isPending) return <div>Loading...</div>;
- if (getSnapshotByIdQuery.error) return <div>Something went wrong...</div>;
+ if (getSnapshotByIdQuery.isPending) return <div className="flex w-full items-center justify-center h-screen"><span><Loader className="animate-spin"/></span></div>;
+ if (getSnapshotByIdQuery.error) return <div className="flex w-full items-center justify-center h-screen">Something went wrong...</div>;
  if (getSnapshotByIdQuery.data) {
+  queryClient.invalidateQueries({
+   queryKey: orpc.documents.getSnapshotById.queryKey({
+    input: {
+     params: { documentId, snapshotId }
+    },
+   })
+  })
   const doc = new Y.Doc();
   Y.applyUpdate(doc, toUint8Array(getSnapshotByIdQuery.data.yjsState));
   return <Viewer document={doc} />
@@ -64,7 +67,7 @@ function Viewer({ document }: { document: Y.Doc }) {
   editorProps: {
    editable: () => false,
    attributes: {
-    class: "simple-editor",
+    class: "simple-editor min-h-screen h-full",
    }
   },
   content: stripMarks(yXmlFragmentToProseMirrorRootNode(document.getXmlFragment('default'), currentEditor!.schema).toJSON(), new Set(['comment'])),

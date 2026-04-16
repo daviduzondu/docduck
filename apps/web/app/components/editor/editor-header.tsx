@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarGroup, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
@@ -17,7 +17,7 @@ import {
  FieldError,
  FieldLabel,
 } from "@/components/ui/field"
-import z from 'zod';
+import z, { uuidv7 } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { $api, orpc } from '@/lib/orpc.client';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AwarenessStates } from '@/types';
 import { useShallow } from 'zustand/react/shallow';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { isDefinedError } from '@orpc/client';
 
 interface EditorHeaderProps {
  onEdit?: () => void;
@@ -56,12 +57,17 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  const { mutate: restore, isPending } = useMutation(
   orpc.documents.restoreSnapshotbyId.mutationOptions({
    onSuccess: () => {
-    queryClient.invalidateQueries(
-     orpc.documents.getSnapshots.queryOptions({
-      input: { params: { documentId } },
-     })
-    );
-    setMode('editor')
+    queryClient.invalidateQueries({
+     queryKey: orpc.documents.getSnapshots.infiniteKey({
+      input: (pageParam) => ({
+       params: { documentId },
+       query: { page: pageParam },
+      }),
+      initialPageParam: 1,
+     }),
+    });
+    setMode('editor');
+    sendStateless(provider, { type: 'notify', data: "Document reverted to older version" })
    },
   })
  );
@@ -200,18 +206,19 @@ function CollaboratorAvatar({ collaborator }: { collaborator: AwarenessStates })
 }
 
 function CollaboratorsHoverCard({ collaborators }: { collaborators: AwarenessStates[] }) {
+ const randomId = useRef(uuidv4());
  return (
   <HoverCard>
    <HoverCardTrigger delay={150}>
     <AvatarGroup className="bg-card-foreground px-1 py-1 rounded-full w-fit">
      {collaborators.map((collaborator) => (
-      <CollaboratorAvatar key={collaborator.id} collaborator={collaborator} />
+      <CollaboratorAvatar key={collaborator.id + randomId} collaborator={collaborator} />
      ))}
     </AvatarGroup>
    </HoverCardTrigger>
    <HoverCardContent side="bottom" align="center">
     <div className='uppercase text-xs font-semibold pb-2'>in this document</div>
-    {collaborators.map((collaborator) => <Item key={collaborator.id} className='p-0 not-last:pb-3'>
+    {collaborators.map((collaborator) => <Item key={collaborator.id + randomId} className='p-0 not-last:pb-3'>
      <ItemMedia variant="icon">
       <CollaboratorAvatar collaborator={collaborator} />
      </ItemMedia>

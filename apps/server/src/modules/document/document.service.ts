@@ -8,7 +8,7 @@ import { Role, Visibility } from "@/db/prisma/generated/types";
 import * as Y from 'yjs';
 import { sql } from "kysely";
 import { hocuspocus } from "@/lib/config/hocuspocus";
-import { fromUint8Array, toUint8Array } from 'js-base64'
+import { fromUint8Array } from 'js-base64'
 
 
 type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
@@ -59,6 +59,26 @@ export async function getSnapshots(documentId: string, page: number = 1) {
   const firstFewLines = doc.getXmlFragment('default').slice(0, 2);
   return ({ ...result, preview: firstFewLines.map(line => line.toJSON()).join(''), yjsState: undefined });
  })
+}
+
+export async function resolveComment({ documentId, commentId }: { documentId: string, commentId: string }) {
+ // db
+ const comment = await db.updateTable('document_comment').set({
+  resolved: true
+ }).where('document_comment.id', '=', commentId).returning(['document_comment.id']).executeTakeFirst();
+
+ const hocuspocusDocument = hocuspocus.documents.get(documentId);
+ if (hocuspocusDocument && comment?.id) {
+  const commentsMap = hocuspocusDocument.getMap<Comment>('comments')
+  commentsMap.set(commentId, {
+   ...commentsMap.get(commentId)!,
+   resolved: true
+  })
+ }
+
+ return {
+  message: "Comment resolved"
+ }
 }
 
 export async function getSnapshotById({ documentId, snapshotId }: { documentId: string, snapshotId: string }) {
@@ -212,7 +232,10 @@ export async function addNewComment({ text, userId, documentId }: { text: string
    documentId,
    text,
    userId,
-  }).returning(['id', 'resolved', 'parentId', 'createdAt', 'updatedAt']).executeTakeFirstOrThrow();
+  })
+   .returning(['id', 'resolved', 'parentId', 'createdAt', 'updatedAt'])
+   .executeTakeFirstOrThrow();
+
   commentsMap.set(commentId, {
    id: commentId,
    text,

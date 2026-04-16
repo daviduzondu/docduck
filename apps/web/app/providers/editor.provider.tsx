@@ -60,7 +60,7 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
     autocorrect: "off",
     autocapitalize: "off",
     "aria-label": "Main content area, start typing to enter text.",
-    class: "simple-editor",
+    class: "simple-editor min-h-screen h-full ",
    },
   },
   autofocus: true,
@@ -70,7 +70,8 @@ export default function TipTapEditorProvider({ children, canEdit }: { children: 
     HTMLAttributes: {
      class: 'comment'
     },
-    activeCommentClass: 'active-comment'
+    activeCommentClass: 'active-comment',
+    
    }),
    StarterKit.configure({
     horizontalRule: false,
