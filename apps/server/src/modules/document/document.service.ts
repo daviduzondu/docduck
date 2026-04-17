@@ -158,7 +158,6 @@ function revertToSnapshot(
  // 5. Undo them — this produces the inverse operations
  undoManager.undo()
 
- console.log(undoManager.doc)
  // 6. Extract just the new inverse update and apply to live doc
  const revertUpdate = Y.encodeStateAsUpdate(snapshotDoc, currentStateVector)
  Y.applyUpdate(liveDoc, revertUpdate)
