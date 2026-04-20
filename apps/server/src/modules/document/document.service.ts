@@ -9,7 +9,7 @@ import * as Y from 'yjs';
 import { sql } from "kysely";
 import { hocuspocus } from "@/lib/config/hocuspocus";
 import { fromUint8Array } from 'js-base64'
-
+import { jsonArrayFrom } from 'kysely/helpers/postgres'
 
 type DocumentMeta = { documentId: string; title: string; visibility: Visibility };
 type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role };
@@ -259,7 +259,7 @@ export async function editComment({ text, documentId, commentId }: { text: strin
   .returning(['id', 'parentId', 'updatedAt'])
   .executeTakeFirstOrThrow();
 
-  const hocuspocusDocument = hocuspocus.documents.get(documentId);
+ const hocuspocusDocument = hocuspocus.documents.get(documentId);
 
  if (hocuspocusDocument && comment.id) {
   const commentsMap = hocuspocusDocument.getMap<Comment>('comments');
@@ -295,6 +295,40 @@ export async function getDocument(data: z.infer<typeof getDocumentSchema>['param
  return await db.selectFrom('document').where('document.id', '=', data.documentId).select(['id', 'title', 'visibility', 'ownerId']).executeTakeFirstOrThrow();
 }
 
+
+export async function getDocuments(userId: string, page = 1) {
+ const offset = (page - 1) * 10
+ const results = await db.selectFrom('document')
+  .where('document.ownerId', '=', userId)
+  .select((eb) => ['id', 'document.title', 'visibility', 'yjsState',
+   jsonArrayFrom(
+    eb.selectFrom('permission')
+     .innerJoin('user', 'user.id', 'permission.userId')
+     .whereRef('permission.documentId', '=', 'document.id')
+     .where('permission.role', '!=', 'OWNER')
+     .select(['user.id', 'user.name'])
+   ).as('collaborators')])
+  .limit(10)
+  .offset(offset)
+  .execute();
+
+ return {
+  data: results.map(r => {
+   const tempDoc = new Y.Doc();
+   if (r.yjsState) {
+    Y.applyUpdate(tempDoc, r.yjsState);
+   }
+   return {
+    ...r,
+    collaborators: r.collaborators,
+    commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
+    yjsState: undefined
+   }
+  })
+ }
+
+}
+
 export async function createDocument(data: z.infer<typeof createDocumentSchema>, ctx: Request["ctx"]) {
  return await db.transaction().execute(async (trx) => {
   const { id: documentId } = await trx.insertInto('document').values({
@@ -313,3 +347,4 @@ export async function createDocument(data: z.infer<typeof createDocumentSchema>,
   return { documentId, role }
  })
 }
+
