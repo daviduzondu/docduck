@@ -297,7 +297,8 @@ export async function getDocument(data: z.infer<typeof getDocumentSchema>['param
 
 
 export async function getDocuments(userId: string, page = 1) {
- const offset = (page - 1) * 10
+ const limit = 10;
+ const offset = (page - 1) * limit
  const results = await db.selectFrom('document')
   .where('document.ownerId', '=', userId)
   .select((eb) => ['id', 'document.title', 'visibility', 'yjsState',
@@ -308,7 +309,7 @@ export async function getDocuments(userId: string, page = 1) {
      .where('permission.role', '!=', 'OWNER')
      .select(['user.id', 'user.name'])
    ).as('collaborators')])
-  .limit(10)
+  .limit(limit)
   .offset(offset)
   .execute();
 
@@ -326,7 +327,33 @@ export async function getDocuments(userId: string, page = 1) {
    }
   })
  }
+}
 
+export async function getSharedDocuments(userId: string, page = 1) {
+ const limit = 10;
+ const offset = (page - 1) * limit;
+ const results = await db.selectFrom('permission')
+  .innerJoin('document', 'document.id', 'permission.documentId')
+  .select(['title', 'yjsState', 'document.id'])
+  .where('permission.role', '!=', 'OWNER')
+  .where('permission.userId', '=', userId)
+  .limit(limit)
+  .offset(offset)
+  .execute()
+
+ return {
+  data: results.map(r => {
+   const tempDoc = new Y.Doc();
+   if (r.yjsState) {
+    Y.applyUpdate(tempDoc, r.yjsState);
+   }
+   return {
+    ...r,
+    commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
+    yjsState: undefined
+   }
+  })
+ }
 }
 
 export async function createDocument(data: z.infer<typeof createDocumentSchema>, ctx: Request["ctx"]) {

@@ -11,19 +11,16 @@ import { useEditorSidebarView } from "@/providers/editor-sidebar.provider";
 import TipTapEditorProvider from "@/providers/editor.provider";
 import { useCurrentEditor } from "@tiptap/react";
 import { useDocument } from "@/providers/document.provider";
-import { useQuery } from "@tanstack/react-query";
-import { orpc } from "@/lib/orpc.client";
-import { useShallow } from 'zustand/react/shallow';
 import Diff from "@/components/editor/diff-viewer";
 
 export default function DocPage({ canEdit, role }: { canEdit: boolean, role: "VIEWER" | "EDITOR" | "OWNER" | undefined }) {
- const { noteId }: { noteId: string } = useParams();
+ const { docId }: { docId: string } = useParams();
  const { toggleSidebar, open } = useSidebar();
  const { view: currentView, setView } = useEditorSidebarView();
  const { editor } = useCurrentEditor();
  const mode = useDocument(state => state.mode)
 
- if (!noteId) throw new Error("Invalid document ID.");
+ if (!docId) throw new Error("Invalid document ID.");
  function handleSidebar(newView: typeof currentView, onClose?: () => void) {
   if (!open) toggleSidebar();
   if (open && newView === currentView) {

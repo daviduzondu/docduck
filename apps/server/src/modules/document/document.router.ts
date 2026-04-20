@@ -16,6 +16,14 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
    .use(ensureAuth)
    .handler(({ context, input }) => documentService.getDocuments(context.user.id, input.query?.page)),
 
+ getSharedDocuments:
+  r.get("/shared", { description: "Get all documents", inputStructure: 'detailed' })
+   .input(z.object({
+    query: z.object({ page: z.coerce.number().optional() }).optional()
+   }))
+   .use(ensureAuth)
+   .handler(({ context, input }) => documentService.getSharedDocuments(context.user.id, input.query?.page)),
+
  getDocument:
   r.get('/{documentId}', { description: "Get document by ID", inputStructure: 'detailed' })
    .input(z.object({

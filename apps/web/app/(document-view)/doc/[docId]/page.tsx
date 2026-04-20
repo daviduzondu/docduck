@@ -1,11 +1,11 @@
-import DocPage from "@/(document-view)/doc/[noteId]/page.client";
+import DocPage from "@/(document-view)/doc/[docId]/page.client";
 import { authClient } from "@/lib/auth.client";
 import { $api } from "@/lib/orpc.client";
 import { DocumentProvider } from "@/providers/document.provider";
 import { headers } from 'next/headers';
 
-export default async function Page({ params }: { params: Promise<{ noteId: string }> }) {
- const { noteId } = await params;
+export default async function Page({ params }: { params: Promise<{ docId: string }> }) {
+ const { docId } = await params;
  const session = await authClient.getSession({
   fetchOptions: {
    headers: await headers()
@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: Promise<{ noteId: strin
  let result
  try {
   result = await $api.documents.getDocumentWithPermissions({
-   params: { documentId: noteId }
+   params: { documentId: docId }
   });
   console.log(result)
   if (!result?.meta.documentId) return <div>Hmm... This document does not exists.</div>;
@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Promise<{ noteId: strin
   return <div>Hmmm...Something went wrong when fetching the document!</div>
  }
 
- return <DocumentProvider documentId={noteId} title={result.meta.title}>
+ return <DocumentProvider documentId={docId} title={result.meta.title}>
   <DocPage canEdit={result.permissions.canEdit} role={result.permissions.role}/>
  </DocumentProvider>
 
