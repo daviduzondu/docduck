@@ -6,5 +6,7 @@ z.config({
 });
 
 export const acceptDocumentInvitationSchema = z.object({
- id: z.uuid()
+ params: z.object({
+  id: z.uuid()
+ })
 })

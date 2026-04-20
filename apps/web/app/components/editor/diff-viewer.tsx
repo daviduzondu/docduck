@@ -6,7 +6,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EditorContent, useCurrentEditor, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import * as Y from 'yjs';
-import { useShallow } from "zustand/react/shallow";
 import { toUint8Array } from 'js-base64';
 import Comment from '@/lib/comment.extension';
 import { Image } from "@tiptap/extension-image"
@@ -22,7 +21,6 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { stripMarks } from "@/lib/utils";
 import ComparePlugin from "@/lib/compare.extension";
-
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss"
 import "@/components/tiptap-node/code-block-node/code-block-node.scss"
 import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss"

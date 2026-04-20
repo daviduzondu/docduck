@@ -123,8 +123,8 @@ model document_invitation {
  status     InvitationStatus @default(PENDING)
  acceptedAt DateTime?
  revokedAt  DateTime?
- createdAt  DateTime         @default(now()) @ignore @db.Timestamptz(6)
- updatedAt  DateTime         @default(now()) @ignore @db.Timestamptz(6)
+ createdAt  DateTime         @default(now()) @db.Timestamptz(6)
+ updatedAt  DateTime         @default(now()) @db.Timestamptz(6)
 
  // Relations 
  inviter  user     @relation(fields: [inviterId], references: [id])

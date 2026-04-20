@@ -4,6 +4,7 @@ import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { NoResultError } from "kysely";
 
 export const onErrorCallback = <T extends typeof onError>(...[err]: Parameters<Parameters<T>[0]>) => {
+ console.log(err)
  // TODO: Improve error handling and type-safety
  if (err instanceof ORPCError) throw err;
  if (err instanceof AppError) throw new ORPCError(StatusCodes[err.statusCode]!, {

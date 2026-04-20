@@ -63,6 +63,8 @@ export type document_invitation = {
     status: Generated<InvitationStatus>;
     acceptedAt: Timestamp | null;
     revokedAt: Timestamp | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Generated<Timestamp>;
 };
 export type document_snapshot = {
     id: Generated<string>;

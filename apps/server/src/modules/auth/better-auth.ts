@@ -8,20 +8,15 @@ export const auth = betterAuth({
   type: 'postgres'
  },
  appName: "DocDuck",
- trustedOrigins: ['http://localhost:3000'],
+ trustedOrigins: [process.env.FRONTEND_URL!],
  emailAndPassword: {
   enabled: true,
-  autoSignIn: false,
+  autoSignIn: true,
  },
- baseURL: 'http://localhost:1711',
+ baseURL: process.env.BACKEND_URL!,
  plugins: [openAPI()],
  advanced: {
   disableOriginCheck: process.env.NODE_ENV === "PRODUCTION" ? false : true,
-  // defaultCookieAttributes: {
-  //  sameSite: "none",   // required for cross-port in Firefox
-  //  secure: false,      // must be false for http:// localhost
-  //  httpOnly: true,
-  // }
  }
 });
 

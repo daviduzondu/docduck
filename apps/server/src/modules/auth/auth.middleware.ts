@@ -15,7 +15,7 @@ export const ensureAuth = base.middleware(async ({ context, next, errors }) => {
  return await next({
   context: { ...context, ...result }
  })
-})
+});
 
 export const ctx = base.middleware(async ({ context, next }) => {
  const result = await auth.api.getSession({
@@ -26,3 +26,4 @@ export const ctx = base.middleware(async ({ context, next }) => {
   context: { ...context, ...result }
  })
 })
+

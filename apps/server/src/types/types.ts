@@ -3,6 +3,8 @@ import z from 'zod';
 import { getDocumentSchema } from "../modules/document/document.validation";
 import { Insertable } from "kysely";
 import { auth } from "@/modules/auth/better-auth";
+import { MergedErrorMap, ORPCErrorConstructorMap } from "@orpc/server";
+import { base } from "@/orpc/os";
 
 type AtLeastOne<T, K extends keyof T = keyof T> =
  K extends keyof T
@@ -22,3 +24,6 @@ export type RequestSchema = AtLeastOne<{
 export type AppContext = {
  req: Request
 } & Partial<Awaited<ReturnType<typeof auth.api.getSession>>>;
+
+
+export type ProcedureErrorMap<T extends typeof base = typeof base> = ORPCErrorConstructorMap<MergedErrorMap<Record<never, never>, T['~orpc']['errorMap']>>;

@@ -18,24 +18,22 @@ export async function loginWithEmailAndPassword(email: string, password: string,
   });
   if (result.error) throw new Error(result.error.message)
  } catch (error) {
-  alert("Failed to sign in!");
   throw error;
  }
- alert("Sign in successful!");
 }
 
+export async function createAccountWithEmailAndPassword({ email, password, name }: { email: string, password: string, name: string }) {
 
 
-export async function createAccountWithEmailAndPassword() {
- await authClient.signUp.email({
-  email: faker.internet.email({
-   provider: 'gmail.com'
-  }),
-  password: 'password',
-  name: faker.person.fullName()
- }).catch(() => {
-  alert("Failed to sign up!")
- });
-
- alert("Sign up sucessful!")
+ try {
+  const result = await authClient.signUp.email({
+   email,
+   password,
+   name,
+  });
+  console.log(result.data?.user)
+  if (result.error) throw new Error(result.error.message)
+ } catch (error) {
+  throw error;
+ }
 }

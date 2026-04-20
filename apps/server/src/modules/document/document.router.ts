@@ -134,6 +134,6 @@ export const documentRouter = base.prefix("/documents").use(ctx).router({
    .input(documentSchema.documentInvitationSchema)
    .use(ensureAuth)
    .use(ensureDocumentOwner, input => input.params.id)
-   .handler(({ input, context }) =>
-    invitationService.addDocInvitees(input.params.id, input.body.invitees.map(i => ({ ...i, inviterId: context.user.id })), context.user))
+   .handler(({ input, context, errors }) =>
+    invitationService.addDocInvitees(input.params.id, input.body.invitees.map(i => ({ ...i, inviterId: context.user.id })), context.user, errors))
 });

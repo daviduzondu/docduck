@@ -10,7 +10,9 @@ export const base = os.$context<AppContext>().errors({
  },
  UNAUTHORIZED: {
   message: "You must be signed in to perform this action"
- }
+ },
+ CONFLICT: {},
+ NOT_FOUND: {}
 });
 // export const authedBase = base.use((await import('@/modules/auth/auth.middleware')).ensureAuth);
 

@@ -4,7 +4,7 @@
   "dist"
  ],
  "include": [
-  "**/*.ts"
+  "**/*.ts",
  ],
  "compilerOptions": {
   "composite": true,
@@ -15,9 +15,7 @@
     "src/*"
    ]
   },
- 
   "target": "esnext",
-  
   "module": "esnext",
   "moduleResolution": "bundler",
   // File Layout
@@ -48,6 +46,7 @@
   // Recommended Options
   "strict": true,
   "jsx": "react-jsx",
+  "jsxImportSource": "react",
   "isolatedModules": true,
   "noUncheckedSideEffectImports": true,
   "moduleDetection": "force",
