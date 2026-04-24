@@ -1,10 +1,10 @@
-'use client';
+'use client'
 
-import { useSearchParams } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { loginWithEmailAndPassword } from "../../lib/auth.client";
+import { useSearchParams } from 'next/navigation'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { loginWithEmailAndPassword } from '../../lib/auth.client'
 
 import {
  Card,
@@ -13,43 +13,43 @@ import {
  CardFooter,
  CardHeader,
  CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 import {
  Field,
  FieldError,
  FieldGroup,
  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 const loginSchema = z.object({
- email: z.email({ error: "Please enter a valid email address." }),
- password: z.string().min(1, "Password is required."),
-});
+ email: z.email({ error: 'Please enter a valid email address.' }),
+ password: z.string().min(1, 'Password is required.'),
+})
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
- const searchParams = useSearchParams();
+ const searchParams = useSearchParams()
 
  const form = useForm<LoginFormValues>({
   resolver: zodResolver(loginSchema),
-  defaultValues: { email: "", password: "" },
- });
+  defaultValues: { email: '', password: '' },
+ })
 
  async function onSubmit(data: LoginFormValues) {
   try {
    await loginWithEmailAndPassword(
     data.email,
     data.password,
-    searchParams?.get("next") ?? '/dashboard'
-   );
+    searchParams?.get('next') ?? '/dashboard'
+   )
   } catch (err) {
    toast.error(
-    err instanceof Error ? err.message : "Invalid email or password."
-   );
+    err instanceof Error ? err.message : 'Invalid email or password.'
+   )
   }
  }
 
@@ -59,16 +59,15 @@ export default function LoginPage() {
     <CardHeader>
      <CardTitle>Sign in</CardTitle>
      <CardDescription>
-      {searchParams?.get("next")
-       ? "You must be logged in to perform this action."
-       : "Enter your credentials to access your account."}
+      {searchParams?.get('next')
+       ? 'You must be logged in to perform this action.'
+       : 'Enter your credentials to access your account.'}
      </CardDescription>
     </CardHeader>
 
     <CardContent>
      <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
       <FieldGroup>
-
        <Controller
         name="email"
         control={form.control}
@@ -83,9 +82,7 @@ export default function LoginPage() {
            autoComplete="email"
            aria-invalid={fieldState.invalid}
           />
-          {fieldState.invalid && (
-           <FieldError errors={[fieldState.error]} />
-          )}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
          </Field>
         )}
        />
@@ -104,9 +101,7 @@ export default function LoginPage() {
            autoComplete="current-password"
            aria-invalid={fieldState.invalid}
           />
-          {fieldState.invalid && (
-           <FieldError errors={[fieldState.error]} />
-          )}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
          </Field>
         )}
        />
@@ -121,10 +116,10 @@ export default function LoginPage() {
       className="w-full"
       disabled={form.formState.isSubmitting}
      >
-      {form.formState.isSubmitting ? "Signing in…" : "Sign in"}
+      {form.formState.isSubmitting ? 'Signing in…' : 'Sign in'}
      </Button>
     </CardFooter>
    </Card>
   </div>
- );
+ )
 }

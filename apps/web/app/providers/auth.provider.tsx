@@ -1,20 +1,22 @@
 'use client'
 
-import React from "react";
-import { authClient } from "@/lib/auth.client";
+import React from 'react'
+import { authClient } from '@/lib/auth.client'
 
-const AuthContext = React.createContext<ReturnType<typeof authClient.useSession> | undefined>(undefined);
+const AuthContext = React.createContext<
+ ReturnType<typeof authClient.useSession> | undefined
+>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
- const session = authClient.useSession();
+ const session = authClient.useSession()
 
  if (!session.isPending)
   return <AuthContext.Provider value={session}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
- const context = React.useContext(AuthContext);
- if (!context) throw new Error("useAuth must be used within an AuthProvider.");
+ const context = React.useContext(AuthContext)
+ if (!context) throw new Error('useAuth must be used within an AuthProvider.')
 
- return context;
+ return context
 }

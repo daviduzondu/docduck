@@ -1,19 +1,19 @@
-import { ensureAuth } from '@/modules/auth/auth.middleware';
-import { appRouter } from '@/orpc/app.router';
-import { AppContext } from '@/types/types';
+import { ensureAuth } from '@/modules/auth/auth.middleware'
+import { appRouter } from '@/orpc/app.router'
+import { AppContext } from '@/types/types'
 import { implement, os, Route } from '@orpc/server'
 
-type RouterOpts = Omit<Route, 'method' | 'path'>;
+type RouterOpts = Omit<Route, 'method' | 'path'>
 export const base = os.$context<AppContext>().errors({
  FORBIDDEN: {
-  message: "You're not the owner of the document you tried to access or modify"
+  message: "You're not the owner of the document you tried to access or modify",
  },
  UNAUTHORIZED: {
-  message: "You must be signed in to perform this action"
+  message: 'You must be signed in to perform this action',
  },
  CONFLICT: {},
- NOT_FOUND: {}
-});
+ NOT_FOUND: {},
+})
 // export const authedBase = base.use((await import('@/modules/auth/auth.middleware')).ensureAuth);
 
 export const r = {
@@ -30,4 +30,3 @@ export const r = {
  head: (path?: `/${string}`, opts?: RouterOpts) =>
   base.route({ method: 'HEAD', ...(path ? { path } : {}), ...opts }),
 }
-

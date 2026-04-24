@@ -1,13 +1,13 @@
-import { betterAuth } from "better-auth";
-import { db } from "../../lib/kysely";
-import { openAPI } from "better-auth/plugins";
+import { betterAuth } from 'better-auth'
+import { db } from '../../lib/kysely'
+import { openAPI } from 'better-auth/plugins'
 
 export const auth = betterAuth({
  database: {
   db,
-  type: 'postgres'
+  type: 'postgres',
  },
- appName: "DocDuck",
+ appName: 'DocDuck',
  trustedOrigins: [process.env.FRONTEND_URL!],
  emailAndPassword: {
   enabled: true,
@@ -16,7 +16,6 @@ export const auth = betterAuth({
  baseURL: process.env.BACKEND_URL!,
  plugins: [openAPI()],
  advanced: {
-  disableOriginCheck: process.env.NODE_ENV === "PRODUCTION" ? false : true,
- }
-});
-
+  disableOriginCheck: process.env.NODE_ENV === 'PRODUCTION' ? false : true,
+ },
+})

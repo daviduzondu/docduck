@@ -14,9 +14,7 @@
   "baseUrl": "../",
   "paths": {
    "@server/*": ["server/src/*"],
-   "@/*": [
-    "web/app/*"
-   ]
+   "@/*": ["web/app/*"]
   }
  },
  "include": [
@@ -26,7 +24,5 @@
   "next.config.js",
   ".next/types/**/*.ts"
  ],
- "exclude": [
-  "node_modules"
- ],
+ "exclude": ["node_modules"]
 }

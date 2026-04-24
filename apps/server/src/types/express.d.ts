@@ -1,11 +1,11 @@
-import { auth } from "../modules/auth/better-auth";
+import { auth } from '../modules/auth/better-auth'
 
-export { };
+export {}
 
 declare global {
  namespace Express {
   interface Request {
-   ctx?: Awaited<ReturnType<typeof auth.api.getSession>>;
+   ctx?: Awaited<ReturnType<typeof auth.api.getSession>>
   }
  }
 }

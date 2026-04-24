@@ -1,16 +1,21 @@
 'use client'
 
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import {
+ Card,
+ CardDescription,
+ CardHeader,
+ CardTitle,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
  AlertCircle,
  ShieldAlert,
  LogIn,
  XCircle,
- LucideIcon
-} from "lucide-react"
+ LucideIcon,
+} from 'lucide-react'
 
 type InvitationErrorProps = {
  code: string
@@ -26,35 +31,35 @@ const ERROR_CONFIG: Record<
  }
 > = {
  CONFLICT: {
-  title: "Already accepted",
-  description:
-   "You've already accepted this invitation.",
+  title: 'Already accepted',
+  description: "You've already accepted this invitation.",
   Icon: XCircle,
  },
  UNAUTHORIZED: {
-  title: "Sign in required",
+  title: 'Sign in required',
   description:
    "You need to be logged in to accept this invitation. If you don't have an account, try creating one now.",
   Icon: LogIn,
  },
  FORBIDDEN: {
-  title: "Access denied",
-  description:
-   "Sorry, you're not allowed to accept this invitation.",
+  title: 'Access denied',
+  description: "Sorry, you're not allowed to accept this invitation.",
   Icon: ShieldAlert,
  },
  UNKNOWN: {
-  title: "Something went wrong",
-  description:
-   "We couldn't process this invitation. Please try again later.",
+  title: 'Something went wrong',
+  description: "We couldn't process this invitation. Please try again later.",
   Icon: AlertCircle,
  },
 }
 
-export function InvitationErrorCard({ code, description }: InvitationErrorProps) {
+export function InvitationErrorCard({
+ code,
+ description,
+}: InvitationErrorProps) {
  const config = ERROR_CONFIG[code] ?? ERROR_CONFIG.UNKNOWN
- const isUnauthorized = code === "UNAUTHORIZED"
- const token = useSearchParams().get("token")
+ const isUnauthorized = code === 'UNAUTHORIZED'
+ const token = useSearchParams().get('token')
  const Icon = config?.Icon
 
  return (

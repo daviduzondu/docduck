@@ -1,18 +1,22 @@
 export type StatelessMessage<T> = {
- type: "update:title" | "notify"
+ type: 'update:title' | 'notify'
  data: T
 }
 
 export type AwarenessStates = {
- name: string, color: string, image?: string, isAnonymous: boolean, role: "VIEWER" | "EDITOR" | "OWNER"
+ name: string
+ color: string
+ image?: string
+ isAnonymous: boolean
+ role: 'VIEWER' | 'EDITOR' | 'OWNER'
  id: string
 }
 
 export type Comment = {
- id: string,
- resolved: boolean,
- parentId: string | null,
- text: string,
+ id: string
+ resolved: boolean
+ parentId: string | null
+ text: string
  commenterId: string
  createdAt: string
  updatedAt: string

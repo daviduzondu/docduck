@@ -21,7 +21,7 @@
 
 /* Ensure each top-level node has relative positioning 
    so absolutely positioned placeholders work correctly */
-.tiptap.ProseMirror>* {
+.tiptap.ProseMirror > * {
  font-size: 0.9em;
  position: relative;
 }
@@ -126,33 +126,32 @@
  }
 }
 
- /* COMMENTS */
- .can-edit .comment:not(:has(.comment-resolved)) {
-  background-color: rgba(237, 226, 21, 0.503);
-  /* lighter so it doesn't fight search */
-  border-bottom: 2px dotted rgba(180, 140, 0, 0.9);
-  border-radius: 2px;
-  padding: 0 2px;
-  margin: 0 1px;
-  cursor: pointer;
+/* COMMENTS */
+.can-edit .comment:not(:has(.comment-resolved)) {
+ background-color: rgba(237, 226, 21, 0.503);
+ /* lighter so it doesn't fight search */
+ border-bottom: 2px dotted rgba(180, 140, 0, 0.9);
+ border-radius: 2px;
+ padding: 0 2px;
+ margin: 0 1px;
+ cursor: pointer;
 
-  position: relative;
-  z-index: 1;
- }
+ position: relative;
+ z-index: 1;
+}
 
- .can-edit .comment:not(:has(.comment-resolved)):hover,
- .can-edit .active-comment:not(.comment-resolved) {
-  background-color: rgba(218, 113, 7, 0.61);
-  border-bottom-color: rgba(180, 140, 0, 1);
-  z-index: 2;
-  /* lift above search highlight */
- }
+.can-edit .comment:not(:has(.comment-resolved)):hover,
+.can-edit .active-comment:not(.comment-resolved) {
+ background-color: rgba(218, 113, 7, 0.61);
+ border-bottom-color: rgba(180, 140, 0, 1);
+ z-index: 2;
+ /* lift above search highlight */
+}
 
 /* =====================
      TEXT DECORATION
      ===================== */
 .tiptap.ProseMirror {
-
  // Text decoration inheritance for spans
  a span {
   text-decoration: underline;
@@ -206,7 +205,7 @@
 /* =====================
      EMOJI
      ===================== */
-.tiptap.ProseMirror [data-type="emoji"] img {
+.tiptap.ProseMirror [data-type='emoji'] img {
  display: inline-block;
  width: 1.25em;
  height: 1.25em;
@@ -227,7 +226,7 @@
      MENTION
      ===================== */
 .tiptap.ProseMirror {
- [data-type="mention"] {
+ [data-type='mention'] {
   display: inline-block;
   color: var(--tt-brand-color-500);
  }
@@ -237,7 +236,6 @@
      THREADS
      ===================== */
 .tiptap.ProseMirror {
-
  // Base styles for inline threads
  .tiptap-thread.tiptap-thread--unresolved.tiptap-thread--inline {
   transition:
@@ -305,16 +303,22 @@
 /* =====================
      PLACEHOLDER
      ===================== */
-.is-empty:not(.with-slash)[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child)::before {
+.is-empty:not(.with-slash)[data-placeholder]:has(
+  > .ProseMirror-trailingBreak:only-child
+ )::before {
  content: attr(data-placeholder);
 }
 
-.is-empty.with-slash[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child)::before {
+.is-empty.with-slash[data-placeholder]:has(
+  > .ProseMirror-trailingBreak:only-child
+ )::before {
  content: "Write, type '/' for commands…";
  font-style: italic;
 }
 
-.is-empty[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child):before {
+.is-empty[data-placeholder]:has(
+  > .ProseMirror-trailingBreak:only-child
+ ):before {
  pointer-events: none;
  height: 0;
  position: absolute;

@@ -1,10 +1,10 @@
-'use client';
+'use client'
 
-import { redirect, useRouter, useSearchParams } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { createAccountWithEmailAndPassword } from "@/lib/auth.client";
+import { redirect, useRouter, useSearchParams } from 'next/navigation'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { createAccountWithEmailAndPassword } from '@/lib/auth.client'
 
 import {
  Card,
@@ -13,55 +13,55 @@ import {
  CardFooter,
  CardHeader,
  CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 import {
  Field,
  FieldError,
  FieldGroup,
  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 const registerSchema = z
  .object({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  email: z.email({ error: "Please enter a valid email address." }),
-  password: z.string().min(8, "Password must be at least 8 characters."),
-  confirmPassword: z.string().min(1, "Please confirm your password."),
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  email: z.email({ error: 'Please enter a valid email address.' }),
+  password: z.string().min(8, 'Password must be at least 8 characters.'),
+  confirmPassword: z.string().min(1, 'Please confirm your password.'),
  })
  .refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match.",
-  path: ["confirmPassword"],
- });
+  message: 'Passwords do not match.',
+  path: ['confirmPassword'],
+ })
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
-  const router = useRouter();
- const searchParams = useSearchParams();
+ const router = useRouter()
+ const searchParams = useSearchParams()
 
  const form = useForm<RegisterFormValues>({
   resolver: zodResolver(registerSchema),
-  defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
- });
+  defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
+ })
 
  async function onSubmit(data: RegisterFormValues) {
   try {
-   await createAccountWithEmailAndPassword(
-    {
-     name: data.name,
-     email: data.email,
-     password: data.password,
-    }
-   );
-   toast.success("Registration successful.");
-   router.replace(searchParams?.get("next") ?? '/dashboard');
+   await createAccountWithEmailAndPassword({
+    name: data.name,
+    email: data.email,
+    password: data.password,
+   })
+   toast.success('Registration successful.')
+   router.replace(searchParams?.get('next') ?? '/dashboard')
   } catch (err) {
    toast.error(
-    err instanceof Error ? err.message : "Something went wrong. Please try again."
-   );
+    err instanceof Error
+     ? err.message
+     : 'Something went wrong. Please try again.'
+   )
   }
  }
 
@@ -71,16 +71,15 @@ export default function RegisterPage() {
     <CardHeader>
      <CardTitle>Create an account</CardTitle>
      <CardDescription>
-      {searchParams?.get("next")
-       ? "You must be logged in to perform this action."
-       : "Enter your details to get started."}
+      {searchParams?.get('next')
+       ? 'You must be logged in to perform this action.'
+       : 'Enter your details to get started.'}
      </CardDescription>
     </CardHeader>
 
     <CardContent>
      <form id="register-form" onSubmit={form.handleSubmit(onSubmit)}>
       <FieldGroup>
-
        <Controller
         name="name"
         control={form.control}
@@ -95,9 +94,7 @@ export default function RegisterPage() {
            autoComplete="name"
            aria-invalid={fieldState.invalid}
           />
-          {fieldState.invalid && (
-           <FieldError errors={[fieldState.error]} />
-          )}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
          </Field>
         )}
        />
@@ -116,9 +113,7 @@ export default function RegisterPage() {
            autoComplete="email"
            aria-invalid={fieldState.invalid}
           />
-          {fieldState.invalid && (
-           <FieldError errors={[fieldState.error]} />
-          )}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
          </Field>
         )}
        />
@@ -137,9 +132,7 @@ export default function RegisterPage() {
            autoComplete="new-password"
            aria-invalid={fieldState.invalid}
           />
-          {fieldState.invalid && (
-           <FieldError errors={[fieldState.error]} />
-          )}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
          </Field>
         )}
        />
@@ -160,13 +153,10 @@ export default function RegisterPage() {
            autoComplete="new-password"
            aria-invalid={fieldState.invalid}
           />
-          {fieldState.invalid && (
-           <FieldError errors={[fieldState.error]} />
-          )}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
          </Field>
         )}
        />
-
       </FieldGroup>
      </form>
     </CardContent>
@@ -178,10 +168,10 @@ export default function RegisterPage() {
       className="w-full"
       disabled={form.formState.isSubmitting}
      >
-      {form.formState.isSubmitting ? "Creating account…" : "Create account"}
+      {form.formState.isSubmitting ? 'Creating account…' : 'Create account'}
      </Button>
     </CardFooter>
    </Card>
   </div>
- );
+ )
 }

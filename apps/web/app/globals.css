@@ -1,8 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import './styles/_variables.scss';
 @import './styles/_keyframe-animations.scss';
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -61,13 +61,18 @@
     Then we multiply each by a large value (999) to make sure the values are well below 0 or above 100.
     The resulting color will be black or white.
   */
- --color-black-or-white: hwb(from var(--color-grayscale) h calc(((w - 50) * 999)) calc(((b - 50) * 999)));
+ --color-black-or-white: hwb(
+  from var(--color-grayscale) h calc(((w - 50) * 999)) calc(((b - 50) * 999))
+ );
 
  /* Finally, we swap the new w and b values to invert the black to white or vice versa */
  --contrast-color: hwb(from var(--color-black-or-white) h b w);
 
  /* all in one line, it looks like this */
- --contrast-color: hwb(from oklch(from var(--color) l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));
+ --contrast-color: hwb(
+  from oklch(from var(--color) l 0 0) h calc(((b - 50) * 999))
+   calc(((w - 50) * 999))
+ );
 
  --card: oklch(1 0 0);
  --card-foreground: oklch(0.141 0.005 285.823);
@@ -144,7 +149,6 @@
 
  body {
   @apply bg-background text-foreground;
-
  }
 
  html {

@@ -1,19 +1,13 @@
 {
  // Visit https://aka.ms/tsconfig to read more about this file
- "exclude": [
-  "dist"
- ],
- "include": [
-  "**/*.ts",
- ],
+ "exclude": ["dist"],
+ "include": ["**/*.ts"],
  "compilerOptions": {
   "composite": true,
   "experimentalDecorators": true,
   "baseUrl": ".",
   "paths": {
-   "@/*": [
-    "src/*"
-   ]
+   "@/*": ["src/*"]
   },
   "target": "esnext",
   "module": "esnext",
@@ -22,12 +16,8 @@
   "outDir": "./dist",
   // Environment Settings
   // See also https://aka.ms/tsconfig/module
-  "lib": [
-   "esnext"
-  ],
-  "types": [
-   "node"
-  ],
+  "lib": ["esnext"],
+  "types": ["node"],
   // Other Outputs
   "sourceMap": true,
   "declaration": true,
@@ -50,7 +40,7 @@
   "isolatedModules": true,
   "noUncheckedSideEffectImports": true,
   "moduleDetection": "force",
-  "skipLibCheck": true,
+  "skipLibCheck": true
  }
 }
 // {

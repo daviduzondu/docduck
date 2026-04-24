@@ -1,7 +1,21 @@
-import { Html, Head, Body, Font, Tailwind, pixelBasedPreset, Container } from "react-email";
-import * as React from "react";
+import {
+ Html,
+ Head,
+ Body,
+ Font,
+ Tailwind,
+ pixelBasedPreset,
+ Container,
+} from 'react-email'
+import * as React from 'react'
 
-export default function Layout({ className, children }: { className?: string; children: React.ReactNode }) {
+export default function Layout({
+ className,
+ children,
+}: {
+ className?: string
+ children: React.ReactNode
+}) {
  return (
   <Html>
    <Tailwind config={{ presets: [pixelBasedPreset], darkMode: 'class' }}>
@@ -25,10 +39,13 @@ export default function Layout({ className, children }: { className?: string; ch
      `}
      </style>
     </Head>
-    <Body style={{ fontFamily: "'Figtree', sans-serif" }} className={`p-10 ${className || ''}`}>
+    <Body
+     style={{ fontFamily: "'Figtree', sans-serif" }}
+     className={`p-10 ${className || ''}`}
+    >
      <Container
       style={{
-       maxWidth: "600px",
+       maxWidth: '600px',
       }}
      >
       <header className="text-2xl font-bold flex my-10">DocDuck</header>
@@ -37,5 +54,5 @@ export default function Layout({ className, children }: { className?: string; ch
     </Body>
    </Tailwind>
   </Html>
- );
+ )
 }

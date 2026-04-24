@@ -1,21 +1,19 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { EditorSidebarProvider } from "../providers/editor-sidebar.provider";
+import { SidebarProvider } from '@/components/ui/sidebar'
+import { EditorSidebarProvider } from '../providers/editor-sidebar.provider'
 // import {gener} from 'next'
 
 export default function Layout({
  children,
 }: Readonly<{
- children: React.ReactNode;
+ children: React.ReactNode
 }>) {
  return (
   <div className="overflow-clip">
    {/* <AuthProvider> */}
    <SidebarProvider>
-    <EditorSidebarProvider>
-     {children}
-    </EditorSidebarProvider>
+    <EditorSidebarProvider>{children}</EditorSidebarProvider>
    </SidebarProvider>
    {/* </AuthProvider> */}
   </div>
- );
+ )
 }

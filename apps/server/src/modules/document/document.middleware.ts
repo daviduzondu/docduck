@@ -1,9 +1,9 @@
-import { db } from "@/lib/kysely";
-import { AppError } from "@/lib/helpers";
-import { StatusCodes } from "http-status-codes";
-import { AppContext } from "@/types/types";
-import { base } from "@/orpc/os";
-import * as documentService from '@/modules/document/document.service';
+import { db } from '@/lib/kysely'
+import { AppError } from '@/lib/helpers'
+import { StatusCodes } from 'http-status-codes'
+import { AppContext } from '@/types/types'
+import { base } from '@/orpc/os'
+import * as documentService from '@/modules/document/document.service'
 
 // export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next:  => {
 //  const isDocumentVisible = await db.selectFrom('document').select(['visibility', 'document.id']).where('id', '=', req.body.documentId).executeTakeFirstOrThrow();
@@ -30,42 +30,50 @@ export const ensureDocumentOwner = base
    .select(['ownerId'])
    .where('document.id', '=', documentId)
    .where('document.ownerId', '=', context.user.id)
-   .executeTakeFirst();
+   .executeTakeFirst()
 
   if (!doc) {
-   throw errors.FORBIDDEN();
+   throw errors.FORBIDDEN()
   }
 
   return next({
-   context
-  });
- });
-
-
-export const ensureCanEditDocument = base
- .middleware(async ({ context, next, errors }, documentId: string) => {
-  const { permissions } = await documentService.getDocumentWithPermissions(documentId, context.user?.id);
-  if (!permissions.canEdit) throw errors.FORBIDDEN();
-  return next({
-   context: { ...context }
+   context,
   })
  })
 
-
+export const ensureCanEditDocument = base.middleware(
+ async ({ context, next, errors }, documentId: string) => {
+  const { permissions } = await documentService.getDocumentWithPermissions(
+   documentId,
+   context.user?.id
+  )
+  if (!permissions.canEdit) throw errors.FORBIDDEN()
+  return next({
+   context: { ...context },
+  })
+ }
+)
 
 export const ensureCommentAuthor = base
  .$context<Required<AppContext>>()
- .middleware(async ({ context, next, errors }, { documentId, commentId }: { documentId: string, commentId: string }) => {
-  const comment = await db.selectFrom('document_comment')
-   .where('document_comment.documentId', '=', documentId)
-   .where('document_comment.userId', '=', context.user.id)
-   .where('document_comment.id', '=', commentId)
-   .select(['userId'])
-   .executeTakeFirst();
-  if (comment?.userId !== context.user.id) throw errors.FORBIDDEN({
-   message: "You're not the author of this comment"
-  });
-  return next({
-   context
-  });
- })
+ .middleware(
+  async (
+   { context, next, errors },
+   { documentId, commentId }: { documentId: string; commentId: string }
+  ) => {
+   const comment = await db
+    .selectFrom('document_comment')
+    .where('document_comment.documentId', '=', documentId)
+    .where('document_comment.userId', '=', context.user.id)
+    .where('document_comment.id', '=', commentId)
+    .select(['userId'])
+    .executeTakeFirst()
+   if (comment?.userId !== context.user.id)
+    throw errors.FORBIDDEN({
+     message: "You're not the author of this comment",
+    })
+   return next({
+    context,
+   })
+  }
+ )
