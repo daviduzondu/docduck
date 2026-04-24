@@ -28,17 +28,30 @@ export default function DashboardShell<K extends keyof DashboardState>({
  title,
  pageName,
  selector,
+ handleSearch,
+ getPrevPage,
+ getNextPage,
 }: {
  children?: React.ReactNode
  title: string
  pageName: keyof DashboardState
  selector: (state: DashboardStore) => DashboardState[K]
+ getPrevPage: () => void
+ getNextPage: () => void
+ handleSearch: () => void
 }) {
  const dashboardState = useDashboard(selector)
 
  useEffect(() => {
-  console.log(dashboardState)
- }, [dashboardState])
+  const timeout = setTimeout(() => {
+   handleSearch()
+   //    console.log(dashboardState.searchTerm)
+  }, 500)
+
+  return () => {
+   clearTimeout(timeout)
+  }
+ }, [dashboardState.searchTerm])
 
  return (
   <div className="px-4 sm:px-6 w-full">
@@ -79,26 +92,30 @@ export default function DashboardShell<K extends keyof DashboardState>({
          variant="outline"
          size="icon"
          className="size-8"
-         onClick={() =>
+         disabled={dashboardState.currentPage <= 1}
+         onClick={() => {
+          getPrevPage()
           useDashboard
            .getState()
            .setCurrentPage(pageName, dashboardState.currentPage - 1 || 1)
-         }
+         }}
         >
          <ChevronLeft className="size-4" />
         </Button>
         <span className="text-xs text-muted-foreground whitespace-nowrap px-1">
-         {dashboardState.currentPage} / 100
+         {dashboardState.currentPage} / {dashboardState.maxPages ?? '?'}
         </span>
         <Button
          variant="outline"
          size="icon"
          className="size-8"
-         onClick={() =>
+         disabled={dashboardState.currentPage === dashboardState.maxPages}
+         onClick={() => {
+          getNextPage()
           useDashboard
            .getState()
            .setCurrentPage(pageName, dashboardState.currentPage + 1)
-         }
+         }}
         >
          <ChevronRight className="size-4" />
         </Button>
@@ -107,6 +124,7 @@ export default function DashboardShell<K extends keyof DashboardState>({
       {/* Grid / List toggle */}
       <ToggleGroup
        value={[dashboardState.view]}
+       variant={'outline'}
        onValueChange={(v) =>
         v[0] &&
         useDashboard
@@ -117,12 +135,23 @@ export default function DashboardShell<K extends keyof DashboardState>({
          )
        }
        aria-label="View mode"
-       className="shrink-0"
+       //    className="shrink-0"
       >
-       <ToggleGroupItem value="grid" size="sm" aria-label="Grid view">
+       <ToggleGroupItem
+        value="grid"
+        variant={dashboardState.view === 'grid' ? 'outline' : 'default'}
+        size="sm"
+        aria-label="Grid view"
+        // className="data-[state=on]:bg-primary"
+       >
         <LayoutGrid className="size-4" />
        </ToggleGroupItem>
-       <ToggleGroupItem value="list" size="sm" aria-label="List view">
+       <ToggleGroupItem
+        value="list"
+        size="sm"
+        variant={dashboardState.view === 'list' ? 'outline' : 'default'}
+        aria-label="List view"
+       >
         <List className="size-4" />
        </ToggleGroupItem>
       </ToggleGroup>

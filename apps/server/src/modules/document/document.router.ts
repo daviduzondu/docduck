@@ -22,12 +22,12 @@ export const documentRouter = base
    })
    .input(
     z.object({
-     query: z.object({ page: z.coerce.number().optional() }).optional(),
+     query: z.object({ page: z.coerce.number().optional(), limit: z.coerce.number().optional() }).optional(),
     })
    )
    .use(ensureAuth)
    .handler(({ context, input }) =>
-    documentService.getDocuments(context.user.id, input.query?.page)
+    documentService.getDocuments(context.user.id, input.query?.page, input.query?.limit)
    ),
 
   getSharedDocuments: r

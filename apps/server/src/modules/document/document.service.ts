@@ -72,15 +72,24 @@ export async function getDocumentWithPermissions(
  }
 }
 
-export async function getSnapshots(documentId: string, page: number = 1) {
- const offset = (page - 1) * 15
+export async function getSnapshots(documentId: string, page = 1) {
+ const limit = 15
+ const offset = (page - 1) * limit
  const results = await db
   .selectFrom('document_snapshot')
-  .select(['creatorId', 'documentId', 'id', 'name', 'yjsState', 'createdAt'])
+  .select(({ eb }) => [
+   'creatorId',
+   'documentId',
+   'id',
+   'name',
+   'yjsState',
+   'createdAt',
+   eb.fn.count('document_snapshot.id').over().as('totalSnapshots'),
+  ])
   .where('documentId', '=', documentId)
   .offset(offset)
   .orderBy('createdAt', 'desc')
-  .limit(15)
+  .limit(limit)
   .execute()
 
  return results.map((result) => {
@@ -89,6 +98,7 @@ export async function getSnapshots(documentId: string, page: number = 1) {
   const firstFewLines = doc.getXmlFragment('default').slice(0, 2)
   return {
    ...result,
+   limit,
    preview: firstFewLines.map((line) => line.toJSON()).join(''),
    yjsState: undefined,
   }
@@ -444,8 +454,7 @@ export async function getDocument(
   .executeTakeFirstOrThrow()
 }
 
-export async function getDocuments(userId: string, page = 1) {
- const limit = 10
+export async function getDocuments(userId: string, page = 1, limit = 10) {
  const offset = (page - 1) * limit
  const results = await db
   .selectFrom('document')
@@ -457,6 +466,7 @@ export async function getDocuments(userId: string, page = 1) {
    'yjsState',
    'document.createdAt',
    'document.updatedAt',
+   eb.fn.count('document.id').over().as('totalDocuments'),
    jsonArrayFrom(
     eb
      .selectFrom('permission')
@@ -477,6 +487,7 @@ export async function getDocuments(userId: string, page = 1) {
     Y.applyUpdate(tempDoc, r.yjsState)
    }
    return {
+    limit,
     ...r,
     collaborators: r.collaborators,
     commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
@@ -492,7 +503,12 @@ export async function getSharedDocuments(userId: string, page = 1) {
  const results = await db
   .selectFrom('permission')
   .innerJoin('document', 'document.id', 'permission.documentId')
-  .select(['title', 'yjsState', 'document.id'])
+  .select(({ eb }) => [
+   'title',
+   'yjsState',
+   'document.id',
+   eb.fn.count('permission.id').over().as('total'),
+  ])
   .where('permission.role', '!=', 'OWNER')
   .where('permission.userId', '=', userId)
   .limit(limit)
@@ -507,6 +523,7 @@ export async function getSharedDocuments(userId: string, page = 1) {
    }
    return {
     ...r,
+    limit,
     commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
     yjsState: undefined,
    }
