@@ -9,6 +9,10 @@ import {
  InputGroupInput,
 } from '@/components/ui/input-group'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import useDashboard, {
+ DashboardState,
+ DashboardStore,
+} from '@/providers/dashboard.store'
 import {
  ChevronLeft,
  ChevronRight,
@@ -17,16 +21,24 @@ import {
  List,
  Search,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect } from 'react'
 
-export default function DashboardShell({
+export default function DashboardShell<K extends keyof DashboardState>({
  children,
  title,
+ pageName,
+ selector,
 }: {
  children?: React.ReactNode
  title: string
+ pageName: keyof DashboardState
+ selector: (state: DashboardStore) => DashboardState[K]
 }) {
- const [view, setView] = useState<string>('grid')
+ const dashboardState = useDashboard(selector)
+
+ useEffect(() => {
+  console.log(dashboardState)
+ }, [dashboardState])
 
  return (
   <div className="px-4 sm:px-6 w-full">
@@ -38,8 +50,15 @@ export default function DashboardShell({
 
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center bg-accent/55 p-1.5 pl-2 rounded-2xl sm:rounded-full">
      {/* Left: search */}
-     <InputGroup className="sm:w-52 shrink-0">
-      <InputGroupInput placeholder="Search..." className="rounded-full h-8" />
+     <InputGroup className="">
+      <InputGroupInput
+       placeholder="Search..."
+       className="rounded-full h-8 w-28"
+       value={dashboardState.searchTerm}
+       onChange={(e) =>
+        useDashboard.getState().setSearchTerm(pageName, e.target.value)
+       }
+      />
       <InputGroupAddon align="inline-end">
        <Search className="size-4 text-muted-foreground" />
       </InputGroupAddon>
@@ -56,22 +75,47 @@ export default function DashboardShell({
       {/* Page arrows + doc count */}
       <div className="flex items-center gap-1.5 shrink-0">
        <ButtonGroup aria-label="Page navigation" className="flex items-center">
-        <Button variant="outline" size="icon" className="size-8">
+        <Button
+         variant="outline"
+         size="icon"
+         className="size-8"
+         onClick={() =>
+          useDashboard
+           .getState()
+           .setCurrentPage(pageName, dashboardState.currentPage - 1 || 1)
+         }
+        >
          <ChevronLeft className="size-4" />
         </Button>
         <span className="text-xs text-muted-foreground whitespace-nowrap px-1">
-         1 / 100
+         {dashboardState.currentPage} / 100
         </span>
-        <Button variant="outline" size="icon" className="size-8">
+        <Button
+         variant="outline"
+         size="icon"
+         className="size-8"
+         onClick={() =>
+          useDashboard
+           .getState()
+           .setCurrentPage(pageName, dashboardState.currentPage + 1)
+         }
+        >
          <ChevronRight className="size-4" />
         </Button>
        </ButtonGroup>
       </div>
-
       {/* Grid / List toggle */}
       <ToggleGroup
-       value={[view]}
-       onValueChange={(v) => v[0] && setView(v[0])}
+       value={[dashboardState.view]}
+       onValueChange={(v) =>
+        v[0] &&
+        useDashboard
+         .getState()
+         .setView(
+          pageName as keyof DashboardStore,
+          v[0] as DashboardState[keyof DashboardState]['view']
+         )
+       }
        aria-label="View mode"
        className="shrink-0"
       >

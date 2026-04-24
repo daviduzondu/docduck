@@ -45,6 +45,8 @@ export type document = {
  visibility: Generated<Visibility>
  allowPublicEdits: Generated<boolean>
  lastSnapshotAt: Timestamp | null
+ createdAt: Generated<Timestamp>
+ updatedAt: Generated<Timestamp>
 }
 export type document_comment = {
  id: Generated<string>

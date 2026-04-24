@@ -155,7 +155,7 @@ export async function createSnapshot(
  documentId: string,
  overrideInterval?: boolean
 ) {
- return await db.transaction().execute(async (trx) => {
+ await db.transaction().execute(async (trx) => {
   const document = await trx
    .selectFrom('document')
    .select((eb) => [
@@ -455,13 +455,15 @@ export async function getDocuments(userId: string, page = 1) {
    'document.title',
    'visibility',
    'yjsState',
+   'document.createdAt',
+   'document.updatedAt',
    jsonArrayFrom(
     eb
      .selectFrom('permission')
      .innerJoin('user', 'user.id', 'permission.userId')
      .whereRef('permission.documentId', '=', 'document.id')
      .where('permission.role', '!=', 'OWNER')
-     .select(['user.id', 'user.name'])
+     .select(['user.id', 'user.name', 'user.image'])
    ).as('collaborators'),
   ])
   .limit(limit)
