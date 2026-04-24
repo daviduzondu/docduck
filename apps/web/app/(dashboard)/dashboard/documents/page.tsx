@@ -33,6 +33,7 @@ import {
 import { formatRelative } from 'date-fns'
 import { ArrowUpDown, MessageSquare, MoreHorizontal } from 'lucide-react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const columnHelper =
  createColumnHelper<
@@ -125,8 +126,8 @@ const columns = [
 ]
 
 export default function Documents() {
+ const router = useRouter()
  const [sorting, setSorting] = useState<SortingState>([])
-
  const { data, isLoading } = useQuery(
   orpc.documents.getDocuments.queryOptions({ input: {} })
  )
@@ -178,6 +179,7 @@ export default function Documents() {
          key={row.id}
          className="cursor-pointer"
          onClick={() => {
+          router.push('/doc/' + row.original.id)
           // navigate to document
          }}
         >
