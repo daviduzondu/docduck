@@ -1,5 +1,11 @@
 'use client'
-import { FileText, Share2, SidebarCloseIcon, Trash2 } from 'lucide-react'
+import {
+ FileText,
+ PlusCircle,
+ Share2,
+ SidebarCloseIcon,
+ Trash2,
+} from 'lucide-react'
 
 import {
  Sidebar,
@@ -41,6 +47,17 @@ export default function DashboardSidebar() {
 
    <SidebarContent>
     <SidebarGroup>
+     <SidebarMenuItem>
+      <SidebarMenuButton
+      variant={'outline'}
+       render={
+        <div>
+         <PlusCircle />
+         <span>Create new Document</span>
+        </div>
+       }
+      ></SidebarMenuButton>
+     </SidebarMenuItem>
      <SidebarGroupLabel>Files</SidebarGroupLabel>
      <SidebarGroupContent>
       <SidebarMenu>
