@@ -581,15 +581,12 @@ export async function searchDocumentByTitle({
  limit?: number
  page?: number
 }) {
-
  const results = await db
   .selectFrom('document')
-  .where(
-   sql<boolean>`${title} <% title OR title % ${title}`
-  )
+  .where(sql<boolean>`(${title} <% title OR title % ${title})`)
   .where('ownerId', '=', ownerId)
   .select(({ eb }) => [
-   'id',
+   'document.id',
    'document.title',
    'visibility',
    'yjsState',

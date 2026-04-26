@@ -153,7 +153,7 @@ export default function Documents() {
  const [sorting, setSorting] = useState<SortingState>([])
  const [pagination, setPagination] = useState({
   pageIndex: 0, //initial page index
-  pageSize: 2, //default page size
+  pageSize: 10, //default page size
  })
  const { data, isLoading } = useQuery(
   orpc.documents.getDocuments.queryOptions({
@@ -215,7 +215,6 @@ export default function Documents() {
   const serverData =
    serverResults?.data ?? []
   const combined = [...localResults, ...serverData]
-  console.log(serverData)
 
   return Array.from(
    new Map(combined.map((doc) => [doc.id, doc])).entries()
