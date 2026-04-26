@@ -21,23 +21,32 @@ import {
 } from '@/components/ui/table'
 import { $api, orpc } from '@/lib/orpc.client'
 import { getUserColor } from '@/lib/utils'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import {
  createColumnHelper,
  flexRender,
  getCoreRowModel,
+ getFilteredRowModel,
  getPaginationRowModel,
  getSortedRowModel,
  useReactTable,
  type SortingState,
 } from '@tanstack/react-table'
 import { formatRelative } from 'date-fns'
-import { ArrowUpDown, MessageSquare, MoreHorizontal } from 'lucide-react'
-import { useState } from 'react'
+import {
+ ArrowUpDown,
+ Loader,
+ Loader2,
+ MessageSquare,
+ MoreHorizontal,
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Fuse from 'fuse.js'
 import useDashboard from '@/providers/dashboard.store'
 import { useShallow } from 'zustand/react/shallow'
+import { InferClientOutputs } from '@orpc/client'
+import { useDebounce } from 'use-debounce'
 
 const columnHelper =
  createColumnHelper<
@@ -60,6 +69,7 @@ const columns = [
   cell: ({ getValue }) => (
    <span className="font-medium">{getValue() || 'Untitled'}</span>
   ),
+  enableColumnFilter: true,
  }),
  columnHelper.accessor('visibility', {
   header: 'Visibility',
@@ -71,6 +81,7 @@ const columns = [
     </Badge>
    )
   },
+  enableColumnFilter: false,
  }),
  columnHelper.accessor('collaborators', {
   header: 'Collaborators',
@@ -107,6 +118,7 @@ const columns = [
     </div>
    )
   },
+  enableColumnFilter: false,
  }),
  columnHelper.accessor('commentsCount', {
   header: 'Comments',
@@ -116,10 +128,12 @@ const columns = [
     <span className="text-sm">{getValue()}</span>
    </div>
   ),
+  enableColumnFilter: false,
  }),
  columnHelper.accessor('updatedAt', {
   header: 'Last Updated',
   cell: ({ getValue }) => <div>{formatRelative(getValue(), new Date())}</div>,
+  enableColumnFilter: false,
  }),
  columnHelper.display({
   id: 'actions',
@@ -130,6 +144,7 @@ const columns = [
     </Button>
    </div>
   ),
+  enableColumnFilter: false,
  }),
 ]
 
@@ -151,105 +166,188 @@ export default function Documents() {
    placeholderData: keepPreviousData,
   })
  )
- const { setMaxPages, maxPages } = useDashboard(
+ const { setMaxPages, maxPages, searchTerm } = useDashboard(
   useShallow((state) => ({
    setMaxPages: state.setMaxPages,
    maxPages: state.documents.maxPages,
+   searchTerm: state.documents.searchTerm,
   }))
  )
-
  if (data) {
   const maxPages = Math.ceil(
    Number(data?.data[0]?.totalDocuments ?? 0) / Number(data.data[0]?.limit ?? 0)
   )
   setMaxPages('documents', isNaN(maxPages) ? 1 : maxPages)
  }
+ const [debouncedSearch] = useDebounce(searchTerm, 500)
+ const localResults = useMemo(() => {
+  if (!debouncedSearch || !data?.data) return data?.data ?? []
+  const fuse = new Fuse(data.data, {
+   keys: ['title'],
+   includeScore: true,
+   isCaseSensitive: false,
+   threshold: 0.3,
+  })
+  return fuse.search(debouncedSearch).map((r) => r.item)
+ }, [debouncedSearch, data?.data])
+
+ const {
+  data: serverResults,
+  isLoading: isServerSearching,
+  isRefetching: isServerSearchRefetching,
+  isError: isServerError,
+ } = useQuery(
+  orpc.documents.searchDocument.queryOptions({
+   input: {
+    body: { title: debouncedSearch },
+    query: {
+     page: pagination.pageIndex + 1,
+     limit: pagination.pageSize,
+    },
+   },
+   enabled: !!debouncedSearch,
+   placeholderData: keepPreviousData,
+  })
+ )
+
+ const mergedResults = useMemo(() => {
+  if (!debouncedSearch) return data?.data ?? []
+  const serverData =
+   serverResults?.data ?? []
+  const combined = [...localResults, ...serverData]
+  console.log(serverData)
+
+  return Array.from(
+   new Map(combined.map((doc) => [doc.id, doc])).entries()
+  ).map(([, doc]) => doc)
+ }, [debouncedSearch, localResults, serverResults, data?.data])
+
+ useEffect(() => {
+  if (debouncedSearch) {
+   setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+ }, [debouncedSearch])
+
  const table = useReactTable({
-  data: data?.data ?? [],
+  data: (mergedResults as any) ?? [],
   columns,
   state: { sorting, pagination },
   onSortingChange: setSorting,
   getCoreRowModel: getCoreRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
+  //   getFilteredRowModel: getFilteredRowModel(),
   manualPagination: true,
+  manualFiltering: true,
   onPaginationChange: setPagination,
-  pageCount: data?.data ? maxPages : -1,
+  // pageCount: debouncedSearch ? 1 : maxPages,
+  pageCount: debouncedSearch
+   ? Math.ceil(
+      Number(serverResults?.data[0]?.totalDocuments ?? 0) / pagination.pageSize
+     )
+   : maxPages,
  })
-
- function handleSearch() {
-  const fuse = new Fuse(data?.data.map((d) => d.title) ?? [], {
-   includeScore: true,
-   isCaseSensitive: false,
-  })
-  console.log(fuse.search(useDashboard.getState().documents.searchTerm))
- }
 
  return (
   <DashboardShell
    title="My Documents"
    pageName="documents"
    selector={(state) => state.documents}
-   handleSearch={handleSearch}
+   //    handleSearch={handleSearch}
    getPrevPage={table.previousPage}
    getNextPage={table.nextPage}
+   pageCount={table.getPageCount}
   >
-   <div className="rounded-xl border mt-4 overflow-hidden">
-    <Table>
-     <TableHeader>
-      {table.getHeaderGroups().map((headerGroup) => (
-       <TableRow key={headerGroup.id} className="hover:bg-transparent">
-        {headerGroup.headers.map((header) => (
-         <TableHead key={header.id}>
-          {header.isPlaceholder
-           ? null
-           : flexRender(header.column.columnDef.header, header.getContext())}
-         </TableHead>
-        ))}
-       </TableRow>
-      ))}
-     </TableHeader>
-     <TableBody>
-      {isLoading ? (
-       Array.from({ length: 5 }).map((_, i) => (
-        <TableRow key={i}>
-         {columns.map((_, j) => (
-          <TableCell key={j}>
-           <Skeleton className="h-4 w-full" />
-          </TableCell>
+   <>
+    <div className="rounded-xl border mt-4 overflow-hidden">
+     <Table>
+      <TableHeader>
+       {table.getHeaderGroups().map((headerGroup) => (
+        <TableRow key={headerGroup.id} className="hover:bg-transparent">
+         {headerGroup.headers.map((header) => (
+          <TableHead key={header.id}>
+           {header.isPlaceholder
+            ? null
+            : flexRender(header.column.columnDef.header, header.getContext())}
+          </TableHead>
          ))}
         </TableRow>
-       ))
-      ) : table.getRowModel().rows.length ? (
-       table.getRowModel().rows.map((row) => (
-        <TableRow
-         key={row.id}
-         className="cursor-pointer"
-         onClick={() => {
-          router.push('/doc/' + row.original.id)
-          // navigate to document
-         }}
-        >
-         {row.getVisibleCells().map((cell) => (
-          <TableCell key={cell.id}>
-           {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          </TableCell>
-         ))}
+       ))}
+      </TableHeader>
+      <TableBody>
+       {isLoading ? (
+        Array.from({ length: 5 }).map((_, i) => (
+         <TableRow key={i}>
+          {columns.map((_, j) => (
+           <TableCell key={j}>
+            <Skeleton className="h-4 w-full" />
+           </TableCell>
+          ))}
+         </TableRow>
+        ))
+       ) : table.getRowModel().rows.length ? (
+        table.getRowModel().rows.map((row) => (
+         <TableRow
+          key={row.id}
+          className="cursor-pointer"
+          onClick={() => router.push('/doc/' + row.original.id)}
+         >
+          {row.getVisibleCells().map((cell) => (
+           <TableCell key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+           </TableCell>
+          ))}
+         </TableRow>
+        ))
+       ) : isServerSearching || isServerSearchRefetching ? (
+        Array.from({ length: 3 }).map((_, i) => (
+         <TableRow key={i}>
+          {columns.map((_, j) => (
+           <TableCell key={j}>
+            <Skeleton className="h-4 w-full" />
+           </TableCell>
+          ))}
+         </TableRow>
+        ))
+       ) : (
+        <TableRow>
+         <TableCell
+          colSpan={columns.length}
+          className="h-32 text-center text-muted-foreground"
+         >
+          {searchTerm
+           ? 'Could not find any documents with that title'
+           : 'No documents yet.'}
+         </TableCell>
         </TableRow>
-       ))
-      ) : (
-       <TableRow>
-        <TableCell
-         colSpan={columns.length}
-         className="h-32 text-center text-muted-foreground"
-        >
-         No documents yet.
-        </TableCell>
-       </TableRow>
-      )}
-     </TableBody>
-    </Table>
-   </div>
+       )}
+       {/* Only append server skeletons below existing local rows */}
+       {table.getRowModel().rows.length > 0 &&
+       (isServerSearching || isServerSearchRefetching)
+        ? Array.from({ length: 3 }).map((_, i) => (
+           <TableRow key={i}>
+            {columns.map((_, j) => (
+             <TableCell key={j}>
+              <Skeleton className="h-4 w-full" />
+             </TableCell>
+            ))}
+           </TableRow>
+          ))
+        : null}
+       {isServerError && mergedResults.length > 0 ? (
+        <TableRow>
+         <TableCell
+          colSpan={columns.length}
+          className="text-center text-muted-foreground"
+         >
+          Local results shown. Some results may still exist on the server.
+         </TableCell>
+        </TableRow>
+       ) : null}
+      </TableBody>
+     </Table>
+    </div>
+   </>
   </DashboardShell>
  )
 }

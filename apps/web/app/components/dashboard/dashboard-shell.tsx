@@ -28,9 +28,10 @@ export default function DashboardShell<K extends keyof DashboardState>({
  title,
  pageName,
  selector,
- handleSearch,
+ //  handleSearch,
  getPrevPage,
  getNextPage,
+ pageCount,
 }: {
  children?: React.ReactNode
  title: string
@@ -38,20 +39,21 @@ export default function DashboardShell<K extends keyof DashboardState>({
  selector: (state: DashboardStore) => DashboardState[K]
  getPrevPage: () => void
  getNextPage: () => void
- handleSearch: () => void
+ pageCount: () => void
+ //  handleSearch: () => void
 }) {
  const dashboardState = useDashboard(selector)
 
- useEffect(() => {
-  const timeout = setTimeout(() => {
-   handleSearch()
-   //    console.log(dashboardState.searchTerm)
-  }, 500)
+ //  useEffect(() => {
+ //   const timeout = setTimeout(() => {
+ //    handleSearch()
+ //    //    console.log(dashboardState.searchTerm)
+ //   }, 500)
 
-  return () => {
-   clearTimeout(timeout)
-  }
- }, [dashboardState.searchTerm])
+ //   return () => {
+ //    clearTimeout(timeout)
+ //   }
+ //  }, [dashboardState.searchTerm])
 
  return (
   <div className="px-4 sm:px-6 w-full">
@@ -103,7 +105,7 @@ export default function DashboardShell<K extends keyof DashboardState>({
          <ChevronLeft className="size-4" />
         </Button>
         <span className="text-xs text-muted-foreground whitespace-nowrap px-1">
-         {dashboardState.currentPage} / {dashboardState.maxPages ?? '?'}
+         {dashboardState.currentPage} / {pageCount() ?? '?'}
         </span>
         <Button
          variant="outline"

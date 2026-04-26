@@ -22,12 +22,47 @@ export const documentRouter = base
    })
    .input(
     z.object({
-     query: z.object({ page: z.coerce.number().optional(), limit: z.coerce.number().optional() }).optional(),
+     query: z
+      .object({
+       page: z.coerce.number().optional(),
+       limit: z.coerce.number().optional(),
+      })
+      .optional(),
     })
    )
    .use(ensureAuth)
    .handler(({ context, input }) =>
-    documentService.getDocuments(context.user.id, input.query?.page, input.query?.limit)
+    documentService.getDocuments(
+     context.user.id,
+     input.query?.page,
+     input.query?.limit
+    )
+   ),
+
+  searchDocument: r
+   .post('/search', {
+    description: 'Search documents',
+    inputStructure: 'detailed',
+   })
+   .input(
+    z.object({
+     body: z.object({
+      title: z.string().min(2),
+     }),
+     query: z.object({
+      page: z.coerce.number().optional(),
+      limit: z.coerce.number().optional(),
+     }),
+    })
+   )
+   .use(ensureAuth)
+   .handler(({ context, input }) =>
+    documentService.searchDocumentByTitle({
+     title: input.body.title,
+     ownerId: context.user.id,
+     page: input.query.page,
+     limit: input.query.limit,
+    })
    ),
 
   getSharedDocuments: r

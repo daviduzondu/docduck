@@ -75,8 +75,8 @@ model verification {
     token      String?
     expiresAt  DateTime
 
-    createdAt DateTime @ignore @db.Timestamptz(6)
-    updatedAt DateTime @ignore @db.Timestamptz(6)
+    createdAt DateTime @default(now()) @ignore @db.Timestamptz(6)
+    updatedAt DateTime @default(now()) @ignore @db.Timestamptz(6)
 }
 
 model document {
@@ -94,6 +94,7 @@ model document {
     documentSnapshots  document_snapshot[]
     documentComments   document_comment[]
 
+    @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "documents_title_trgm_idx")
     @@index([ownerId])
 }
 

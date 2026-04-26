@@ -10,6 +10,7 @@ import { sql } from 'kysely'
 import { hocuspocus } from '@/lib/config/hocuspocus'
 import { fromUint8Array } from 'js-base64'
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
+import { setTimeout } from 'node:timers/promises'
 
 type DocumentMeta = {
  documentId: string
@@ -568,3 +569,71 @@ export async function createDocument(
   return { documentId, role }
  })
 }
+
+export async function searchDocumentByTitle({
+ title,
+ ownerId,
+ limit,
+ page,
+}: {
+ title: string
+ ownerId: string
+ limit?: number
+ page?: number
+}) {
+
+ const results = await db
+  .selectFrom('document')
+  .where(
+   sql<boolean>`${title} <% title OR title % ${title}`
+  )
+  .where('ownerId', '=', ownerId)
+  .select(({ eb }) => [
+   'id',
+   'document.title',
+   'visibility',
+   'yjsState',
+   'document.createdAt',
+   'document.updatedAt',
+   sql<number>`
+  GREATEST(
+    word_similarity(${title}, title),
+    similarity(title, ${title})
+  )`.as('score'),
+   eb.fn.count('document.id').over().as('totalDocuments'),
+   jsonArrayFrom(
+    eb
+     .selectFrom('permission')
+     .innerJoin('user', 'user.id', 'permission.userId')
+     .whereRef('permission.documentId', '=', 'document.id')
+     .where('permission.role', '!=', 'OWNER')
+     .select(['user.id', 'user.name', 'user.image'])
+   ).as('collaborators'),
+  ])
+  .limit(limit ?? 10)
+  .offset(((page ?? 1) - 1) * (limit ?? 10))
+  .orderBy('score', 'desc')
+  .execute()
+
+ return {
+  totalDocuments: Number(results[0]?.totalDocuments ?? 0),
+  data: results.map((r) => {
+   const tempDoc = new Y.Doc()
+   if (r.yjsState) {
+    Y.applyUpdate(tempDoc, r.yjsState)
+   }
+   return {
+    ...r,
+    collaborators: r.collaborators,
+    commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
+    yjsState: undefined,
+   }
+  }),
+ }
+}
+// (qb) => qb.selectFrom('pet')
+//   .select('pet.name')
+//   .whereRef('pet.owner_id', '=', 'person.id')
+//   .limit(1),
+// '=',
+// 'Fluffy'
