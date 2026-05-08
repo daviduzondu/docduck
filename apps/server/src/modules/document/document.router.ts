@@ -39,6 +39,78 @@ export const documentRouter = base
     )
    ),
 
+  getTrashedDocuments: r
+   .get('/trash', {
+    description: 'Get deleted documents',
+    inputStructure: 'detailed',
+   })
+   .input(
+    z.object({
+     query: z
+      .object({
+       page: z.coerce.number(),
+       limit: z.coerce.number(),
+      })
+      .optional(),
+    })
+   )
+   .use(ensureAuth)
+   .handler(({ context, input }) =>
+    documentService.getTrashedDocuments({
+     ownerId: context.user.id,
+     limit: input.query?.limit,
+     page: input.query?.page,
+    })
+   ),
+
+  putInTrash: r
+   .patch('/{documentId}/trash', {
+    description: 'Move a document to the trash (soft delete)',
+    inputStructure: 'detailed',
+   })
+   .input(
+    z.object({
+     params: z.object({ documentId: z.string() }),
+    })
+   )
+   .use(ensureAuth)
+   .use(ensureDocumentOwner, (input) => input.params.documentId)
+   .handler(({ input }) =>
+    documentService.putInTrash({ documentId: input.params.documentId })
+   ),
+
+  restoreDocumentById: r
+   .patch('/{documentId}/restore', {
+    description: 'Restore a document from the trash',
+    inputStructure: 'detailed',
+   })
+   .input(
+    z.object({
+     params: z.object({ documentId: z.string() }),
+    })
+   )
+   .use(ensureAuth)
+   .use(ensureDocumentOwner, (input) => input.params.documentId)
+   .handler(({ input }) =>
+    documentService.restoreFromTrash(input.params.documentId)
+   ),
+
+  permanentlyDelete: r
+   .delete('/{documentId}', {
+    description: 'Permanently delete a document',
+    inputStructure: 'detailed',
+   })
+   .input(
+    z.object({
+     params: z.object({ documentId: z.string() }),
+    })
+   )
+   .use(ensureAuth)
+   .use(ensureDocumentOwner, (input) => input.params.documentId)
+   .handler(({ input }) =>
+    documentService.permanentlyDelete(input.params.documentId)
+   ),
+
   searchDocument: r
    .post('/search', {
     description: 'Search documents',
@@ -48,6 +120,7 @@ export const documentRouter = base
     z.object({
      body: z.object({
       title: z.string().min(2),
+      isDeleted: z.boolean().optional(),
      }),
      query: z.object({
       page: z.coerce.number().optional(),
@@ -62,6 +135,7 @@ export const documentRouter = base
      ownerId: context.user.id,
      page: input.query.page,
      limit: input.query.limit,
+     isDeleted: input.body.isDeleted,
     })
    ),
 
@@ -99,11 +173,12 @@ export const documentRouter = base
      params: z.object({ documentId: z.string() }),
     })
    )
-   .handler(({ input, context }) =>
-    documentService.getDocumentWithPermissions(
-     input.params.documentId,
-     context.user?.id
-    )
+   .handler(
+    async ({ input, context }) =>
+     await documentService.getDocumentWithPermissions(
+      input.params.documentId,
+      context.user?.id
+     )
    ),
 
   getSnapshots: r
@@ -119,21 +194,21 @@ export const documentRouter = base
     documentService.getSnapshots(input.params.documentId, input.query?.page)
    ),
 
-  getSnapshotDiff: r
-   .get('/{documentId}/snapshots/{snapshotId}/diff', {
-    inputStructure: 'detailed',
-   })
-   .input(
-    z.object({
-     params: z.object({ documentId: z.string(), snapshotId: z.string() }),
-    })
-   )
-   .handler(({ input }) =>
-    documentService.getSnapshotDiff({
-     documentId: input.params.documentId,
-     snapshotId: input.params.snapshotId,
-    })
-   ),
+  // getSnapshotDiff: r
+  //  .get('/{documentId}/snapshots/{snapshotId}/diff', {
+  //   inputStructure: 'detailed',
+  //  })
+  //  .input(
+  //   z.object({
+  //    params: z.object({ documentId: z.string(), snapshotId: z.string() }),
+  //   })
+  //  )
+  //  .handler(({ input }) =>
+  //   documentService.getSnapshotDiff({
+  //    documentId: input.params.documentId,
+  //    snapshotId: input.params.snapshotId,
+  //   })
+  //  ),
 
   getSnapshotById: r
    .get('/{documentId}/snapshots/{snapshotId}', {
@@ -234,12 +309,12 @@ export const documentRouter = base
    )
    .use(ensureCanEditDocument, (input) => input.params.documentId)
    .handler(
-    ({
+    async ({
      input: {
       params: { documentId, commentId },
      },
     }) => {
-     documentService.resolveComment({ documentId, commentId })
+     await documentService.resolveComment({ documentId, commentId })
     }
    ),
 
@@ -248,7 +323,7 @@ export const documentRouter = base
    .use(ensureAuth)
    .input(documentSchema.createDocumentSchema)
    .handler(({ input, context }) =>
-    documentService.createDocument(input, context)
+    documentService.createDocument(input, context.user.id)
    ),
 
   updateDocumentTitle: r

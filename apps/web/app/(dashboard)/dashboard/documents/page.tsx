@@ -10,6 +10,13 @@ import {
 } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+ DropdownMenu,
+ DropdownMenuContent,
+ DropdownMenuItem,
+ DropdownMenuSeparator,
+ DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
  Table,
@@ -21,55 +28,75 @@ import {
 } from '@/components/ui/table'
 import { $api, orpc } from '@/lib/orpc.client'
 import { getUserColor } from '@/lib/utils'
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
  createColumnHelper,
  flexRender,
  getCoreRowModel,
- getFilteredRowModel,
  getPaginationRowModel,
  getSortedRowModel,
  useReactTable,
  type SortingState,
+ type Row,
 } from '@tanstack/react-table'
 import { formatRelative } from 'date-fns'
 import {
- ArrowUpDown,
- Loader,
- Loader2,
  MessageSquare,
  MoreHorizontal,
+ Pencil,
+ Eye,
+ Trash2,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Fuse from 'fuse.js'
-import useDashboard from '@/providers/dashboard.store'
+import useDashboard, { DocumentFilter } from '@/providers/dashboard.store'
 import { useShallow } from 'zustand/react/shallow'
-import { InferClientOutputs } from '@orpc/client'
 import { useDebounce } from 'use-debounce'
+import { SortButton } from '@/components/dashboard/sort-button'
 
-const columnHelper =
- createColumnHelper<
-  Awaited<ReturnType<typeof $api.documents.getDocuments>>['data'][number]
- >()
+type DocumentRow = Awaited<
+ ReturnType<typeof $api.documents.getDocuments>
+>['data'][number]
+
+const columnHelper = createColumnHelper<DocumentRow>()
+
+function ActionsMenu({ row }: { row: Row<DocumentRow> }) {
+ const router = useRouter()
+ return (
+  <DropdownMenu>
+   <DropdownMenuTrigger
+    render={
+     <Button
+      variant="ghost"
+      size="icon"
+      className="size-8"
+      onClick={(e) => e.stopPropagation()}
+     />
+    }
+   >
+    <MoreHorizontal className="size-4" />
+   </DropdownMenuTrigger>
+   <DropdownMenuContent align="end">
+    <DropdownMenuItem>
+     <Pencil className="size-4" />
+     Edit Title
+    </DropdownMenuItem>
+    <DropdownMenuItem className="text-destructive focus:text-destructive">
+     <Trash2 className="size-4" />
+     Delete
+    </DropdownMenuItem>
+   </DropdownMenuContent>
+  </DropdownMenu>
+ )
+}
 
 const columns = [
  columnHelper.accessor('title', {
-  header: ({ column }) => (
-   <Button
-    variant="ghost"
-    size="sm"
-    className="-ml-3"
-    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-   >
-    Title
-    <ArrowUpDown className="size-3.5" />
-   </Button>
-  ),
+  header: () => <SortButton label="Title" asc="title_asc" desc="title_desc" />,
   cell: ({ getValue }) => (
    <span className="font-medium">{getValue() || 'Untitled'}</span>
   ),
-  enableColumnFilter: true,
  }),
  columnHelper.accessor('visibility', {
   header: 'Visibility',
@@ -81,7 +108,6 @@ const columns = [
     </Badge>
    )
   },
-  enableColumnFilter: false,
  }),
  columnHelper.accessor('collaborators', {
   header: 'Collaborators',
@@ -89,7 +115,6 @@ const columns = [
    const collaborators = getValue()
    return (
     <div className="flex items-center gap-1.5 text-muted-foreground">
-     {/* <Users className="size-3.5 shrink-0" /> */}
      {collaborators.length > 0 ? (
       <AvatarGroup>
        {collaborators.slice(0, 2).map((collaborator) => (
@@ -99,18 +124,18 @@ const columns = [
           alt={collaborator.name}
          />
          <AvatarFallback
-          className={'text-background'}
+          className="text-background"
           style={{ background: getUserColor(collaborator.id) }}
          >
           {collaborator.name[0]}
          </AvatarFallback>
         </Avatar>
        ))}
-       {collaborators.length > 2 ? (
+       {collaborators.length > 2 && (
         <AvatarGroupCount className="text-sm">
          +{collaborators.slice(2).length}
         </AvatarGroupCount>
-       ) : null}
+       )}
       </AvatarGroup>
      ) : (
       'No collaborators'
@@ -118,68 +143,185 @@ const columns = [
     </div>
    )
   },
-  enableColumnFilter: false,
  }),
  columnHelper.accessor('commentsCount', {
-  header: 'Comments',
+  header: () => (
+   <SortButton label="Comments" asc="comments_asc" desc="comments_desc" />
+  ),
   cell: ({ getValue }) => (
    <div className="flex items-center gap-1.5 text-muted-foreground">
     <MessageSquare className="size-3.5 shrink-0" />
     <span className="text-sm">{getValue()}</span>
    </div>
   ),
-  enableColumnFilter: false,
  }),
  columnHelper.accessor('updatedAt', {
-  header: 'Last Updated',
+  header: () => (
+   <SortButton label="Last Updated" asc="updated_asc" desc="updated_desc" />
+  ),
   cell: ({ getValue }) => <div>{formatRelative(getValue(), new Date())}</div>,
-  enableColumnFilter: false,
  }),
  columnHelper.display({
   id: 'actions',
-  cell: () => (
+  cell: ({ row }) => (
    <div className="flex justify-end">
-    <Button variant="ghost" size="icon" className="size-8">
-     <MoreHorizontal className="size-4" />
-    </Button>
+    <ActionsMenu row={row} />
    </div>
   ),
-  enableColumnFilter: false,
  }),
 ]
+
+function DocumentCard({
+ row,
+ onClick,
+}: {
+ row: Row<DocumentRow>
+ onClick: () => void
+}) {
+ const router = useRouter()
+ const { title, visibility, collaborators, commentsCount, updatedAt } =
+  row.original
+
+ return (
+  <div
+   onClick={onClick}
+   className="group relative flex flex-col gap-3 rounded-xl border bg-card p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-foreground/20 hover:-translate-y-0.5"
+  >
+   <div className="flex items-start justify-between gap-2">
+    <Badge
+     variant={visibility === 'PUBLIC' ? 'default' : 'secondary'}
+     className="shrink-0"
+    >
+     {visibility.charAt(0) + visibility.slice(1).toLowerCase()}
+    </Badge>
+    <DropdownMenu>
+     <DropdownMenuTrigger
+      render={
+       <Button
+        variant="ghost"
+        size="icon"
+        className="size-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 -mr-1 -mt-1"
+        onClick={(e) => e.stopPropagation()}
+       />
+      }
+     >
+      <MoreHorizontal className="size-3.5" />
+     </DropdownMenuTrigger>
+     <DropdownMenuContent align="end">
+      <DropdownMenuItem onClick={() => router.push('/doc/' + row.original.id)}>
+       <Eye className="size-4" />
+       Open
+      </DropdownMenuItem>
+      <DropdownMenuItem>
+       <Pencil className="size-4" />
+       Rename
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem className="text-destructive focus:text-destructive">
+       <Trash2 className="size-4" />
+       Delete
+      </DropdownMenuItem>
+     </DropdownMenuContent>
+    </DropdownMenu>
+   </div>
+
+   <p className="font-medium text-sm leading-snug line-clamp-2 flex-1">
+    {title || 'Untitled'}
+   </p>
+
+   <div className="flex items-center justify-between pt-1 border-t border-border/60">
+    {collaborators.length > 0 ? (
+     <AvatarGroup>
+      {collaborators.slice(0, 3).map((c) => (
+       <Avatar key={c.id} size="sm">
+        <AvatarImage src={c.image ?? undefined} alt={c.name} />
+        <AvatarFallback
+         className="text-background text-[10px]"
+         style={{ background: getUserColor(c.id) }}
+        >
+         {c.name[0]}
+        </AvatarFallback>
+       </Avatar>
+      ))}
+      {collaborators.length > 3 && (
+       <AvatarGroupCount className="text-xs">
+        +{collaborators.slice(3).length}
+       </AvatarGroupCount>
+      )}
+     </AvatarGroup>
+    ) : (
+     <span className="text-xs text-muted-foreground">No collaborators</span>
+    )}
+
+    <div className="flex items-center gap-2 text-muted-foreground">
+     <div className="flex items-center gap-1">
+      <MessageSquare className="size-3 shrink-0" />
+      <span className="text-xs">{commentsCount}</span>
+     </div>
+     <span className="text-xs hidden sm:block">
+      {formatRelative(updatedAt, new Date())}
+     </span>
+    </div>
+   </div>
+  </div>
+ )
+}
+
+function GridSkeleton({ count = 6 }: { count?: number }) {
+ return (
+  <>
+   {Array.from({ length: count }).map((_, i) => (
+    <div key={i} className="flex flex-col gap-3 rounded-xl border bg-card p-4">
+     <div className="flex items-start justify-between">
+      <Skeleton className="h-5 w-16 rounded-full" />
+     </div>
+     <Skeleton className="h-4 w-3/4" />
+     <Skeleton className="h-3.5 w-1/2" />
+     <div className="flex items-center justify-between pt-1 border-t border-border/60">
+      <Skeleton className="h-6 w-16 rounded-full" />
+      <Skeleton className="h-3.5 w-20" />
+     </div>
+    </div>
+   ))}
+  </>
+ )
+}
 
 export default function Documents() {
  const router = useRouter()
  const [sorting, setSorting] = useState<SortingState>([])
- const [pagination, setPagination] = useState({
-  pageIndex: 0, //initial page index
-  pageSize: 10, //default page size
- })
+ const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+
  const { data, isLoading } = useQuery(
   orpc.documents.getDocuments.queryOptions({
    input: {
-    query: {
-     page: pagination.pageIndex + 1,
-     limit: pagination.pageSize,
-    },
+    query: { page: pagination.pageIndex + 1, limit: pagination.pageSize },
    },
    placeholderData: keepPreviousData,
   })
  )
- const { setMaxPages, maxPages, searchTerm } = useDashboard(
-  useShallow((state) => ({
-   setMaxPages: state.setMaxPages,
-   maxPages: state.documents.maxPages,
-   searchTerm: state.documents.searchTerm,
-  }))
- )
+
+ const { setMaxPages, maxPages, searchTerm, view, activeFilters, sortBy } =
+  useDashboard(
+   useShallow((state) => ({
+    setMaxPages: state.setMaxPages,
+    maxPages: state.documents.maxPages,
+    searchTerm: state.documents.searchTerm,
+    view: state.documents.view,
+    activeFilters: state.documents.activeFilters,
+    sortBy: state.documents.sortBy,
+   }))
+  )
+
  if (data) {
   const maxPages = Math.ceil(
    Number(data?.data[0]?.totalDocuments ?? 0) / Number(data.data[0]?.limit ?? 0)
   )
   setMaxPages('documents', isNaN(maxPages) ? 1 : maxPages)
  }
+
  const [debouncedSearch] = useDebounce(searchTerm, 500)
+
  const localResults = useMemo(() => {
   if (!debouncedSearch || !data?.data) return data?.data ?? []
   const fuse = new Fuse(data.data, {
@@ -200,10 +342,7 @@ export default function Documents() {
   orpc.documents.searchDocument.queryOptions({
    input: {
     body: { title: debouncedSearch },
-    query: {
-     page: pagination.pageIndex + 1,
-     limit: pagination.pageSize,
-    },
+    query: { page: pagination.pageIndex + 1, limit: pagination.pageSize },
    },
    enabled: !!debouncedSearch,
    placeholderData: keepPreviousData,
@@ -211,20 +350,95 @@ export default function Documents() {
  )
 
  const mergedResults = useMemo(() => {
-  if (!debouncedSearch) return data?.data ?? []
-  const serverData =
-   serverResults?.data ?? []
-  const combined = [...localResults, ...serverData]
+  const serverData = serverResults?.data ?? []
+  const combined = debouncedSearch
+   ? [...localResults, ...serverData]
+   : (data?.data ?? [])
 
   return Array.from(
-   new Map(combined.map((doc) => [doc.id, doc])).entries()
-  ).map(([, doc]) => doc)
- }, [debouncedSearch, localResults, serverResults, data?.data])
+   new Map(
+    combined
+     .filter((d) => d.id != null)
+     .map((d) => [String(d.id), d] as const)
+     .filter(([, doc]) => {
+      if (activeFilters.length === 0) return true
+      return activeFilters.every((filter) => {
+       switch (filter.type) {
+        case 'visibility':
+         return doc.visibility === filter.value
+        case 'collaborators': {
+         const isShared = (doc.collaborators?.length ?? 0) > 1
+         return filter.value === 'shared' ? isShared : !isShared
+        }
+        case 'date': {
+         const updated = doc.updatedAt ? new Date(doc.updatedAt) : null
+         if (!updated) return false
+         const now = new Date()
+         const startOfDay = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+         )
+         const startOfWeek = new Date(startOfDay)
+         startOfWeek.setDate(startOfDay.getDate() - now.getDay())
+         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+         switch (filter.value) {
+          case 'today':
+           return updated >= startOfDay
+          case 'this_week':
+           return updated >= startOfWeek
+          case 'this_month':
+           return updated >= startOfMonth
+          case 'older':
+           return updated < startOfMonth
+         }
+        }
+        case 'comments':
+         return filter.value === 'has_comments'
+          ? (doc.commentsCount ?? 0) > 0
+          : true
+        default:
+         return true
+       }
+      })
+     })
+     .sort(([, a], [, b]) => {
+      switch (sortBy) {
+       case 'updated_desc':
+        return (
+         new Date(b.updatedAt ?? 0).getTime() -
+         new Date(a.updatedAt ?? 0).getTime()
+        )
+       case 'updated_asc':
+        return (
+         new Date(a.updatedAt ?? 0).getTime() -
+         new Date(b.updatedAt ?? 0).getTime()
+        )
+       case 'title_asc':
+        return (a.title ?? '').localeCompare(b.title ?? '')
+       case 'title_desc':
+        return (b.title ?? '').localeCompare(a.title ?? '')
+       case 'comments_desc':
+        return (b.commentsCount ?? 0) - (a.commentsCount ?? 0)
+       case 'comments_asc':
+        return (a.commentsCount ?? 0) - (b.commentsCount ?? 0)
+       default:
+        return 0
+      }
+     })
+   ).values()
+  )
+ }, [
+  debouncedSearch,
+  localResults,
+  serverResults,
+  data?.data,
+  activeFilters,
+  sortBy,
+ ])
 
  useEffect(() => {
-  if (debouncedSearch) {
-   setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }
+  if (debouncedSearch) setPagination((prev) => ({ ...prev, pageIndex: 0 }))
  }, [debouncedSearch])
 
  const table = useReactTable({
@@ -235,11 +449,9 @@ export default function Documents() {
   getCoreRowModel: getCoreRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
-  //   getFilteredRowModel: getFilteredRowModel(),
   manualPagination: true,
   manualFiltering: true,
   onPaginationChange: setPagination,
-  // pageCount: debouncedSearch ? 1 : maxPages,
   pageCount: debouncedSearch
    ? Math.ceil(
       Number(serverResults?.data[0]?.totalDocuments ?? 0) / pagination.pageSize
@@ -247,18 +459,28 @@ export default function Documents() {
    : maxPages,
  })
 
+ const isSearchPending = isServerSearching || isServerSearchRefetching
+ const rows = table.getRowModel().rows
+
  return (
   <DashboardShell
    title="My Documents"
    pageName="documents"
    selector={(state) => state.documents}
-   //    handleSearch={handleSearch}
    getPrevPage={table.previousPage}
    getNextPage={table.nextPage}
    pageCount={table.getPageCount}
+   onSetActiveFilters={(f: DocumentFilter[]) =>
+    useDashboard.getState().setActiveFilters('documents', f)
+   }
+   onToggleFilter={(f) => useDashboard.getState().toggleFilter('documents', f)}
+   onClearFilters={() =>
+    useDashboard.getState().setActiveFilters('documents', [])
+   }
+   onSortChange={(s) => useDashboard.getState().setSortBy('documents', s)}
   >
-   <>
-    <div className="rounded-xl border mt-4 overflow-hidden">
+   {view === 'list' && (
+    <div className="rounded-xl border mt-2 overflow-hidden">
      <Table>
       <TableHeader>
        {table.getHeaderGroups().map((headerGroup) => (
@@ -284,8 +506,8 @@ export default function Documents() {
           ))}
          </TableRow>
         ))
-       ) : table.getRowModel().rows.length ? (
-        table.getRowModel().rows.map((row) => (
+       ) : rows.length ? (
+        rows.map((row) => (
          <TableRow
           key={row.id}
           className="cursor-pointer"
@@ -298,7 +520,7 @@ export default function Documents() {
           ))}
          </TableRow>
         ))
-       ) : isServerSearching || isServerSearchRefetching ? (
+       ) : isSearchPending ? (
         Array.from({ length: 3 }).map((_, i) => (
          <TableRow key={i}>
           {columns.map((_, j) => (
@@ -320,20 +542,18 @@ export default function Documents() {
          </TableCell>
         </TableRow>
        )}
-       {/* Only append server skeletons below existing local rows */}
-       {table.getRowModel().rows.length > 0 &&
-       (isServerSearching || isServerSearchRefetching)
-        ? Array.from({ length: 3 }).map((_, i) => (
-           <TableRow key={i}>
-            {columns.map((_, j) => (
-             <TableCell key={j}>
-              <Skeleton className="h-4 w-full" />
-             </TableCell>
-            ))}
-           </TableRow>
-          ))
-        : null}
-       {isServerError && mergedResults.length > 0 ? (
+       {rows.length > 0 &&
+        isSearchPending &&
+        Array.from({ length: 3 }).map((_, i) => (
+         <TableRow key={`skel-${i}`}>
+          {columns.map((_, j) => (
+           <TableCell key={j}>
+            <Skeleton className="h-4 w-full" />
+           </TableCell>
+          ))}
+         </TableRow>
+        ))}
+       {isServerError && mergedResults.length > 0 && (
         <TableRow>
          <TableCell
           colSpan={columns.length}
@@ -342,11 +562,45 @@ export default function Documents() {
           Local results shown. Some results may still exist on the server.
          </TableCell>
         </TableRow>
-       ) : null}
+       )}
       </TableBody>
      </Table>
     </div>
-   </>
+   )}
+
+   {view === 'grid' && (
+    <div className="mt-2">
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      {isLoading ? (
+       <GridSkeleton count={8} />
+      ) : rows.length ? (
+       <>
+        {rows.map((row) => (
+         <DocumentCard
+          key={row.id}
+          row={row}
+          onClick={() => router.push('/doc/' + row.original.id)}
+         />
+        ))}
+        {isSearchPending && <GridSkeleton count={3} />}
+       </>
+      ) : isSearchPending ? (
+       <GridSkeleton count={6} />
+      ) : (
+       <div className="col-span-full h-32 flex items-center justify-center text-muted-foreground text-sm">
+        {searchTerm
+         ? 'Could not find any documents with that title'
+         : 'No documents yet.'}
+       </div>
+      )}
+     </div>
+     {isServerError && mergedResults.length > 0 && (
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+       Local results shown. Some results may still exist on the server.
+      </p>
+     )}
+    </div>
+   )}
   </DashboardShell>
  )
 }

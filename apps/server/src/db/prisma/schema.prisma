@@ -80,13 +80,15 @@ model verification {
 }
 
 model document {
-    id               String     @id @unique @default(dbgenerated("gen_random_uuid()"))
-    ownerId          String
-    title            String     @default("Untitled Document")
-    yjsState         Bytes?
-    visibility       Visibility @default(PRIVATE)
-    allowPublicEdits Boolean    @default(false)
-    lastSnapshotAt   DateTime?  @db.Timestamptz(6)
+    id                   String     @id @unique @default(dbgenerated("gen_random_uuid()"))
+    ownerId              String
+    title                String     @default("Untitled Document")
+    yjsState             Bytes?
+    visibility           Visibility @default(PRIVATE)
+    allowPublicEdits     Boolean    @default(false)
+    lastSnapshotAt       DateTime?  @db.Timestamptz(6)
+    deletedAt            DateTime?  @db.Timestamptz(6)
+    permanentlyDeletedAt DateTime?  @db.Timestamptz(6)
 
     createdAt          DateTime              @default(now()) @db.Timestamptz(6)
     updatedAt          DateTime              @default(now()) @db.Timestamptz(6)

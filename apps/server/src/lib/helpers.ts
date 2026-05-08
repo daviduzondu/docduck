@@ -1,7 +1,7 @@
 import { NextFunction, Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import z from 'zod'
-import { db } from './kysely'
+import { db } from '../db/kysely'
 import { createErrorMap, fromError } from 'zod-validation-error'
 import { ORPCError } from '@orpc/server'
 

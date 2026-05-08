@@ -1,12 +1,11 @@
 'use client'
-
 import {
  Card,
+ CardContent,
  CardDescription,
  CardHeader,
  CardTitle,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
@@ -24,11 +23,7 @@ type InvitationErrorProps = {
 
 const ERROR_CONFIG: Record<
  string,
- {
-  title: string
-  description: string
-  Icon: LucideIcon
- }
+ { title: string; description: string; Icon: LucideIcon }
 > = {
  CONFLICT: {
   title: 'Already accepted',
@@ -53,6 +48,9 @@ const ERROR_CONFIG: Record<
  },
 }
 
+const linkBase =
+ 'inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm flex-1'
+
 export function InvitationErrorCard({
  code,
  description,
@@ -63,39 +61,38 @@ export function InvitationErrorCard({
  const Icon = config?.Icon
 
  return (
-  <Card className="w-full max-w-md text-center">
-   <CardHeader>
-    <div className="flex flex-col items-center gap-2 mb-2">
-     {Icon ? <Icon className="text-muted-foreground" size={30} /> : null}
+  <div className="flex w-full min-h-screen items-center justify-center bg-muted/30 px-4">
+   <Card className="w-full max-w-md shadow-lg">
+    <CardHeader className="items-center pb-2 text-center">
+     <div className="flex items-center justify-center w-full">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+       {Icon ? (
+        <Icon className="h-7 w-7 text-muted-foreground" strokeWidth={1.5} />
+       ) : null}
+      </div>
+     </div>
      <CardTitle className="text-xl">{config?.title}</CardTitle>
-    </div>
-
-    <CardDescription className="text-sm">
-     {description ?? config?.description}
-    </CardDescription>
-
-    {isUnauthorized ? (
-     <div className="flex space-x-3 w-full mt-4">
+     <CardDescription className="text-sm leading-relaxed">
+      {description ?? (config?.description ?? null)}
+     </CardDescription>
+    </CardHeader>
+    {isUnauthorized && (
+     <CardContent className="flex gap-3 justify-center pb-8 pt-2">
       <Link
        href={`/auth/login?next=/invite/accept?token=${token}`}
-       className="shrink-0 flex-1"
+       className={linkBase}
       >
-       <Button variant="outline" className="w-full">
-        Login
-       </Button>
+       Login
       </Link>
-
       <Link
        href={`/auth/register?next=/invite/accept?token=${token}`}
-       className="shrink-0 flex-1"
+       className={linkBase}
       >
-       <Button variant="outline" className="w-full">
-        Create Account
-       </Button>
+       Create account
       </Link>
-     </div>
-    ) : null}
-   </CardHeader>
-  </Card>
+     </CardContent>
+    )}
+   </Card>
+  </div>
  )
 }

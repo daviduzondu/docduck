@@ -1,4 +1,4 @@
-import { db } from '@/lib/kysely'
+import { db } from '@/db/kysely'
 import { document_invitation } from '@/db/prisma/generated/types'
 import { AppError } from '@/lib/helpers'
 import { StatusCodes } from 'http-status-codes'

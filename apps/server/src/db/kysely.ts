@@ -1,7 +1,6 @@
 import { Pool } from 'pg'
 import { Kysely, PostgresDialect } from 'kysely'
-import { DB as Database } from '../db/prisma/generated/types'
-import pino from 'pino'
+import { DB as Database } from './prisma/generated/types'
 
 // Database interface is passed to Kysely's constructor, and from now on, Kysely
 // knows your database structure.
@@ -10,7 +9,7 @@ import pino from 'pino'
 export const db = new Kysely<Database>({
  dialect: new PostgresDialect({
   pool: new Pool({
-   connectionString: process.env['DATABASE_URL'],
+   connectionString: process.env.DATABASE_URL,
   }),
  }),
  log(event): void {

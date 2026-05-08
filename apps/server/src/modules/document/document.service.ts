@@ -1,5 +1,4 @@
-import { db } from '@/lib/kysely'
-import { Request } from 'express'
+import { db } from '@/db/kysely'
 import { createDocumentSchema, getDocumentSchema } from './document.validation'
 import * as z from 'zod'
 import { AppError } from '@/lib/helpers'
@@ -10,15 +9,19 @@ import { sql } from 'kysely'
 import { hocuspocus } from '@/lib/config/hocuspocus'
 import { fromUint8Array } from 'js-base64'
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
-import { setTimeout } from 'node:timers/promises'
 
-type DocumentMeta = {
+export type DocumentMeta = {
  documentId: string
  title: string
  visibility: Visibility
 }
-type DocumentPermissions = { canEdit: boolean; canView: boolean; role?: Role }
-type Comment = {
+
+export type DocumentPermissions = {
+ canEdit: boolean
+ canView: boolean
+ role?: Role
+}
+export type Comment = {
  id: string
  resolved: boolean
  parentId: string | null
@@ -51,6 +54,7 @@ export async function getDocumentWithPermissions(
    'document.title',
   ])
   .executeTakeFirstOrThrow()
+
  return {
   meta: {
    documentId: result.documentId,
@@ -59,16 +63,16 @@ export async function getDocumentWithPermissions(
   },
   permissions: {
    canEdit: !!(
-    result?.documentId &&
+    result.documentId &&
     result.role &&
     (result.allowPublicEdits ||
      (['OWNER', 'EDITOR'] as Role[]).includes(result.role))
    ),
    canView: !!(
-    result?.documentId &&
+    result.documentId &&
     (result.visibility === 'PUBLIC' || result.role)
    ),
-   role: result?.role ?? undefined,
+   role: result.role ?? undefined,
   },
  }
 }
@@ -126,10 +130,12 @@ export async function resolveComment({
  const hocuspocusDocument = hocuspocus.documents.get(documentId)
  if (hocuspocusDocument && comment?.id) {
   const commentsMap = hocuspocusDocument.getMap<Comment>('comments')
-  commentsMap.set(commentId, {
-   ...commentsMap.get(commentId)!,
-   resolved: true,
-  })
+  const existing = commentsMap.get(commentId)
+  if (existing)
+   commentsMap.set(commentId, {
+    ...existing,
+    resolved: true,
+   })
  }
 
  return {
@@ -273,7 +279,7 @@ export async function restoreSnapshotById(
    .forUpdate()
    .executeTakeFirstOrThrow()
 
-  const hocuspocusDocument = hocuspocus.documents.get(document.id)!
+  const hocuspocusDocument = hocuspocus.documents.get(document.id)
   if (hocuspocusDocument) {
    revertToSnapshot(hocuspocusDocument, snapshot.yjsState)
   } else if (document.yjsState) {
@@ -296,41 +302,41 @@ export async function restoreSnapshotById(
 }
 
 // TODO: This endpoint might not be needed
-export async function getSnapshotDiff({
- snapshotId,
- documentId,
-}: {
- snapshotId: string
- documentId: string
-}) {
- const document = await db
-  .selectFrom('document')
-  .where('document.id', '=', documentId)
-  .select(['id', 'yjsState'])
-  .executeTakeFirstOrThrow()
- const snapshot = await db
-  .selectFrom('document_snapshot')
-  .where('document_snapshot.id', '=', snapshotId)
-  .select(['id', 'yjsState'])
-  .executeTakeFirstOrThrow()
- const currentDoc = new Y.Doc()
- Y.applyUpdate(currentDoc, document.yjsState!)
+// export async function getSnapshotDiff({
+//  snapshotId,
+//  documentId,
+// }: {
+//  snapshotId: string
+//  documentId: string
+// }) {
+//  const document = await db
+//   .selectFrom('document')
+//   .where('document.id', '=', documentId)
+//   .select(['id', 'yjsState'])
+//   .executeTakeFirstOrThrow()
+//  const snapshot = await db
+//   .selectFrom('document_snapshot')
+//   .where('document_snapshot.id', '=', snapshotId)
+//   .select(['id', 'yjsState'])
+//   .executeTakeFirstOrThrow()
+//  const currentDoc = new Y.Doc()
+//  Y.applyUpdate(currentDoc, document.yjsState!)
 
- const snapshotDoc = new Y.Doc()
- Y.applyUpdate(snapshotDoc, snapshot.yjsState!)
+//  const snapshotDoc = new Y.Doc()
+//  Y.applyUpdate(snapshotDoc, snapshot.yjsState!)
 
- const snapshotDocVector = Y.encodeStateVector(snapshotDoc!)
+//  const snapshotDocVector = Y.encodeStateVector(snapshotDoc!)
 
- // const changesSinceSnapshot = Y.encodeStateAsUpdate(currentDoc, snapshotDocVector); // snapshotDocVector here is for efficiency or something idk
+//  // const changesSinceSnapshot = Y.encodeStateAsUpdate(currentDoc, snapshotDocVector); // snapshotDocVector here is for efficiency or something idk
 
- const diffDoc = new Y.Doc()
- const updates = Y.diffUpdate(document.yjsState!, snapshotDocVector)
- Y.applyUpdate(diffDoc, updates)
+//  const diffDoc = new Y.Doc()
+//  const updates = Y.diffUpdate(document.yjsState!, snapshotDocVector)
+//  Y.applyUpdate(diffDoc, updates)
 
- return {
-  diff: fromUint8Array(Y.encodeStateAsUpdate(currentDoc)),
- }
-}
+//  return {
+//   diff: fromUint8Array(Y.encodeStateAsUpdate(currentDoc)),
+//  }
+// }
 
 export async function addNewComment({
  text,
@@ -400,11 +406,14 @@ export async function editComment({
 
  if (hocuspocusDocument && comment.id) {
   const commentsMap = hocuspocusDocument.getMap<Comment>('comments')
-  commentsMap.set(commentId, {
-   ...commentsMap.get(commentId)!,
-   text,
-   updatedAt: comment.updatedAt.toISOString(),
-  })
+  const existing = commentsMap.get(commentId)
+  if (existing) {
+   commentsMap.set(commentId, {
+    ...existing,
+    text,
+    updatedAt: comment.updatedAt.toISOString(),
+   })
+  }
   return {
    commentId: comment.id,
    parentId: comment.parentId,
@@ -460,6 +469,7 @@ export async function getDocuments(userId: string, page = 1, limit = 10) {
  const results = await db
   .selectFrom('document')
   .where('document.ownerId', '=', userId)
+  .where('deletedAt', 'is', null)
   .select((eb) => [
    'id',
    'document.title',
@@ -534,13 +544,13 @@ export async function getSharedDocuments(userId: string, page = 1) {
 
 export async function createDocument(
  data: z.infer<typeof createDocumentSchema>,
- ctx: Request['ctx']
+ userId: string
 ) {
  return await db.transaction().execute(async (trx) => {
   const { id: documentId } = await trx
    .insertInto('document')
    .values({
-    ownerId: ctx!.user.id,
+    ownerId: userId,
     title: data.title,
    })
    .returning(['id'])
@@ -556,7 +566,7 @@ export async function createDocument(
    .values({
     documentId,
     role: 'OWNER',
-    userId: ctx!.user.id,
+    userId: userId,
    })
    .returning(['role'])
    .executeTakeFirstOrThrow(() => {
@@ -575,11 +585,13 @@ export async function searchDocumentByTitle({
  ownerId,
  limit,
  page,
+ isDeleted = false,
 }: {
  title: string
  ownerId: string
  limit?: number
  page?: number
+ isDeleted?: boolean
 }) {
  const results = await db
   .selectFrom('document')
@@ -592,6 +604,7 @@ export async function searchDocumentByTitle({
    'yjsState',
    'document.createdAt',
    'document.updatedAt',
+   'deletedAt',
    sql<number>`
   GREATEST(
     word_similarity(${title}, title),
@@ -607,6 +620,7 @@ export async function searchDocumentByTitle({
      .select(['user.id', 'user.name', 'user.image'])
    ).as('collaborators'),
   ])
+  .$if(isDeleted, (qb) => qb.where('document.deletedAt', 'is not', null))
   .limit(limit ?? 10)
   .offset(((page ?? 1) - 1) * (limit ?? 10))
   .orderBy('score', 'desc')
@@ -627,6 +641,85 @@ export async function searchDocumentByTitle({
    }
   }),
  }
+}
+
+export async function getTrashedDocuments({
+ ownerId,
+ page = 10,
+ limit = 10,
+}: {
+ ownerId: string
+ limit?: number
+ page?: number
+}) {
+ const offset = (page - 1) * limit
+
+ const results = await db.transaction().execute(async (trx) => {
+  await sql`SET LOCAL app.showDeleted = 'true'`.execute(trx)
+
+  return await trx
+   .selectFrom('document')
+   .where(({ eb }) =>
+    eb.and([
+     eb('deletedAt', 'is not', null),
+     eb('permanentlyDeletedAt', 'is', null),
+    ])
+   )
+   .where('document.ownerId', '=', ownerId)
+   .select((eb) => [
+    'id',
+    'document.title',
+    'visibility',
+    'document.createdAt',
+    'document.updatedAt',
+    'deletedAt',
+    eb.fn.count('document.id').over().as('totalDocuments'),
+   ])
+   .limit(limit)
+   .offset(offset)
+   .execute()
+ })
+
+ return {
+  limit,
+  data: results,
+ }
+}
+
+export async function putInTrash({ documentId }: { documentId: string }) {
+ await db
+  .updateTable('document')
+  .set({
+   deletedAt: sql`now()`,
+  })
+  .where('document.id', '=', documentId)
+  .returning('id')
+  .execute()
+}
+
+export async function restoreFromTrash(documentId: string) {
+ await db.transaction().execute(async (trx) => {
+  await sql`SET LOCAL app.showDeleted = true`.execute(trx)
+
+  await trx
+   .updateTable('document')
+   .set({
+    deletedAt: null,
+   })
+   .where('document.id', '=', documentId)
+   .where('document.permanentlyDeletedAt', 'is', null)
+   .execute()
+ })
+}
+
+export async function permanentlyDelete(documentId: string) {
+ await db
+  .updateTable('document')
+  .set({
+   permanentlyDeletedAt: sql`now()`,
+  })
+  .where('document.id', '=', documentId)
+  .execute()
 }
 // (qb) => qb.selectFrom('pet')
 //   .select('pet.name')

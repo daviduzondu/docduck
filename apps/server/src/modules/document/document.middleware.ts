@@ -1,9 +1,10 @@
-import { db } from '@/lib/kysely'
+import { db } from '@/db/kysely'
 import { AppError } from '@/lib/helpers'
 import { StatusCodes } from 'http-status-codes'
 import { AppContext } from '@/types/types'
 import { base } from '@/orpc/os'
 import * as documentService from '@/modules/document/document.service'
+import { sql } from 'kysely'
 
 // export const verifyDocumentAccess = async (req: Request<{}, {}, z.infer<typeof getDocumentSchema['body']>>, res: Response, next:  => {
 //  const isDocumentVisible = await db.selectFrom('document').select(['visibility', 'document.id']).where('id', '=', req.body.documentId).executeTakeFirstOrThrow();
@@ -25,12 +26,23 @@ import * as documentService from '@/modules/document/document.service'
 export const ensureDocumentOwner = base
  .$context<Required<AppContext>>()
  .middleware(async ({ context, next, errors }, documentId: string) => {
-  const doc = await db
-   .selectFrom('document')
-   .select(['ownerId'])
-   .where('document.id', '=', documentId)
-   .where('document.ownerId', '=', context.user.id)
-   .executeTakeFirst()
+  //   const doc = await db
+  //    .selectFrom('document')
+  //    .select(['ownerId'])
+  //    .where('document.id', '=', documentId)
+  //    .where('document.ownerId', '=', context.user.id)
+  //    .executeTakeFirst();
+
+  const doc = await db.transaction().execute(async (trx) => {
+   await sql`SET LOCAL app.showDeleted = true`.execute(trx)
+
+   return await trx
+    .selectFrom('document')
+    .select(['ownerId'])
+    .where('document.id', '=', documentId)
+    .where('document.ownerId', '=', context.user.id)
+    .executeTakeFirst()
+  })
 
   if (!doc) {
    throw errors.FORBIDDEN()

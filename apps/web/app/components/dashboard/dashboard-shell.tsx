@@ -1,6 +1,7 @@
 'use client'
 
 import DashboardBreadcrumb from '@/components/dashboard/dashboard-breadcrumb'
+import { DocumentFilterPopover } from '@/components/dashboard/document-filter-popover'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import {
@@ -12,16 +13,16 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import useDashboard, {
  DashboardState,
  DashboardStore,
+ DocumentFilter,
+ SortOption,
 } from '@/providers/dashboard.store'
 import {
  ChevronLeft,
  ChevronRight,
- Filter,
  LayoutGrid,
  List,
  Search,
 } from 'lucide-react'
-import { useEffect } from 'react'
 
 export default function DashboardShell<K extends keyof DashboardState>({
  children,
@@ -32,6 +33,10 @@ export default function DashboardShell<K extends keyof DashboardState>({
  getPrevPage,
  getNextPage,
  pageCount,
+ onToggleFilter,
+ onClearFilters,
+ onSetActiveFilters,
+ onSortChange,
 }: {
  children?: React.ReactNode
  title: string
@@ -40,6 +45,10 @@ export default function DashboardShell<K extends keyof DashboardState>({
  getPrevPage: () => void
  getNextPage: () => void
  pageCount: () => void
+ onToggleFilter: (filter: DocumentFilter) => void
+ onSetActiveFilters: (filter: DocumentFilter[]) => void
+ onClearFilters: () => void
+ onSortChange: (sort: SortOption) => void
  //  handleSearch: () => void
 }) {
  const dashboardState = useDashboard(selector)
@@ -82,10 +91,14 @@ export default function DashboardShell<K extends keyof DashboardState>({
      {/* Right: controls */}
      <div className="flex items-center gap-2 sm:ml-auto flex-wrap sm:flex-nowrap">
       {/* Filter */}
-      <Button variant="ghost" size="sm" className="rounded-full shrink-0">
-       <Filter className="size-4" />
-       Filters
-      </Button>
+      <DocumentFilterPopover
+       activeFilters={dashboardState.activeFilters}
+       sortBy={dashboardState.sortBy}
+       onToggleFilter={onToggleFilter}
+       onClearFilters={onClearFilters}
+       onSortChange={onSortChange}
+       onSetActiveFilters={onSetActiveFilters}
+      />
 
       {/* Page arrows + doc count */}
       <div className="flex items-center gap-1.5 shrink-0">
@@ -132,7 +145,7 @@ export default function DashboardShell<K extends keyof DashboardState>({
         useDashboard
          .getState()
          .setView(
-          pageName as keyof DashboardStore,
+          pageName as keyof DashboardState,
           v[0] as DashboardState[keyof DashboardState]['view']
          )
        }

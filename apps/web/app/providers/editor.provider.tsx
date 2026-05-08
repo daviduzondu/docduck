@@ -51,10 +51,9 @@ export default function TipTapEditorProvider({
     const marks = $pos.marks()
     const hasComment = marks.some((mark) => mark.type.name === 'comment')
 
-    if (hasComment) {
+    if (hasComment && marks.some((mark) => mark.attrs.resolved === false)) {
      setView('comments')
      setOpen(true)
-     console.log(editor?.storage.comment.activeCommentId)
      return true
     }
 

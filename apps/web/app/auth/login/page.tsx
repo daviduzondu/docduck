@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -32,7 +32,8 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
- const searchParams = useSearchParams()
+ const redirectAfterAuth = sessionStorage.getItem("redirectAfterAuth");
+ const router = useRouter();
 
  const form = useForm<LoginFormValues>({
   resolver: zodResolver(loginSchema),
@@ -44,8 +45,9 @@ export default function LoginPage() {
    await loginWithEmailAndPassword(
     data.email,
     data.password,
-    searchParams?.get('next') ?? '/dashboard'
-   )
+   );
+   sessionStorage.removeItem("redirectAfterAuth");
+   router.replace(redirectAfterAuth ?? '/dashboard')
   } catch (err) {
    toast.error(
     err instanceof Error ? err.message : 'Invalid email or password.'
@@ -59,7 +61,7 @@ export default function LoginPage() {
     <CardHeader>
      <CardTitle>Sign in</CardTitle>
      <CardDescription>
-      {searchParams?.get('next')
+      {redirectAfterAuth
        ? 'You must be logged in to perform this action.'
        : 'Enter your credentials to access your account.'}
      </CardDescription>

@@ -45,6 +45,8 @@ export type document = {
  visibility: Generated<Visibility>
  allowPublicEdits: Generated<boolean>
  lastSnapshotAt: Timestamp | null
+ deletedAt: Timestamp | null
+ permanentlyDeletedAt: Timestamp | null
  createdAt: Generated<Timestamp>
  updatedAt: Generated<Timestamp>
 }

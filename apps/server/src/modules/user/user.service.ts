@@ -1,5 +1,5 @@
 import { AppError } from '@/lib/helpers'
-import { db } from '@/lib/kysely'
+import { db } from '@/db/kysely'
 import { StatusCodes } from 'http-status-codes'
 
 export async function getBasicUserInfo(userId: string) {

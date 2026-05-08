@@ -40,7 +40,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
  const router = useRouter()
- const searchParams = useSearchParams()
+ const redirectAfterAuth = sessionStorage.getItem('redirectAfterAuth')
 
  const form = useForm<RegisterFormValues>({
   resolver: zodResolver(registerSchema),
@@ -55,7 +55,8 @@ export default function RegisterPage() {
     password: data.password,
    })
    toast.success('Registration successful.')
-   router.replace(searchParams?.get('next') ?? '/dashboard')
+   sessionStorage.removeItem('redirectAfterAuth')
+   router.replace(redirectAfterAuth ?? '/dashboard')
   } catch (err) {
    toast.error(
     err instanceof Error
@@ -71,7 +72,7 @@ export default function RegisterPage() {
     <CardHeader>
      <CardTitle>Create an account</CardTitle>
      <CardDescription>
-      {searchParams?.get('next')
+      {redirectAfterAuth
        ? 'You must be logged in to perform this action.'
        : 'Enter your details to get started.'}
      </CardDescription>

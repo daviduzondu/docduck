@@ -5,10 +5,8 @@ import { AppError } from '@/lib/helpers'
 import { StatusCodes } from 'http-status-codes'
 import * as documentService from '@/modules/document/document.service'
 import { Database } from '@hocuspocus/extension-database'
-import { db } from '@/lib/kysely'
+import { db } from '@/db/kysely'
 import { Logger } from '@hocuspocus/extension-logger'
-import { sql } from 'kysely'
-import { createSnapshot } from 'yjs'
 import { fromNodeHeaders } from 'better-auth/node'
 
 export const hocuspocus = new Hocuspocus({
@@ -30,37 +28,48 @@ export const hocuspocus = new Hocuspocus({
   return authData
  },
  async onStateless({ document, payload }) {
-  document.broadcastStateless(payload.toString())
+  document.broadcastStateless(payload)
+  return new Promise<void>((resolve) => {
+   resolve()
+  })
  },
  extensions: [
   new Logger(),
   new Database({
    fetch: async (data) => {
-    return new Promise(async (resolve) => {
-     const result = await db
-      .selectFrom('document')
-      .where('document.id', '=', data.documentName)
-      .select(['yjsState'])
-      .executeTakeFirstOrThrow()
-     resolve(result?.yjsState ?? null)
-    })
+    const result = await db
+     .selectFrom('document')
+     .where('document.id', '=', data.documentName)
+     .select(['yjsState'])
+     .executeTakeFirstOrThrow()
+
+    return result.yjsState
    },
    store: async (data) => {
-    await db
-     .updateTable('document')
-     .where('document.id', '=', data.documentName)
-     .set({
-      yjsState: data.state,
-     })
-     .returning(['id'])
-     .executeTakeFirstOrThrow(() => {
-      throw new AppError(
-       `Failed to update document with id: ${data.documentName}`,
-       StatusCodes.NOT_FOUND
+    try {
+     await db
+      .updateTable('document')
+      .where('document.id', '=', data.documentName)
+      .set({
+       yjsState: data.state,
+      })
+      .returning(['id'])
+      .executeTakeFirstOrThrow(() => {
+       throw new AppError(
+        `Failed to update document with id: ${data.documentName}`,
+        StatusCodes.NOT_FOUND
+       )
+      })
+
+     // Create snapshot
+     await documentService.createSnapshot(data.documentName)
+    } catch (error) {
+     if (error instanceof AppError) {
+      data.document.broadcastStateless(
+       JSON.stringify({ data: 'Failed to update document', type: 'notify' })
       )
-     })
-    // Create snapshot
-    await documentService.createSnapshot(data.documentName)
+     }
+    }
    },
   }),
  ],

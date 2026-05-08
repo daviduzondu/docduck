@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useAuth } from '@/providers/auth.provider'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export default function AuthGuard({
  children,
@@ -11,14 +11,16 @@ export default function AuthGuard({
  children: React.ReactNode
  next?: string
 }) {
- const { data, isPending, error } = useAuth()
+ const { data, isPending } = useAuth()
  const router = useRouter()
+ const pathname = usePathname()
 
  useEffect(() => {
+  sessionStorage.setItem('redirectAfterAuth', next ? next : pathname)
   if (!isPending && !data) {
-   router.replace('/auth/login' + (next ? '?next=' + next : ''))
+   router.replace('/auth/login')
   }
- }, [isPending, data, router])
+ }, [isPending, data, router, next, pathname])
 
  if (isPending || !data) return null
 

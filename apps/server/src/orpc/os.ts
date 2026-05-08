@@ -1,7 +1,5 @@
-import { ensureAuth } from '@/modules/auth/auth.middleware'
-import { appRouter } from '@/orpc/app.router'
 import { AppContext } from '@/types/types'
-import { implement, os, Route } from '@orpc/server'
+import { os, Route } from '@orpc/server'
 
 type RouterOpts = Omit<Route, 'method' | 'path'>
 export const base = os.$context<AppContext>().errors({
