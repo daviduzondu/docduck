@@ -124,6 +124,7 @@ model document_invitation {
     documentId String
     role       Role
     status     InvitationStatus @default(PENDING)
+    emailSent  Boolean          @default(false)
     acceptedAt DateTime?
     revokedAt  DateTime?
     createdAt  DateTime         @default(now()) @db.Timestamptz(6)

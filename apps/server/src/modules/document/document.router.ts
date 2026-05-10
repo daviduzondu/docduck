@@ -356,4 +356,17 @@ export const documentRouter = base
      errors
     )
    ),
+
+  getPendingInvitations: r
+   .get('/{id}/invitations/pending', { inputStructure: 'detailed' })
+   .input(
+    z.object({
+     params: z.object({ id: z.uuid() }),
+    })
+   )
+   .use(ensureAuth)
+   .use(ensureDocumentOwner, (input) => input.params.id)
+   .handler(({ input }) =>
+    documentService.getPendingInvitations(input.params.id)
+   ),
  })

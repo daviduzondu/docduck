@@ -38,11 +38,10 @@ import {
  ItemActions,
  ItemContent,
  ItemDescription,
- ItemHeader,
  ItemMedia,
  ItemTitle,
 } from '@/components/ui/item'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import z from 'zod'
@@ -54,12 +53,13 @@ import {
 import validator from 'validator'
 import { orpc } from '@/lib/orpc.client'
 import { useDocument } from '@/providers/document.provider'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getUserColor } from '@/lib/utils'
 import { useAuth } from '@/providers/auth.provider'
 import { AwarenessStates } from '@/types'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const shareFormSchema = z.object({
  invitees: z
@@ -77,13 +77,14 @@ const roles = [
  { label: 'Viewer', value: 'VIEWER' },
 ]
 export function EditorShareDialogButton({ onShare }: { onShare: any }) {
+ const queryClient = useQueryClient()
  const [copied, setCopied] = useState(false)
  const [newEmail, setNewEmail] = useState('')
  const [newRole, setNewRole] = useState<'EDITOR' | 'VIEWER'>('VIEWER')
  const [emailError, setEmailError] = useState('')
- const [tabValue, setTabValue] = useState<'people-with-access' | 'invite-list'>(
-  'people-with-access'
- )
+ const [tabValue, setTabValue] = useState<
+  'people-with-access' | 'invite-list' | 'yet-to-respond'
+ >('people-with-access')
  const { documentId, provider } = useDocument()
  const { data } = useAuth()
  const getCollaboratorsQuery = useQuery(
@@ -100,10 +101,28 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
   })
  )
 
+ const getPendingInvitationsQuery = useQuery(
+  orpc.documents.getPendingInvitations.queryOptions({
+   input: {
+    params: {
+     id: documentId,
+    },
+   },
+   enabled: tabValue === 'yet-to-respond',
+  })
+ )
+
  const sendInvitationsMutation = useMutation(
   orpc.documents.createDocumentInvitations.mutationOptions({
    onError(error) {
     toast.error(error.message)
+   },
+   onSuccess() {
+    queryClient.invalidateQueries({
+     predicate(query) {
+      return query.queryHash.includes('getPendingInvitations')
+     },
+    })
    },
   })
  )
@@ -252,10 +271,17 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
        >
         invite list
        </TabsTrigger>
+       <TabsTrigger
+        className={'uppercase text-xs font-semibold'}
+        value="yet-to-respond"
+        onClick={() => setTabValue('yet-to-respond')}
+       >
+        Yet to respond
+       </TabsTrigger>
       </TabsList>
       <TabsContent value="people-with-access" className={'min-h-60 max-h-60'}>
        {getCollaboratorsQuery.isLoading ? (
-        <div className="p-4">Loading collaborators...</div>
+        <TabSkeleton />
        ) : getCollaboratorsQuery.data &&
          getCollaboratorsQuery.data.length > 0 ? (
         <>
@@ -363,6 +389,35 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         </Item>
        ))}
       </TabsContent>
+      <TabsContent value="yet-to-respond" className={'min-h-60 max-h-60'}>
+       {(() => {
+        if (getPendingInvitationsQuery.error)
+         return <div>Failed to get pending invitations</div>
+        if (getPendingInvitationsQuery.isLoading) return <TabSkeleton />
+        if (getPendingInvitationsQuery.data?.data.length === 0)
+         return (
+          <NothingToSeeHere
+           icon={<MailPlus />}
+           title="No pending invitations"
+           description="After you send out an invite, anyone who's not responded will appear here"
+          />
+         )
+        if (
+         getPendingInvitationsQuery.data &&
+         getPendingInvitationsQuery.data.data.length > 0
+        )
+         return getPendingInvitationsQuery.data.data.map((invitation) => (
+          <Item
+           key={invitation.id}
+           className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center"
+          >
+           <ItemContent>{invitation.email}</ItemContent>
+           <ItemActions></ItemActions>
+          </Item>
+         ))
+        return <div>Something went wrong.</div>
+       })()}
+      </TabsContent>
      </Tabs>
 
      <DialogFooter className="flex sm:justify-between w-full">
@@ -409,5 +464,15 @@ function NothingToSeeHere({
     <EmptyDescription>{description}</EmptyDescription>
    </EmptyHeader>
   </Empty>
+ )
+}
+
+function TabSkeleton() {
+ return (
+  <div className="h-60 overflow-hidden">
+   {Array.from({ length: 10 }).map((_, i) => (
+    <Skeleton key={i} className="h-10 not-last:mb-2 w-full" />
+   ))}
+  </div>
  )
 }

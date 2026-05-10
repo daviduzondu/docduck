@@ -25,7 +25,9 @@ export type RequestSchema = AtLeastOne<{
 }>
 
 export type AppContext = {
- req: Request
+ req: Request,
+ res: Response, 
+ next: NextFunction
 } & Partial<Awaited<ReturnType<typeof auth.api.getSession>>>
 
 export type ProcedureErrorMap<T extends typeof base = typeof base> =

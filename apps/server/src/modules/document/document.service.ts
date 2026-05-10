@@ -9,6 +9,7 @@ import { sql, Transaction } from 'kysely'
 import { hocuspocus } from '@/lib/config/hocuspocus'
 import { fromUint8Array } from 'js-base64'
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
+import { ORPCError } from '@orpc/contract'
 
 export type DocumentMeta = {
  documentId: string
@@ -548,7 +549,7 @@ export async function getSharedDocuments(userId: string, page = 1) {
 
 export async function createDocument(userId: string) {
  return await db.transaction().execute(async (trx) => {
-  // await allowHiddenRows(trx);
+  await allowHiddenRows(trx);
 
   const { id: documentId } = await trx
    .insertInto('document')
@@ -726,6 +727,18 @@ export async function permanentlyDelete(documentId: string) {
   })
   .where('document.id', '=', documentId)
   .execute()
+}
+
+export async function getPendingInvitations(documentId: string) {
+ const result = await db
+  .selectFrom('document_invitation')
+  .where('documentId', '=', documentId)
+  .where('status', '=', 'PENDING')
+  .where('revokedAt', 'is', null)
+  .select(['email', 'document_invitation.role', 'id'])
+  .execute()
+
+ return { data: result }
 }
 // (qb) => qb.selectFrom('pet')
 //   .select('pet.name')

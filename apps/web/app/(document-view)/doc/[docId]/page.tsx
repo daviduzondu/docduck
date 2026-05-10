@@ -102,7 +102,7 @@ export default async function Page({
     description="This document is private. Login in to see if you have access."
     action={
      <Button>
-      <Link href="/login">Login in</Link>
+      <Link href="/auth/login">Login in</Link>
      </Button>
     }
    />

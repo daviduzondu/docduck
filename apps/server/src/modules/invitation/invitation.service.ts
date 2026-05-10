@@ -68,7 +68,7 @@ export async function addDocInvitees(
      email: i.email,
      options: {
       subject:
-       (isEqual(result?.createdAt, result?.updatedAt) ? '' : 'Reminder: ') +
+       (isEqual(result.createdAt, result.updatedAt) ? '' : 'Reminder: ') +
        "You've been invited to collaborate on a document",
       html: await invitationEmailHtml({
        documentTitle: title,

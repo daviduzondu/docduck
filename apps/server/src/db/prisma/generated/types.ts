@@ -67,6 +67,7 @@ export type document_invitation = {
  documentId: string
  role: Role
  status: Generated<InvitationStatus>
+ emailSent: Generated<boolean>
  acceptedAt: Timestamp | null
  revokedAt: Timestamp | null
  createdAt: Generated<Timestamp>

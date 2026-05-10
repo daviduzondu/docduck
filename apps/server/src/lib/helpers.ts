@@ -3,21 +3,20 @@ import { StatusCodes } from 'http-status-codes'
 import z from 'zod'
 import { db } from '../db/kysely'
 import { createErrorMap, fromError } from 'zod-validation-error'
-import { ORPCError } from '@orpc/server'
 
 z.config({
  customError: createErrorMap(),
 })
 
 export class AppError extends Error {
- statusCode: number
+ statusCode: StatusCodes
 
  constructor(message: string, statusCode: number) {
   super(message)
   this.name = 'AppError'
   this.statusCode = statusCode
 
-  Error.captureStackTrace?.(this, this.constructor)
+  Error.captureStackTrace(this, this.constructor)
  }
 }
 
