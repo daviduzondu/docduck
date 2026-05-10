@@ -34,7 +34,7 @@ export const ensureDocumentOwner = base
   //    .executeTakeFirst();
 
   const doc = await db.transaction().execute(async (trx) => {
-   await sql`SET LOCAL app.showDeleted = true`.execute(trx)
+   await documentService.allowHiddenRows(trx)
 
    return await trx
     .selectFrom('document')

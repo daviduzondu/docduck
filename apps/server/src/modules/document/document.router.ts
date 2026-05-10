@@ -321,10 +321,7 @@ export const documentRouter = base
   createDocument: r
    .post('/new')
    .use(ensureAuth)
-   .input(documentSchema.createDocumentSchema)
-   .handler(({ input, context }) =>
-    documentService.createDocument(input, context.user.id)
-   ),
+   .handler(({ context }) => documentService.createDocument(context.user.id)),
 
   updateDocumentTitle: r
    .patch('/{id}/title', { inputStructure: 'detailed' })

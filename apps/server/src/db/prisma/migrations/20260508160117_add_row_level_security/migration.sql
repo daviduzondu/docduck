@@ -1,21 +1,16 @@
--- This is an empty migration.
-
 ALTER TABLE document ENABLE ROW LEVEL SECURITY;
 ALTER TABLE document FORCE ROW LEVEL SECURITY;
 
-CREATE POLICY no_select_deleted
- ON document
- FOR SELECT
- USING (
-    ("deletedAt" IS NULL
-    AND "permanentlyDeletedAt" IS NULL)
-    OR current_setting('app.showDeleted', true) = 'true'
- );
+CREATE POLICY document_visibility_policy
+  ON document
+  USING (
+    "permanentlyDeletedAt" IS NULL
+    AND (
+      "deletedAt" IS NULL
+      OR current_setting('app.showDeleted', true) = 'true'
+    )
+  );
 
- CREATE POLICY no_update_deleted
- on document
- FOR UPDATE
- USING (("deletedAt" IS NULL AND "permanentlyDeletedAt" IS NULL) OR current_setting('app.showDeleted', true) = 'true');
 
 
 -- Create or replace function for updating the updatedAt column

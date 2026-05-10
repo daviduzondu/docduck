@@ -3,9 +3,9 @@ import { createDocumentSchema, getDocumentSchema } from './document.validation'
 import * as z from 'zod'
 import { AppError } from '@/lib/helpers'
 import { StatusCodes } from 'http-status-codes'
-import { Role, Visibility } from '@/db/prisma/generated/types'
+import { DB, Role, Visibility } from '@/db/prisma/generated/types'
 import * as Y from 'yjs'
-import { sql } from 'kysely'
+import { sql, Transaction } from 'kysely'
 import { hocuspocus } from '@/lib/config/hocuspocus'
 import { fromUint8Array } from 'js-base64'
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
@@ -29,6 +29,10 @@ export type Comment = {
  commenterId: string
  createdAt: string
  updatedAt: string
+}
+
+export async function allowHiddenRows(trx: Transaction<DB>) {
+ return await sql`SET LOCAL app.showDeleted = 'true'`.execute(trx)
 }
 
 export async function getDocumentWithPermissions(
@@ -434,7 +438,7 @@ export async function updateDocumentTitle(id: string, title: string) {
   })
   .where('document.id', '=', id)
   .returning(['id', 'title'])
-  .execute()
+  .executeTakeFirstOrThrow()
 }
 
 export async function getDocumentCollaborators(id: string) {
@@ -542,16 +546,14 @@ export async function getSharedDocuments(userId: string, page = 1) {
  }
 }
 
-export async function createDocument(
- data: z.infer<typeof createDocumentSchema>,
- userId: string
-) {
+export async function createDocument(userId: string) {
  return await db.transaction().execute(async (trx) => {
+  // await allowHiddenRows(trx);
+
   const { id: documentId } = await trx
    .insertInto('document')
    .values({
     ownerId: userId,
-    title: data.title,
    })
    .returning(['id'])
    .executeTakeFirstOrThrow(() => {
@@ -655,7 +657,7 @@ export async function getTrashedDocuments({
  const offset = (page - 1) * limit
 
  const results = await db.transaction().execute(async (trx) => {
-  await sql`SET LOCAL app.showDeleted = 'true'`.execute(trx)
+  await allowHiddenRows(trx)
 
   return await trx
    .selectFrom('document')
@@ -687,19 +689,22 @@ export async function getTrashedDocuments({
 }
 
 export async function putInTrash({ documentId }: { documentId: string }) {
- await db
-  .updateTable('document')
-  .set({
-   deletedAt: sql`now()`,
-  })
-  .where('document.id', '=', documentId)
-  .returning('id')
-  .execute()
+ await db.transaction().execute(async (trx) => {
+  await allowHiddenRows(trx)
+  await trx
+   .updateTable('document')
+   .set({
+    deletedAt: sql`now()`,
+   })
+   .where('document.id', '=', documentId)
+   .returning('id')
+   .execute()
+ })
 }
 
 export async function restoreFromTrash(documentId: string) {
  await db.transaction().execute(async (trx) => {
-  await sql`SET LOCAL app.showDeleted = true`.execute(trx)
+  await allowHiddenRows(trx)
 
   await trx
    .updateTable('document')
@@ -708,7 +713,8 @@ export async function restoreFromTrash(documentId: string) {
    })
    .where('document.id', '=', documentId)
    .where('document.permanentlyDeletedAt', 'is', null)
-   .execute()
+   .returning(['id'])
+   .executeTakeFirstOrThrow()
  })
 }
 

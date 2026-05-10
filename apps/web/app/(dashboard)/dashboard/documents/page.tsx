@@ -28,7 +28,12 @@ import {
 } from '@/components/ui/table'
 import { $api, orpc } from '@/lib/orpc.client'
 import { getUserColor } from '@/lib/utils'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import {
+ keepPreviousData,
+ useMutation,
+ useQuery,
+ useQueryClient,
+} from '@tanstack/react-query'
 import {
  createColumnHelper,
  flexRender,
@@ -40,13 +45,7 @@ import {
  type Row,
 } from '@tanstack/react-table'
 import { formatRelative } from 'date-fns'
-import {
- MessageSquare,
- MoreHorizontal,
- Pencil,
- Eye,
- Trash2,
-} from 'lucide-react'
+import { MessageSquare, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Fuse from 'fuse.js'
@@ -54,6 +53,10 @@ import useDashboard, { DocumentFilter } from '@/providers/dashboard.store'
 import { useShallow } from 'zustand/react/shallow'
 import { useDebounce } from 'use-debounce'
 import { SortButton } from '@/components/dashboard/sort-button'
+import { isDefinedError } from '@orpc/client'
+import { toast } from 'sonner'
+import { useConfirm } from '@/providers/confirm-provider'
+import { usePrompt } from '@/providers/prompt.provider'
 
 type DocumentRow = Awaited<
  ReturnType<typeof $api.documents.getDocuments>
@@ -61,8 +64,105 @@ type DocumentRow = Awaited<
 
 const columnHelper = createColumnHelper<DocumentRow>()
 
+function useDocumentActions(row: Row<DocumentRow>) {
+ const id = row.original.id
+ const queryClient = useQueryClient()
+ const confirm = useConfirm()
+ const prompt = usePrompt()
+
+ const { mutate: trash, isPending: isTrashing } = useMutation(
+  orpc.documents.putInTrash.mutationOptions({
+   onSuccess() {
+    toast.success('Document moved to trash.')
+    queryClient.invalidateQueries({
+     queryKey: orpc.documents.getDocuments.queryKey({ input: {} }),
+    })
+    queryClient.invalidateQueries({
+     queryKey: orpc.documents.getTrashedDocuments.queryKey({ input: {} }),
+    })
+   },
+   onError(error) {
+    if (isDefinedError(error)) {
+     toast.error(error.message)
+    } else {
+     toast.error('Failed to move document to trash.')
+    }
+   },
+  })
+ )
+
+ const { mutate: updateTitle, isPending: isUpdatingTitle } = useMutation(
+  orpc.documents.updateDocumentTitle.mutationOptions({
+   onSuccess(data) {
+    toast.success('Updated sucessfully')
+    console.log(
+     queryClient.getQueryCache().findAll({
+      predicate: (query) => query.queryHash.includes('getDocuments'),
+     })
+    )
+    queryClient.setQueriesData(
+     {
+      predicate: (query) => query.queryHash.includes('getDocuments'),
+     },
+     (
+      prev: { data: DocumentRow[] } | undefined
+     ): { data: DocumentRow[] } | undefined => {
+      if (!prev?.data) return prev
+      return {
+       data: prev.data.map((x) => {
+        if (x.id === id) {
+         return {
+          ...x,
+          title: data.title,
+         }
+        }
+
+        return x
+       }),
+      }
+     }
+    )
+   },
+  })
+ )
+ const handleTrash = async (e: React.MouseEvent) => {
+  e.stopPropagation()
+  const confirmed = await confirm({
+   title: 'Move to trash?',
+   description: 'You can restore this document from the trash later.',
+   confirmLabel: 'Move to trash',
+   variant: 'destructive',
+  })
+  if (confirmed) trash({ params: { documentId: id } })
+ }
+
+ const handleRename = async (e: React.MouseEvent) => {
+  e.stopPropagation()
+  const newTitle = await prompt({
+   confirmLabel: 'Save changes',
+   defaultValue: row.original.title,
+   placeholder: 'Edit title',
+   label: 'Edit title',
+  })
+  if (newTitle) {
+   updateTitle({
+    params: {
+     id: id,
+    },
+    body: {
+     title: newTitle,
+    },
+   })
+  }
+ }
+
+ return { handleTrash, handleRename, isTrashing, isUpdatingTitle }
+}
+
 function ActionsMenu({ row }: { row: Row<DocumentRow> }) {
- const router = useRouter()
+ const { handleTrash, handleRename, isTrashing, isUpdatingTitle } =
+  useDocumentActions(row)
+
  return (
   <DropdownMenu>
    <DropdownMenuTrigger
@@ -78,11 +178,16 @@ function ActionsMenu({ row }: { row: Row<DocumentRow> }) {
     <MoreHorizontal className="size-4" />
    </DropdownMenuTrigger>
    <DropdownMenuContent align="end">
-    <DropdownMenuItem>
+    <DropdownMenuItem disabled={isUpdatingTitle} onClick={handleRename}>
      <Pencil className="size-4" />
-     Edit Title
+     Rename
     </DropdownMenuItem>
-    <DropdownMenuItem className="text-destructive focus:text-destructive">
+    <DropdownMenuSeparator />
+    <DropdownMenuItem
+     disabled={isTrashing}
+     className="text-destructive focus:text-destructive"
+     onClick={handleTrash}
+    >
      <Trash2 className="size-4" />
      Delete
     </DropdownMenuItem>
@@ -178,7 +283,8 @@ function DocumentCard({
  row: Row<DocumentRow>
  onClick: () => void
 }) {
- const router = useRouter()
+ const { handleTrash, handleRename, isTrashing, isUpdatingTitle } =
+  useDocumentActions(row)
  const { title, visibility, collaborators, commentsCount, updatedAt } =
   row.original
 
@@ -208,16 +314,16 @@ function DocumentCard({
       <MoreHorizontal className="size-3.5" />
      </DropdownMenuTrigger>
      <DropdownMenuContent align="end">
-      <DropdownMenuItem onClick={() => router.push('/doc/' + row.original.id)}>
-       <Eye className="size-4" />
-       Open
-      </DropdownMenuItem>
-      <DropdownMenuItem>
+      <DropdownMenuItem disabled={isUpdatingTitle} onClick={handleRename}>
        <Pencil className="size-4" />
        Rename
       </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="text-destructive focus:text-destructive">
+      <DropdownMenuItem
+       disabled={isTrashing}
+       className="text-destructive focus:text-destructive"
+       onClick={handleTrash}
+      >
        <Trash2 className="size-4" />
        Delete
       </DropdownMenuItem>
