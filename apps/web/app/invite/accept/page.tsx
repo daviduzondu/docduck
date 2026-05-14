@@ -11,7 +11,7 @@ export default async function Page({ searchParams }: { searchParams: any }) {
  console.log(token)
  if (!token) {
   return (
-   <div className="flex  h-screen w-screen overflow-hidden items-center justify-center">
+   <div className="flex h-screen w-screen overflow-hidden items-center justify-center">
     <InvalidTokenCard />
    </div>
   )

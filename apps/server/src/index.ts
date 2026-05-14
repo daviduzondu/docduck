@@ -16,6 +16,7 @@ import { generateContract } from '@/orpc/scripts/generate-contract'
 import { AppError } from '@/lib/helpers'
 import { NoResultError } from 'kysely'
 import { getReasonPhrase, StatusCodes } from 'http-status-codes'
+import { emailWorker } from '@/modules/email/email.service'
 
 if (!process.env.NODE_ENV)
  throw new Error('Failed to specify Node.js environment')
@@ -26,16 +27,24 @@ generateContract()
 initializeHocuspocus(createWebsocketServer(server))
 const handler = new OpenAPIHandler(appRouter, {
  plugins: [new CORSPlugin()],
-  interceptors: [
-// I know this is bad lol. But for now, it'll do for now haha
-   onError((err, opts) => {
-    if (err instanceof ORPCError) {
-     opts.context.res.status(err.status).json(err.toJSON())
-    } else {
-     opts.context.next(err)
-    }
-   }),
-  ],
+ interceptors: [
+  // I know this is bad lol. But for now, it'll do for now haha
+  onError((err, opts) => {
+   if (err instanceof ORPCError) {
+    opts.context.res.status(err.status).json(err.toJSON())
+   } else if (err instanceof AppError) {
+    throw new ORPCError(StatusCodes[err.statusCode]!, {
+     status: err.statusCode,
+     message: err.message,
+    })
+   } else {
+    throw new ORPCError(getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR), {
+     status: StatusCodes.INTERNAL_SERVER_ERROR,
+     message: 'Internal server error',
+    })
+   }
+  }),
+ ],
 })
 // app.use(logger);
 app.use(cors(corsConfig))
@@ -51,9 +60,10 @@ app.use('/api{/*path}', async (req, res, next) => {
 })
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+ console.log(err)
  if (err instanceof AppError) {
   sendErrorResponse(
-   new ORPCError(getReasonPhrase(StatusCodes[err.statusCode]), {
+   new ORPCError(getReasonPhrase(400), {
     status: err.statusCode,
     message: err.message,
    })

@@ -4,10 +4,16 @@ import { AppError } from '@/lib/helpers'
 import { StatusCodes } from 'http-status-codes'
 import { Insertable, sql } from 'kysely'
 import { User } from 'better-auth'
-import { sendEmail } from '@/modules/email/email.service'
+import {
+ emailQueue,
+ emailWorker,
+ Recipient,
+ sendEmail,
+} from '@/modules/email/email.service'
 import { ProcedureErrorMap } from '@/types/types'
 import { invitationEmailHtml } from '@repo/transactional/new-invitation'
 import { isEqual } from 'date-fns'
+import { Job, Queue } from 'bullmq'
 
 export async function addDocInvitees(
  documentId: string,
@@ -23,7 +29,6 @@ export async function addDocInvitees(
   .select(['title'])
   .where('document.id', '=', documentId)
   .executeTakeFirstOrThrow()
-
  if (invitees.some((i) => i.email === user.email)) {
   throw errors.CONFLICT({ message: 'You already own this document' })
  }
@@ -53,11 +58,12 @@ export async function addDocInvitees(
      eb('document_invitation.status', '=', 'PENDING')
       .and('document_invitation.revokedAt', 'is', null)
       .and('document_invitation.acceptedAt', 'is', null)
+      .and('document_invitation.emailStatus', '!=', 'SENT')
     )
   })
   .execute()
 
- const emails = await Promise.all(
+ const emails: (Recipient | undefined)[] = await Promise.all(
   invitees.map(async (i) => {
    const result = results.find((r) => r.email === i.email)
    if (result?.id) {
@@ -81,7 +87,11 @@ export async function addDocInvitees(
   })
  )
 
- await sendEmail(emails.filter((e) => e !== undefined))
+ const cleanEmails = emails.filter((e) => e !== undefined)
+ await emailQueue.add('send-mail', {
+  documentId,
+  recipients: cleanEmails,
+ })
 
  return {
   invited: results.map((r) => ({ ...r, id: undefined })),

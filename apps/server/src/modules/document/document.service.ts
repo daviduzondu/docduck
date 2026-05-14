@@ -549,7 +549,7 @@ export async function getSharedDocuments(userId: string, page = 1) {
 
 export async function createDocument(userId: string) {
  return await db.transaction().execute(async (trx) => {
-  await allowHiddenRows(trx);
+  await allowHiddenRows(trx)
 
   const { id: documentId } = await trx
    .insertInto('document')
@@ -735,7 +735,7 @@ export async function getPendingInvitations(documentId: string) {
   .where('documentId', '=', documentId)
   .where('status', '=', 'PENDING')
   .where('revokedAt', 'is', null)
-  .select(['email', 'document_invitation.role', 'id'])
+  .select(['email', 'document_invitation.role', 'id', 'emailStatus'])
   .execute()
 
  return { data: result }

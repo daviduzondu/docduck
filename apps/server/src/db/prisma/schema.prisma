@@ -118,17 +118,17 @@ model document_snapshot {
 }
 
 model document_invitation {
-    id         String           @id @unique @default(dbgenerated("gen_random_uuid()"))
-    email      String
-    inviterId  String
-    documentId String
-    role       Role
-    status     InvitationStatus @default(PENDING)
-    emailSent  Boolean          @default(false)
-    acceptedAt DateTime?
-    revokedAt  DateTime?
-    createdAt  DateTime         @default(now()) @db.Timestamptz(6)
-    updatedAt  DateTime         @default(now()) @db.Timestamptz(6)
+    id          String           @id @unique @default(dbgenerated("gen_random_uuid()"))
+    email       String
+    inviterId   String
+    documentId  String
+    role        Role
+    status      InvitationStatus @default(PENDING)
+    emailStatus EmailStatus      @default(PENDING)
+    acceptedAt  DateTime?
+    revokedAt   DateTime?
+    createdAt   DateTime         @default(now()) @db.Timestamptz(6)
+    updatedAt   DateTime         @default(now()) @db.Timestamptz(6)
 
     // Relations 
     inviter  user     @relation(fields: [inviterId], references: [id])
@@ -184,4 +184,10 @@ enum InvitationStatus {
     ACCEPTED
     DECLINED
     REVOKED
+}
+
+enum EmailStatus {
+    PENDING
+    SENT
+    FAILED
 }

@@ -73,25 +73,34 @@ export function InvitationErrorCard({
      </div>
      <CardTitle className="text-xl">{config?.title}</CardTitle>
      <CardDescription className="text-sm leading-relaxed">
-      {description ?? (config?.description ?? null)}
+      {description ?? config?.description ?? null}
      </CardDescription>
     </CardHeader>
-    {isUnauthorized && (
-     <CardContent className="flex gap-3 justify-center pb-8 pt-2">
-      <Link
-       href={`/auth/login?next=/invite/accept?token=${token}`}
-       className={linkBase}
-      >
-       Login
-      </Link>
-      <Link
-       href={`/auth/register?next=/invite/accept?token=${token}`}
-       className={linkBase}
-      >
-       Create account
-      </Link>
-     </CardContent>
-    )}
+    {isUnauthorized &&
+     (() => {
+      sessionStorage.setItem(
+       'redirectAfterAuth',
+       `/invite/accept?token=${token}`
+      )
+
+      return (
+       <CardContent className="flex justify-center gap-3 pt-2">
+        <Link
+         href={`/auth/login`}
+         className={linkBase}
+        >
+         Login
+        </Link>
+
+        <Link
+         href={`/auth/register`}
+         className={linkBase}
+        >
+         Create account
+        </Link>
+       </CardContent>
+      )
+     })()}
    </Card>
   </div>
  )

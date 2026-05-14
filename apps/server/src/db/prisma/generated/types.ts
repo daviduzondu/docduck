@@ -24,6 +24,12 @@ export const InvitationStatus = {
 } as const
 export type InvitationStatus =
  (typeof InvitationStatus)[keyof typeof InvitationStatus]
+export const EmailStatus = {
+ PENDING: 'PENDING',
+ SENT: 'SENT',
+ FAILED: 'FAILED',
+} as const
+export type EmailStatus = (typeof EmailStatus)[keyof typeof EmailStatus]
 export type account = {
  id: Generated<string>
  userId: string
@@ -67,7 +73,7 @@ export type document_invitation = {
  documentId: string
  role: Role
  status: Generated<InvitationStatus>
- emailSent: Generated<boolean>
+ emailStatus: Generated<EmailStatus>
  acceptedAt: Timestamp | null
  revokedAt: Timestamp | null
  createdAt: Generated<Timestamp>

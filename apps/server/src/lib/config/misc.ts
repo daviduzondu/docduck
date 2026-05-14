@@ -2,6 +2,7 @@ import pino from 'pino-http'
 import cors from 'cors'
 import { Server } from 'http'
 import { WebSocketServer } from 'ws'
+import Redis from 'ioredis'
 
 export const logger = pino({
  ...(process.env.NODE_ENV === 'PRODUCTION'
@@ -25,3 +26,7 @@ export const createWebsocketServer = (server: Server) =>
   server,
   path: '/collab',
  })
+
+export const redis = new Redis({
+ maxRetriesPerRequest: null,
+})

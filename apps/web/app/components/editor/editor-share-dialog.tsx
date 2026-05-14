@@ -172,6 +172,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
    body: { invitees: data.invitees },
    params: { id: documentId },
   })
+  remove()
  }
 
  return (
@@ -189,7 +190,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
      </Button>
     }
    />
-   <DialogContent className="sm:max-w-md">
+   <DialogContent className="w-225">
     <DialogHeader>
      <DialogTitle>Share with others</DialogTitle>
      <DialogDescription>Add people by email</DialogDescription>
@@ -279,7 +280,10 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         Yet to respond
        </TabsTrigger>
       </TabsList>
-      <TabsContent value="people-with-access" className={'min-h-60 max-h-60'}>
+      <TabsContent
+       value="people-with-access"
+       className={'min-h-60 max-h-60 overflow-y-auto'}
+      >
        {getCollaboratorsQuery.isLoading ? (
         <TabSkeleton />
        ) : getCollaboratorsQuery.data &&
@@ -338,7 +342,10 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         />
        )}
       </TabsContent>
-      <TabsContent value="invite-list" className={'min-h-60 max-h-60'}>
+      <TabsContent
+       value="invite-list"
+       className={'min-h-60 max-h-60 overflow-y-auto'}
+      >
        {fields.length === 0 && (
         <NothingToSeeHere
          icon={<MailPlus />}
@@ -389,7 +396,10 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         </Item>
        ))}
       </TabsContent>
-      <TabsContent value="yet-to-respond" className={'min-h-60 max-h-60'}>
+      <TabsContent
+       value="yet-to-respond"
+       className={'min-h-60 max-h-60 overflow-y-auto'}
+      >
        {(() => {
         if (getPendingInvitationsQuery.error)
          return <div>Failed to get pending invitations</div>
@@ -409,10 +419,36 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
          return getPendingInvitationsQuery.data.data.map((invitation) => (
           <Item
            key={invitation.id}
-           className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center"
+           className="px-3 py-1 hover:bg-accent mb-1 flex items-center justify-center group"
           >
-           <ItemContent>{invitation.email}</ItemContent>
-           <ItemActions></ItemActions>
+           <ItemContent>
+            <ItemTitle>{invitation.email}</ItemTitle>
+            <ItemDescription className="text-amber-600/80">
+             {invitation.emailStatus === 'FAILED' &&
+              'There was a problem delivering the invite email'}
+            </ItemDescription>
+           </ItemContent>
+           <ItemActions className="invisible group-hover:visible transition-none">
+            <Button
+             variant={'outline'}
+             size="sm"
+             onClick={async () => {
+              await sendInvitationsMutation.mutateAsync({
+               body: {
+                invitees: [
+                 {
+                  email: invitation.email,
+                  role: invitation.role as any,
+                 },
+                ],
+               },
+               params: { id: documentId },
+              });
+             }}
+            >
+             Resend
+            </Button>
+           </ItemActions>
           </Item>
          ))
         return <div>Something went wrong.</div>
