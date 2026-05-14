@@ -141,7 +141,7 @@ export const documentRouter = base
 
   getSharedDocuments: r
    .get('/shared', {
-    description: 'Get all documents',
+    description: 'Get shared documents',
     inputStructure: 'detailed',
    })
    .input(

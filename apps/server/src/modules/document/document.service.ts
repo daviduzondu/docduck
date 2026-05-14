@@ -523,6 +523,8 @@ export async function getSharedDocuments(userId: string, page = 1) {
    'title',
    'yjsState',
    'document.id',
+   'document.visibility',
+   'document.updatedAt',
    eb.fn.count('permission.id').over().as('total'),
   ])
   .where('permission.role', '!=', 'OWNER')

@@ -8,6 +8,7 @@ import {
   SidebarOpenIcon,
   Sun,
   Trash2,
+  Users,
 } from 'lucide-react'
 
 import {
@@ -40,6 +41,7 @@ import {
 
 export const navItems = [
   { label: 'My Documents', icon: FileText, href: '/dashboard/documents' },
+  { label: 'Shared With Me', icon: Users, href: '/dashboard/shared' },
   { label: 'Trash', icon: Trash2, href: '/dashboard/trash' },
 ]
 

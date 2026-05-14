@@ -37,6 +37,15 @@ export type DashboardState = {
   view: 'grid' | 'list'
   sortBy: SortOption
  }
+
+ shared: {
+  searchTerm: string
+  activeFilters: DocumentFilter[]
+  currentPage: number
+  maxPages: number | undefined
+  view: 'grid' | 'list'
+  sortBy: SortOption
+ }
 }
 
 export type DashboardStoreActions = {
@@ -71,7 +80,14 @@ const useDashboard = create<DashboardStore>((set) => ({
   maxPages: undefined,
   view: 'list',
  },
-
+ shared: {
+  searchTerm: '',
+  activeFilters: [],
+  sortBy: 'updated_desc',
+  currentPage: 1,
+  maxPages: undefined,
+  view: 'list',
+ },
  setSearchTerm: (page, searchTerm) =>
   set((state) => ({ [page]: { ...state[page], searchTerm } })),
 
