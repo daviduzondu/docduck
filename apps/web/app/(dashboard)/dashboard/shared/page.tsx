@@ -169,7 +169,7 @@ const columns = [
    const value = getValue()
    return (
     <Badge variant={value === 'PUBLIC' ? 'default' : 'secondary'}>
-     {value?.charAt(0) + value?.slice(1).toLowerCase()}
+     {value?.charAt(0)} {value?.slice(1).toLowerCase()}
     </Badge>
    )
   },

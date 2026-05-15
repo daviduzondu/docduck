@@ -1,5 +1,5 @@
 import { db } from '@/db/kysely'
-import { createDocumentSchema, getDocumentSchema } from './document.validation'
+import { getDocumentSchema } from './document.validation'
 import * as z from 'zod'
 import { AppError } from '@/lib/helpers'
 import { StatusCodes } from 'http-status-codes'
@@ -9,7 +9,6 @@ import { sql, Transaction } from 'kysely'
 import { hocuspocus } from '@/lib/config/hocuspocus'
 import { fromUint8Array } from 'js-base64'
 import { jsonArrayFrom } from 'kysely/helpers/postgres'
-import { ORPCError } from '@orpc/contract'
 
 export type DocumentMeta = {
  documentId: string
@@ -532,6 +531,8 @@ export async function getSharedDocuments(userId: string, page = 1) {
   .limit(limit)
   .offset(offset)
   .execute()
+
+ console.log(results);
 
  return {
   data: results.map((r) => {

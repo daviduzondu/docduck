@@ -53,6 +53,7 @@ export async function addDocInvitees(
     )
     .doUpdateSet((eb) => ({
      role: eb.ref('excluded.role'),
+     emailStatus: 'PENDING'
     }))
     .where((eb) =>
      eb('document_invitation.status', '=', 'PENDING')
@@ -116,6 +117,7 @@ export async function acceptDocumentInvitation(
  ctx: Express.Request['ctx'],
  errors: ProcedureErrorMap
 ) {
+  // throw new AppError("something", StatusCodes.BAD_REQUEST)
  return await db.transaction().execute(async (trx) => {
   const invitation = await trx
    .selectFrom('document_invitation')

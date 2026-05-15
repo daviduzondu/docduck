@@ -29,4 +29,5 @@ export const createWebsocketServer = (server: Server) =>
 
 export const redis = new Redis({
  maxRetriesPerRequest: null,
-})
+});
+

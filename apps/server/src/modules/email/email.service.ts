@@ -3,6 +3,7 @@ import { ORPCError } from '@orpc/contract'
 import { Queue, Worker } from 'bullmq'
 import { redis } from '@/lib/config/misc'
 import { db } from '@/db/kysely'
+import { sendMailpitMail } from '@/lib/config/mailpit'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 export type Recipient = {
@@ -17,6 +18,16 @@ export type MailerJobData = {
 
 export async function sendEmail(recipients: Recipient[]) {
  if (recipients.length === 0) return
+ if (process.env.NODE_ENV === 'DEVELOPMENT') {
+  await sendMailpitMail(
+   {
+    name: 'DocDuck',
+    email: `no-reply@${process.env.RESEND_DOMAIN}`,
+   },
+   recipients
+  )
+  return
+ }
  const { error } = await resend.batch.send(
   recipients.map((r) => ({
    from: `DocDuck <no-reply@${process.env.RESEND_DOMAIN}>`,
@@ -34,6 +45,10 @@ export async function sendEmail(recipients: Recipient[]) {
 
 export const emailQueue = new Queue<MailerJobData>('Mailer', {
  connection: redis,
+ defaultJobOptions: {
+  removeOnComplete: { count: 100 },
+  removeOnFail: { count: 200 },
+ },
 })
 
 export const emailWorker = new Worker<MailerJobData>(

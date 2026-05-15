@@ -76,7 +76,7 @@ export function InvitationErrorCard({
       {description ?? config?.description ?? null}
      </CardDescription>
     </CardHeader>
-    {isUnauthorized &&
+    {(isUnauthorized || code === "FORBIDDEN") &&
      (() => {
       sessionStorage.setItem(
        'redirectAfterAuth',
@@ -84,7 +84,7 @@ export function InvitationErrorCard({
       )
 
       return (
-       <CardContent className="flex justify-center gap-3 pt-2">
+       <CardContent className="flex justify-center gap-3">
         <Link
          href={`/auth/login`}
          className={linkBase}

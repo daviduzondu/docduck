@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { OpenAPIHandler } from '@orpc/openapi/node'
-import { onError, ORPCError } from '@orpc/server'
+import { ORPCError } from '@orpc/server'
 import { CORSPlugin } from '@orpc/server/plugins'
 import { toNodeHandler } from 'better-auth/node'
 import cors from 'cors'
@@ -16,7 +16,8 @@ import { generateContract } from '@/orpc/scripts/generate-contract'
 import { AppError } from '@/lib/helpers'
 import { NoResultError } from 'kysely'
 import { getReasonPhrase, StatusCodes } from 'http-status-codes'
-import { emailWorker } from '@/modules/email/email.service'
+import { verifyMailpitInstance } from '@/lib/config/mailpit'
+import { experimental_RethrowHandlerPlugin as RethrowHandlerPlugin } from '@orpc/server/plugins'
 
 if (!process.env.NODE_ENV)
  throw new Error('Failed to specify Node.js environment')
@@ -25,24 +26,14 @@ const app: Express = express()
 const server = createServer(app)
 generateContract()
 initializeHocuspocus(createWebsocketServer(server))
+await verifyMailpitInstance()
 const handler = new OpenAPIHandler(appRouter, {
- plugins: [new CORSPlugin()],
- interceptors: [
-  // I know this is bad lol. But for now, it'll do for now haha
-  onError((err, opts) => {
-   if (err instanceof ORPCError) {
-    opts.context.res.status(err.status).json(err.toJSON())
-   } else if (err instanceof AppError) {
-    throw new ORPCError(StatusCodes[err.statusCode]!, {
-     status: err.statusCode,
-     message: err.message,
-    })
-   } else {
-    throw new ORPCError(getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR), {
-     status: StatusCodes.INTERNAL_SERVER_ERROR,
-     message: 'Internal server error',
-    })
-   }
+ plugins: [
+  new CORSPlugin(),
+  new RethrowHandlerPlugin({
+   filter: (error) => {
+    return error instanceof Error
+   },
   }),
  ],
 })
@@ -60,10 +51,12 @@ app.use('/api{/*path}', async (req, res, next) => {
 })
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
- console.log(err)
- if (err instanceof AppError) {
+ if (err instanceof ORPCError) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  sendErrorResponse(err)
+ } else if (err instanceof AppError) {
   sendErrorResponse(
-   new ORPCError(getReasonPhrase(400), {
+   new ORPCError(StatusCodes[err.statusCode], {
     status: err.statusCode,
     message: err.message,
    })
