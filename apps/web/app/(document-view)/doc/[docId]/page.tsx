@@ -14,6 +14,7 @@ import {
 import { FileX2, Lock, LogIn, ServerCrash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import TipTapEditorProvider from '@/providers/editor.provider'
 
 function StateCard({
  icon: Icon,
@@ -30,7 +31,7 @@ function StateCard({
   <div className="flex w-full min-h-screen items-center justify-center bg-muted/30 px-4">
    <Card className="w-full max-w-md shadow-lg">
     <CardHeader className="items-center pb-2 text-center">
-     <div className='flex items-center justify-center w-full'>
+     <div className="flex items-center justify-center w-full">
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
        <Icon className="h-7 w-7 text-muted-foreground" strokeWidth={1.5} />
       </div>
@@ -41,9 +42,7 @@ function StateCard({
      </CardDescription>
     </CardHeader>
     {action && (
-     <CardContent className="flex justify-center">
-      {action}
-     </CardContent>
+     <CardContent className="flex justify-center">{action}</CardContent>
     )}
    </Card>
   </div>
@@ -124,10 +123,13 @@ export default async function Page({
 
  return (
   <DocumentProvider documentId={docId} title={result.meta.title}>
-   <DocPage
-    canEdit={result.permissions.canEdit}
-    role={result.permissions.role}
-   />
+   <TipTapEditorProvider canEdit={result.permissions.canEdit}>
+    <DocPage
+     visibility={result.meta.visibility}
+     initialCanEdit={result.permissions.canEdit}
+     initialRole={result.permissions.role}
+    />
+   </TipTapEditorProvider>
   </DocumentProvider>
  )
 }

@@ -131,17 +131,18 @@ export async function resolveComment({
   .returning(['document_comment.id'])
   .executeTakeFirst()
 
- const hocuspocusDocument = hocuspocus.documents.get(documentId)
+ const hocuspocusDocument = hocuspocus.documents.get(documentId);
+
  if (hocuspocusDocument && comment?.id) {
   const commentsMap = hocuspocusDocument.getMap<Comment>('comments')
   const existing = commentsMap.get(commentId)
-  if (existing)
+  if (existing) {
    commentsMap.set(commentId, {
     ...existing,
     resolved: true,
    })
+  }
  }
-
  return {
   message: 'Comment resolved',
  }
@@ -505,7 +506,11 @@ export async function getDocuments(userId: string, page = 1, limit = 10) {
     limit,
     ...r,
     collaborators: r.collaborators,
-    commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
+    commentsCount: r.yjsState
+     ? Array.from(tempDoc.getMap('comments').entries()).filter(([, v]) =>
+        !(v as Comment).resolved ? true : false
+       ).length
+     : 0,
     yjsState: undefined,
    }
   }),
@@ -532,8 +537,6 @@ export async function getSharedDocuments(userId: string, page = 1) {
   .offset(offset)
   .execute()
 
- console.log(results);
-
  return {
   data: results.map((r) => {
    const tempDoc = new Y.Doc()
@@ -543,7 +546,11 @@ export async function getSharedDocuments(userId: string, page = 1) {
    return {
     ...r,
     limit,
-    commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
+    commentsCount: r.yjsState
+     ? Array.from(tempDoc.getMap('comments').entries()).filter(([, v]) =>
+        !(v as Comment).resolved ? true : false
+       ).length
+     : 0,
     yjsState: undefined,
    }
   }),
@@ -642,7 +649,11 @@ export async function searchDocumentByTitle({
    return {
     ...r,
     collaborators: r.collaborators,
-    commentsCount: r.yjsState ? tempDoc.getMap('comments').size : 0,
+    commentsCount: r.yjsState
+     ? Array.from(tempDoc.getMap('comments').entries()).filter(([, v]) =>
+        !(v as Comment).resolved ? true : false
+       ).length
+     : 0,
     yjsState: undefined,
    }
   }),
@@ -740,6 +751,44 @@ export async function getPendingInvitations(documentId: string) {
   .where('revokedAt', 'is', null)
   .select(['email', 'document_invitation.role', 'id', 'emailStatus'])
   .execute()
+
+ return { data: result }
+}
+
+export async function setDocumentVisibility(
+ documentId: string,
+ visibility: Visibility
+) {
+ const result = await db
+  .updateTable('document')
+  .where('document.id', '=', documentId)
+  .set({
+   visibility,
+  })
+  .returning(['document.id', 'visibility'])
+  .executeTakeFirstOrThrow()
+
+ return { data: result }
+}
+
+export async function updateUserRole({
+ documentId,
+ userId,
+ role,
+}: {
+ documentId: string
+ userId: string
+ role: Omit<Role, 'OWNER'>
+}) {
+ const result = await db
+  .updateTable('permission')
+  .where('documentId', '=', documentId)
+  .where('userId', '=', userId)
+  .set({
+   role: role as Role,
+  })
+  .returning(['userId', 'role'])
+  .executeTakeFirstOrThrow()
 
  return { data: result }
 }

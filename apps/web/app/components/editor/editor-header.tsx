@@ -38,20 +38,22 @@ import { AwarenessStates } from '@/types'
 import { useShallow } from 'zustand/react/shallow'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isDefinedError } from '@orpc/client'
+import Link from 'next/link'
 
 interface EditorHeaderProps {
  onEdit?: () => void
  onShare?: () => void
  canEdit: boolean
+ visibility: 'PRIVATE' | 'PUBLIC'
 }
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
  canEdit,
  onEdit,
+ visibility,
  onShare,
 }) => {
  const queryClient = useQueryClient()
-
  const [collaborators, setCollaborators] = useState<AwarenessStates[]>([])
  const { open } = useSidebar()
  const { mode, documentId, snapshotId, title, provider, setMode } = useDocument(
@@ -100,7 +102,9 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
  return (
   <header className="flex w-full items-center px-3 py-2 justify-between">
    {mode === 'editor' ? (
-    <div className="text-2xl font-bold grow basis-0">DocDuck</div>
+    <div className="text-2xl font-bold grow basis-0 hover:opacity-85">
+     <Link href="/dashboard">DocDuck</Link>
+    </div>
    ) : (
     <div className={'grow basis-0'}>
      <Button
@@ -157,7 +161,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
     collaborators.every((collaborator) => collaborator.id !== undefined) ? (
      <CollaboratorsHoverCard collaborators={collaborators} />
     ) : null}
-    <EditorShareDialogButton onShare={onShare} />
+    <EditorShareDialogButton onShare={onShare} isPrivate={visibility === 'PRIVATE'} />
    </div>
   </header>
  )
@@ -293,7 +297,7 @@ function CollaboratorsHoverCard({
       </ItemMedia>
       <ItemContent>
        <ItemTitle>{collaborator.name}</ItemTitle>
-       <Badge>{collaborator.role}</Badge>
+       <Badge>{collaborator.role ?? "VIEWER"}</Badge>
       </ItemContent>
      </Item>
     ))}

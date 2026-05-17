@@ -10,6 +10,7 @@ import {
  ensureDocumentOwner,
 } from '@/modules/document/document.middleware'
 import z from 'zod'
+import { Role, Visibility } from '@/db/prisma/generated/types'
 
 export const documentRouter = base
  .prefix('/documents')
@@ -368,5 +369,45 @@ export const documentRouter = base
    .use(ensureDocumentOwner, (input) => input.params.id)
    .handler(({ input }) =>
     documentService.getPendingInvitations(input.params.id)
+   ),
+
+  setDocumentVisibility: r
+   .patch('/{id}/visibility', { inputStructure: 'detailed' })
+   .input(
+    z.object({
+     params: z.object({ id: z.uuid() }),
+     body: z.object({
+      visibility: z.enum(Visibility),
+     }),
+    })
+   )
+   .use(ensureAuth)
+   .use(ensureDocumentOwner, (input) => input.params.id)
+   .handler(({ input }) =>
+    documentService.setDocumentVisibility(
+     input.params.id,
+     input.body.visibility
+    )
+   ),
+
+  updateUserRole: r
+   .patch('/{id}/role', { inputStructure: 'detailed' })
+   .input(
+    z.object({
+     params: z.object({ id: z.uuid() }),
+     body: z.object({
+      role: z.enum(Role),
+      userId: z.string(),
+     }),
+    })
+   )
+   .use(ensureAuth)
+   .use(ensureDocumentOwner, (input) => input.params.id)
+   .handler(({ input }) =>
+    documentService.updateUserRole({
+     documentId: input.params.id,
+     role: input.body.role,
+     userId: input.body.userId,
+    })
    ),
  })

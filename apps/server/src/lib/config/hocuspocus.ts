@@ -33,6 +33,23 @@ export const hocuspocus = new Hocuspocus({
    resolve()
   })
  },
+ async beforeHandleMessage(data) {
+  data.connection.readOnly = true
+  const authData = await auth.api.getSession({
+   headers: fromNodeHeaders(data.requestHeaders),
+  })
+  const permissions = await documentService.getDocumentWithPermissions(
+   data.documentName,
+   authData?.user.id ?? null
+  )
+  if (!permissions.permissions.canView)
+   throw new AppError(
+    'You must be signed in to perform this action!',
+    StatusCodes.UNAUTHORIZED
+   )
+  if (permissions.permissions.canEdit) data.connection.readOnly = false
+  return authData
+ },
  extensions: [
   new Logger(),
   new Database({

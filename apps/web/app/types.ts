@@ -1,5 +1,5 @@
 export type StatelessMessage<T> = {
- type: 'update:title' | 'notify'
+ type: 'update:title' | 'notify' | 'role:update'
  data: T
 }
 

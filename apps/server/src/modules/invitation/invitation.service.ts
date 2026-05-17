@@ -59,7 +59,6 @@ export async function addDocInvitees(
      eb('document_invitation.status', '=', 'PENDING')
       .and('document_invitation.revokedAt', 'is', null)
       .and('document_invitation.acceptedAt', 'is', null)
-      .and('document_invitation.emailStatus', '!=', 'SENT')
     )
   })
   .execute()

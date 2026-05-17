@@ -1,11 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Field } from '@/components/ui/field'
 import {
  Popover,
  PopoverContent,
- PopoverDescription,
  PopoverHeader,
  PopoverTitle,
  PopoverTrigger,
@@ -17,8 +15,7 @@ import { useDocument } from '@/providers/document.provider'
 import { useMutation } from '@tanstack/react-query'
 import { useCurrentEditor } from '@tiptap/react'
 import { MessageSquareText } from 'lucide-react'
-import { RefObject, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 export function InlineCommentPopover() {
@@ -35,7 +32,7 @@ export function InlineCommentPopover() {
    onSuccess(data) {
     const { commentId, parentId } = data
     editor?.commands.setComment(commentId)
-    toast.success('Comment added')
+    toast.success('Comment added');
    },
    onError(error) {
     toast.error('Failed to add comment', { description: error.message })

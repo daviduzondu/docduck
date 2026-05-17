@@ -1,3 +1,5 @@
+'use client'
+
 import Collaboration from '@tiptap/extension-collaboration'
 import CollaborationCaret from '@tiptap/extension-collaboration-caret'
 
@@ -42,6 +44,7 @@ export default function TipTapEditorProvider({
  const editor = useEditor({
   immediatelyRender: false,
   editable: canEdit,
+  
   editorProps: {
    handleClick(view, pos, event) {
     if (!canEdit) return false

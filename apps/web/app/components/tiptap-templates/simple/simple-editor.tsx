@@ -232,7 +232,7 @@ export function SimpleEditor({
     role: canEdit ? 'EDITOR' : 'VIEWER',
    })
   }
- }, [editor, data])
+ }, [editor, data, role, canEdit])
 
  return (
   <div className="simple-editor-wrapper">

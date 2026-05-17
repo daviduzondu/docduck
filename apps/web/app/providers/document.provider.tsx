@@ -1,5 +1,6 @@
 'use client'
 
+import { useConfirm } from '@/providers/confirm-provider'
 import { StatelessMessage } from '@/types'
 import {
  HocuspocusProvider,
@@ -45,6 +46,7 @@ export const useDocumentStore = createStore<DocumentState & DocumentActions>(
      if (message.type === 'notify') {
       toast.info(message.data)
      }
+     
     },
    })
    provider.attach()

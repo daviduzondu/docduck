@@ -10,8 +10,11 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import {
+ ArrowRightIcon,
  Check,
+ GlobeIcon,
  Link,
+ Loader,
  LockIcon,
  Mail,
  MailPlus,
@@ -56,10 +59,14 @@ import { useDocument } from '@/providers/document.provider'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { getUserColor } from '@/lib/utils'
+import { cn, getUserColor, sendStateless } from '@/lib/utils'
 import { useAuth } from '@/providers/auth.provider'
 import { AwarenessStates } from '@/types'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Toggle } from '@/components/ui/toggle'
+import { Switch } from '@/components/ui/switch'
+import { router } from 'better-auth/api'
+import { usePathname, useRouter } from 'next/navigation'
 
 const shareFormSchema = z.object({
  invitees: z
@@ -76,8 +83,17 @@ const roles = [
  { label: 'Editor', value: 'EDITOR' },
  { label: 'Viewer', value: 'VIEWER' },
 ]
-export function EditorShareDialogButton({ onShare }: { onShare: any }) {
+
+export function EditorShareDialogButton({
+ onShare,
+ isPrivate,
+}: {
+ onShare: any
+ isPrivate: boolean
+}) {
  const queryClient = useQueryClient()
+ const { data: authData } = useAuth()
+ const [privateDocument, setPrivateDocument] = useState(isPrivate)
  const [copied, setCopied] = useState(false)
  const [newEmail, setNewEmail] = useState('')
  const [newRole, setNewRole] = useState<'EDITOR' | 'VIEWER'>('VIEWER')
@@ -87,6 +103,9 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
  >('people-with-access')
  const { documentId, provider } = useDocument()
  const { data } = useAuth()
+ const router = useRouter()
+ const pathname = usePathname()
+
  const getCollaboratorsQuery = useQuery(
   orpc.documents.getCollaborators.queryOptions({
    input: {
@@ -112,12 +131,50 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
   })
  )
 
+ const updateDocumentVisibilityMutation = useMutation(
+  orpc.documents.setDocumentVisibility.mutationOptions({
+   onError(error) {
+    toast.error(error.message)
+   },
+   onSuccess() {
+    setPrivateDocument(!privateDocument)
+   },
+  })
+ )
+
+ const updateUserRoleMutation = useMutation(
+  orpc.documents.updateUserRole.mutationOptions({
+   onError(error) {
+    toast.error(error.message)
+   },
+   onSuccess(data) {
+    sendStateless(provider, {
+     type: 'role:update',
+     data: {
+      userId: data.data.userId,
+      newRole: data.data.role,
+     },
+    })
+    queryClient.invalidateQueries({
+     predicate(query) {
+      return query.queryHash.includes('getCollaborators')
+     },
+    })
+   },
+  })
+ )
+
  const sendInvitationsMutation = useMutation(
   orpc.documents.createDocumentInvitations.mutationOptions({
    onError(error) {
     toast.error(error.message)
    },
    onSuccess() {
+    queryClient.invalidateQueries({
+     predicate(query) {
+      return query.queryHash.includes('getCollaborators')
+     },
+    })
     queryClient.invalidateQueries({
      predicate(query) {
       return query.queryHash.includes('getPendingInvitations')
@@ -178,19 +235,35 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
  return (
   <Dialog>
    <DialogTrigger
-    disabled={!getCollaboratorsQuery.isEnabled}
     render={
-     <Button
-      size="lg"
-      onClick={onShare}
-      className={'outline outline-accent-foreground'}
-     >
-      <LockIcon data-icon="inline-end" />
-      Share
-     </Button>
+     !authData?.user.id ? (
+      <Button
+       onClick={() => {
+        sessionStorage.setItem('redirectAfterAuth', pathname)
+        router.push('/auth/login')
+       }}
+      >
+       <ArrowRightIcon data-icon="inline-end" />
+       Login
+      </Button>
+     ) : (
+      <Button
+       size="lg"
+       disabled={!getCollaboratorsQuery.isEnabled}
+       onClick={onShare}
+       className={'outline outline-accent-foreground'}
+      >
+       {privateDocument ? (
+        <LockIcon data-icon="inline-end" />
+       ) : (
+        <GlobeIcon data-icon="inline-end" />
+       )}
+       Share
+      </Button>
+     )
     }
    />
-   <DialogContent className="w-225">
+   <DialogContent className="w-[680px] max-h-[90vh] overflow-hidden flex flex-col">
     <DialogHeader>
      <DialogTitle>Share with others</DialogTitle>
      <DialogDescription>Add people by email</DialogDescription>
@@ -270,7 +343,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         value="invite-list"
         onClick={() => setTabValue('invite-list')}
        >
-        invite list
+        Invite list
        </TabsTrigger>
        <TabsTrigger
         className={'uppercase text-xs font-semibold'}
@@ -280,9 +353,10 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         Yet to respond
        </TabsTrigger>
       </TabsList>
+
       <TabsContent
        value="people-with-access"
-       className={'min-h-60 max-h-60 overflow-y-auto'}
+       className={'min-h-72 max-h-72 overflow-y-auto'}
       >
        {getCollaboratorsQuery.isLoading ? (
         <TabSkeleton />
@@ -322,13 +396,37 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
              <ItemDescription>{collab.email}</ItemDescription>
             </ItemContent>
             <ItemActions>
-             <span className="text-sm text-muted-foreground">
-              {collab.role === 'EDITOR'
-               ? 'Editor'
-               : collab.role === 'OWNER'
-                 ? 'Owner'
-                 : 'Viewer'}
-             </span>
+             {collab.role === 'OWNER' ? (
+              <span className="text-sm text-muted-foreground">You</span>
+             ) : (
+              <Select
+               value={collab.role}
+               disabled={updateUserRoleMutation.isPending}
+               onValueChange={(value) => {
+                updateUserRoleMutation.mutate({
+                 params: { id: documentId },
+                 body: {
+                  role: value as 'EDITOR' | 'VIEWER',
+                  userId: collab.id,
+                 },
+                })
+               }}
+              >
+               <SelectTrigger className="w-max bg-transparent">
+                {roles.find((r) => r.value === collab.role)?.label ??
+                 collab.role}
+               </SelectTrigger>
+               <SelectContent>
+                <SelectGroup>
+                 {roles.map((role) => (
+                  <SelectItem key={role.value} value={role.value}>
+                   {role.label}
+                  </SelectItem>
+                 ))}
+                </SelectGroup>
+               </SelectContent>
+              </Select>
+             )}
             </ItemActions>
            </Item>
           ))
@@ -342,9 +440,10 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         />
        )}
       </TabsContent>
+
       <TabsContent
        value="invite-list"
-       className={'min-h-60 max-h-60 overflow-y-auto'}
+       className={'min-h-72 max-h-72 overflow-y-auto'}
       >
        {fields.length === 0 && (
         <NothingToSeeHere
@@ -396,9 +495,10 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
         </Item>
        ))}
       </TabsContent>
+
       <TabsContent
        value="yet-to-respond"
-       className={'min-h-60 max-h-60 overflow-y-auto'}
+       className={'min-h-72 max-h-72 overflow-y-auto'}
       >
        {(() => {
         if (getPendingInvitationsQuery.error)
@@ -443,7 +543,7 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
                 ],
                },
                params: { id: documentId },
-              });
+              })
              }}
             >
              Resend
@@ -456,27 +556,52 @@ export function EditorShareDialogButton({ onShare }: { onShare: any }) {
       </TabsContent>
      </Tabs>
 
-     <DialogFooter className="flex sm:justify-between w-full">
-      <Button
-       variant={'outline'}
-       onClick={() => handleCopy(window.location.href)}
+     <div className={cn('flex flex-col w-full')}>
+      <div
+       className="text-left py-2 mb-4 mt-2 flex items-center gap-2 justify-between border -mx-2 px-4 hover:cursor-pointer hover:bg-accent rounded-full"
+       onClick={() => {
+        updateDocumentVisibilityMutation.mutate({
+         params: { id: documentId },
+         body: { visibility: privateDocument ? 'PUBLIC' : 'PRIVATE' },
+        })
+       }}
       >
-       {copied ? (
-        <Check data-icon="inline-end" />
-       ) : (
-        <Link data-icon="inline-end" />
-       )}{' '}
-       Copy link
-      </Button>
-      <Button
-       type="submit"
-       className={`${tabValue === 'invite-list' ? 'visible' : 'invisible'}`}
-       disabled={form.formState.isSubmitting || !form.formState.isValid}
-      >
-       <Mail data-icon="inline-end" />{' '}
-       {form.formState.isSubmitting ? 'Sending...' : 'Send invitation'}
-      </Button>
-     </DialogFooter>
+       <Label htmlFor="visibility" className="pointer-events-none">
+        Anyone with link can view
+       </Label>
+       <div className="flex">
+        <Loader
+         className={`animate-spin ${updateDocumentVisibilityMutation.isPending ? 'visible' : 'invisible'}`}
+        />
+        <Switch
+         checked={!privateDocument}
+         name="visibility"
+         className={`pointer-events-none ${updateDocumentVisibilityMutation.isPending ? 'hidden' : ''}`}
+        />
+       </div>
+      </div>
+      <div className="flex justify-between">
+       <Button
+        variant={'outline'}
+        onClick={() => handleCopy(window.location.href)}
+       >
+        {copied ? (
+         <Check data-icon="inline-end" />
+        ) : (
+         <Link data-icon="inline-end" />
+        )}{' '}
+        Copy link
+       </Button>
+       <Button
+        type="submit"
+        className={`${tabValue === 'invite-list' ? 'visible' : 'invisible'}`}
+        disabled={form.formState.isSubmitting || !form.formState.isValid}
+       >
+        <Mail data-icon="inline-end" />{' '}
+        {form.formState.isSubmitting ? 'Sending...' : 'Send invitation'}
+       </Button>
+      </div>
+     </div>
     </form>
    </DialogContent>
   </Dialog>
@@ -493,7 +618,7 @@ function NothingToSeeHere({
  icon: React.ReactNode
 }) {
  return (
-  <Empty className="border border-dashed h-60">
+  <Empty className="border border-dashed h-72">
    <EmptyHeader>
     <EmptyMedia variant="icon">{icon}</EmptyMedia>
     <EmptyTitle className="text-lg">{title}</EmptyTitle>
@@ -505,7 +630,7 @@ function NothingToSeeHere({
 
 function TabSkeleton() {
  return (
-  <div className="h-60 overflow-hidden">
+  <div className="h-72 overflow-hidden">
    {Array.from({ length: 10 }).map((_, i) => (
     <Skeleton key={i} className="h-10 not-last:mb-2 w-full" />
    ))}

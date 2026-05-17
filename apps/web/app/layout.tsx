@@ -34,7 +34,7 @@ export default function RootLayout({
       <AuthProvider>
        <ConfirmProvider>
         <PromptProvider>
-         {children}
+         <main>{children}</main>
          <Toaster richColors theme="light" position="bottom-left" />
         </PromptProvider>
        </ConfirmProvider>

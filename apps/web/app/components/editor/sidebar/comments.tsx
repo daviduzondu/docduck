@@ -98,7 +98,6 @@ export default function Comments() {
    editor?.off('selectionUpdate', handleSelectionUpdate)
   }
  }, [editor, provider.document])
-
  const visibleComments = sortedComments.filter((c) => !c.resolved)
 
  if (visibleComments.length === 0) {
@@ -338,7 +337,7 @@ function CommentDropdownMenu({
  const { mutate, isPending } = useMutation(
   orpc.documents.resolveComment.mutationOptions({
    onSuccess() {
-    editor?.commands.resolveComment(commentId)
+    editor?.commands.unsetComment(commentId);
    },
    onError(error) {
     toast.error('Failed to resolve comment', {

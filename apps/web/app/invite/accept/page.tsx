@@ -22,7 +22,6 @@ export default async function Page({ searchParams }: { searchParams: any }) {
  )
 
  if (error) {
-  console.log('ERROROR', error.code)
   const code = isDefinedError(error) ? error.code : 'UNKNOWN'
   return (
    <div className="flex  h-screen w-screen overflow-hidden items-center justify-center">
