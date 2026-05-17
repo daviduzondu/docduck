@@ -29,7 +29,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useForm, Controller } from 'react-hook-form'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import z, { uuidv7 } from 'zod'
+import z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { $api, orpc } from '@/lib/orpc.client'
 import { Badge } from '@/components/ui/badge'
@@ -37,7 +37,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { AwarenessStates } from '@/types'
 import { useShallow } from 'zustand/react/shallow'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { isDefinedError } from '@orpc/client'
 import Link from 'next/link'
 
 interface EditorHeaderProps {
@@ -66,6 +65,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
    setMode: state.setMode,
   }))
  )
+
  const { mutate: restore, isPending } = useMutation(
   orpc.documents.restoreSnapshotbyId.mutationOptions({
    onSuccess: () => {
@@ -91,9 +91,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   const handleAwarenessUpdate = ({ states }: onAwarenessUpdateParameters) => {
    setCollaborators(states.map((x) => ({ ...x.user })))
   }
-
   provider.on('awarenessUpdate', handleAwarenessUpdate)
-
   return () => {
    provider.off('awarenessUpdate', handleAwarenessUpdate)
   }
@@ -125,25 +123,23 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
       provider={provider}
      >
       <div
-       className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[24rem]' : ''}`}
+       className={`text-center space-x-2 inline-flex items-center justify-center max-w-sm ${open ? 'mr-[24rem]' : ''}`}
       >
-       <div className={`truncate text-center`}>{title}</div>
-       <Edit3 className={'size-3.5'} />
+       <div className="truncate min-w-0 text-center">{title}</div>
+       <Edit3 className="size-3.5 shrink-0" />
       </div>
      </EditTitlePopover>
     ) : (
      <div
-      className={`text-center space-x-2 inline-flex items-center justify-center  ${open ? 'mr-[24rem]' : ''}`}
+      className={`text-center space-x-2 inline-flex items-center justify-center max-w-sm ${open ? 'mr-[24rem]' : ''}`}
      >
-      <div className={`truncate text-center`}>{title}</div>
+      <div className="truncate min-w-0 text-center">{title}</div>
      </div>
     )
    ) : (
     <div
-     className={`${open ? 'mr-[20rem]' : ''} w-full inline-flex items-center justify-center `}
+     className={`${open ? 'mr-[20rem]' : ''} w-full inline-flex items-center justify-center`}
     >
-     {/* <Button >Restore this version</Button> */}
-
      <Button
       size="lg"
       disabled={isPending}
@@ -156,12 +152,16 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
      </Button>
     </div>
    )}
+
    <div className="gap-2 items-center flex grow basis-0 justify-end">
     {collaborators.length > 0 &&
     collaborators.every((collaborator) => collaborator.id !== undefined) ? (
      <CollaboratorsHoverCard collaborators={collaborators} />
     ) : null}
-    <EditorShareDialogButton onShare={onShare} isPrivate={visibility === 'PRIVATE'} />
+    <EditorShareDialogButton
+     onShare={onShare}
+     isPrivate={visibility === 'PRIVATE'}
+    />
    </div>
   </header>
  )
@@ -179,9 +179,11 @@ function EditTitlePopover({
  provider: HocuspocusProvider
 }) {
  const { open } = useSidebar()
+
  const updateTitleSchema = z.object({
   title: z.string().trim().nonempty({ error: 'Title cannot be empty' }),
  })
+
  const form = useForm<z.infer<typeof updateTitleSchema>>({
   resolver: zodResolver(updateTitleSchema),
   shouldUnregister: true,
@@ -189,6 +191,10 @@ function EditTitlePopover({
    title,
   },
  })
+
+ useEffect(() => {
+  form.reset({ title })
+ }, [title])
 
  async function onSubmit({ title }: { title: string }) {
   try {
@@ -202,7 +208,6 @@ function EditTitlePopover({
    })
   } catch (e) {
    console.error(e)
-   return
   }
  }
 
@@ -276,13 +281,14 @@ function CollaboratorsHoverCard({
  collaborators: AwarenessStates[]
 }) {
  const randomId = useRef(uuidv4())
+
  return (
   <HoverCard>
    <HoverCardTrigger delay={150}>
     <AvatarGroup className="bg-card-foreground px-1 py-1 rounded-full w-fit">
      {collaborators.map((collaborator) => (
       <CollaboratorAvatar
-       key={collaborator.id + randomId}
+       key={collaborator.id + randomId.current}
        collaborator={collaborator}
       />
      ))}
@@ -291,13 +297,13 @@ function CollaboratorsHoverCard({
    <HoverCardContent side="bottom" align="center">
     <div className="uppercase text-xs font-semibold pb-2">in this document</div>
     {collaborators.map((collaborator) => (
-     <Item key={collaborator.id + randomId} className="p-0 not-last:pb-3">
+     <Item key={collaborator.id + randomId.current} className="p-0 not-last:pb-3">
       <ItemMedia variant="icon">
        <CollaboratorAvatar collaborator={collaborator} />
       </ItemMedia>
       <ItemContent>
        <ItemTitle>{collaborator.name}</ItemTitle>
-       <Badge>{collaborator.role ?? "VIEWER"}</Badge>
+       <Badge>{collaborator.role ?? 'VIEWER'}</Badge>
       </ItemContent>
      </Item>
     ))}
