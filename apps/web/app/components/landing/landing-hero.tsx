@@ -26,8 +26,11 @@ export function LandingHero() {
         <div className="text-center">
           <div className="mb-10">
             <Image
-              src="/docduck.png" alt="DocDuck" width={325} height={325}
+              src="/docduck.png" alt="DocDuck"
+              width={325} height={325}
               className="mx-auto rounded-2xl w-48 h-48 sm:w-64 sm:h-64 lg:w-[325px] lg:h-[325px]"
+              sizes="(max-width: 640px) 192px, (max-width: 1024px) 256px, 325px"
+              priority
             />
           </div>
           <CollaborativeHero />
@@ -40,7 +43,10 @@ export function LandingHero() {
               </Link>
             ) : (
               <>
-                <Link href="/auth/login" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
+                <Link 
+                  href="/auth/login" 
+                  className={buttonVariants({ size: 'lg' })}
+                >
                   Login
                 </Link>
                 <Link href="/auth/register" className={buttonVariants({ size: 'lg' })}>
