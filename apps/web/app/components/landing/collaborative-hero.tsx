@@ -163,17 +163,17 @@ export function CollaborativeHero() {
         const allCursorIds = [1, 2, 3, 4, 5]
         allCursorIds.forEach((cursorId) => {
           const t = territories[cursorId]
-          const homeX = basePos.x + t.dx
-          const homeY = basePos.y + t.dy
+          const homeX = basePos.x + (t?.dx ?? 0)
+          const homeY = basePos.y + (t?.dy ?? 0)
           
           moveCursor(cursorId, homeX, homeY)
 
           const intervalId = setInterval(() => {
             if (dead) return
-            const offsetX = homeX + (Math.random() - 0.5) * t.range
-            const offsetY = homeY + (Math.random() - 0.5) * (t.range * 0.6)
+            const offsetX = homeX + (Math.random() - 0.5) * (t?.range ?? 1)
+            const offsetY = homeY + (Math.random() - 0.5) * ((t?.range ?? 1) * 0.6)
             moveCursor(cursorId, offsetX, offsetY)
-          }, t.interval)
+          }, t?.interval)
           
           intervalIds.current.push(intervalId)
         })
