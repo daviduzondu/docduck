@@ -1,6 +1,8 @@
 {
  "name": "@repo/mailpit",
  "scripts": {
-  "dev": "mailpit --database ~/mailpit.db"
+  "dev": "mailpit --database ~/mailpit.db",
+  "start": "mailpit --database ~/mailpit.db"
+
  }
 }

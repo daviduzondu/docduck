@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    /* Base */
+    "target": "es2022",
+    // "module": "esnext",
+    // "moduleDetection": "force",
+    // "moduleResolution": "bundler",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "jsx": "react-jsx",
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    /* Library build */
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+
+    /* Environment */
+    "lib": ["es2022", "dom", "dom.iterable"]
+  },
+  "include": ["*"]
+}
