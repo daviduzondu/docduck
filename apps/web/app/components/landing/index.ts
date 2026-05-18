@@ -1,0 +1,6 @@
+export { CollaborativeHero } from './collaborative-hero'
+export { LandingNavbar } from './landing-navbar'
+export { LandingHero } from './landing-hero'
+export { LandingFooter } from './landing-footer'
+export { BentoGrid } from './bento-grid'
+export { Testimonials } from './testimonials'

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from './providers/auth.provider'
-import { Figtree } from 'next/font/google'
+import { Figtree, Inter } from 'next/font/google'
 import { cn } from '@/lib/utils'
 import TanstackQueryClientProvider from '@/providers/react-query.provider'
 import { Toaster } from '@/components/ui/sonner'
@@ -10,6 +10,7 @@ import { PromptProvider } from '@/providers/prompt.provider'
 import { ThemeProvider } from 'next-themes'
 
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
  title: 'DocDuck',
@@ -22,7 +23,7 @@ export default function RootLayout({
  children: React.ReactNode
 }>) {
  return (
-  <html lang="en" className={cn('font-sans', figtree.variable)}>
+  <html lang="en" className={cn('font-sans', figtree.variable, inter.variable)}>
    <body>
     <ThemeProvider
      attribute="class"
