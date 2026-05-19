@@ -197,12 +197,12 @@ function ActionsMenu({ row }: { row: Row<DocumentRow> }) {
 }
 
 const columns = [
- columnHelper.accessor('title', {
-  header: () => <SortButton label="Title" asc="title_asc" desc="title_desc" />,
-  cell: ({ getValue }) => (
-   <span className="font-medium">{getValue() || 'Untitled'}</span>
-  ),
- }),
+columnHelper.accessor('title', {
+   header: () => <SortButton label="Title" asc="title_asc" desc="title_desc" />,
+   cell: ({ getValue }) => (
+    <span className="font-medium truncate block max-w-[200px] lg:max-w-xs">{getValue() || 'Untitled'}</span>
+   ),
+  }),
  columnHelper.accessor('visibility', {
   header: 'Visibility',
   cell: ({ getValue }) => {
@@ -585,10 +585,10 @@ export default function Documents() {
    }
    onSortChange={(s) => useDashboard.getState().setSortBy('documents', s)}
   >
-   {view === 'list' && (
-    <div className="rounded-xl border mt-2 overflow-hidden">
-     <Table>
-      <TableHeader>
+{view === 'list' && (
+     <div className="rounded-xl border mt-2 overflow-x-auto">
+      <Table>
+       <TableHeader>
        {table.getHeaderGroups().map((headerGroup) => (
         <TableRow key={headerGroup.id} className="hover:bg-transparent">
          {headerGroup.headers.map((header) => (

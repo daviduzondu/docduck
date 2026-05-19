@@ -9,23 +9,23 @@ export default function Layout({
  children: React.ReactNode
 }>) {
  return (
-  <div className="overflow-clip w-full flex">
-   <AuthProvider>
-    <AuthGuard>
-     <SidebarProvider
-      style={
-       {
-        '--sidebar-width': '20rem',
-        '--sidebar-width-mobile': '20rem',
-       } as React.CSSProperties
-      }
-      defaultOpen={true}
-     >
-      <DashboardSidebar />
-      <div className="p-2 w-full">{children}</div>
-     </SidebarProvider>
-    </AuthGuard>
-   </AuthProvider>
-  </div>
+<div className="overflow-clip w-full flex min-h-screen">
+    <AuthProvider>
+     <AuthGuard>
+      <SidebarProvider
+       style={
+        {
+         '--sidebar-width': '20rem',
+         '--sidebar-width-mobile': '20rem',
+        } as React.CSSProperties
+       }
+       defaultOpen={true}
+      >
+       <DashboardSidebar />
+       <div className="p-2 w-full overflow-x-hidden">{children}</div>
+      </SidebarProvider>
+     </AuthGuard>
+    </AuthProvider>
+   </div>
  )
 }
